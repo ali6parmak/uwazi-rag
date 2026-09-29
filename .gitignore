@@ -1,0 +1,19 @@
+# Secrets — filled in locally, never committed
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+
+# Volatile data caches (fixtured copies of captured documents live under
+# src/uwazi_rag/tests/fixtures/ and are committed; everything in data/ is
+# disposable and rebuildable from Uwazi alone — PLAN.md golden rule 4),
+# except the eval harness artifacts which are versioned in git.
+data/raw/
