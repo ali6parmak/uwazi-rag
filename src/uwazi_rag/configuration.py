@@ -26,6 +26,10 @@ from dotenv import load_dotenv
 # Repo root: src/uwazi_rag/configuration.py -> up three levels.
 ROOT_PATH: Path = Path(__file__).parent.parent.parent.resolve()
 DATA_DIR: Path = ROOT_PATH / "data"
+# Uwazi captures (Step 1) — disposable, rebuildable from Uwazi alone.
+RAW_DIR: Path = DATA_DIR / "raw"
+# Real captured data for offline unit tests (AGENTS.md testing policy). Committed.
+FIXTURES_DIR: Path = Path(__file__).parent / "tests" / "fixtures"
 
 # ``override=True`` makes the ``.env`` file authoritative so a stale
 # ``UWAZI_URL`` inherited from a parent process cannot redirect the app

@@ -3,9 +3,18 @@ from __future__ import annotations
 import argparse
 import sys
 
+from uwazi_api.client import UwaziClient
+from uwazi_api.domain.exceptions import SegmentationNotFoundError
+
 from uwazi_rag import configuration
 from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
+from uwazi_rag.use_cases.fetch_document import (
+    pages_covered,
+    raw_capture_json,
+    segmentation_paragraphs,
+    write_raw_capture,
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -56,6 +65,54 @@ def _run_hello(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_fetch(args: argparse.Namespace) -> int:
+    url, user, password = configuration.uwazi_credentials()
+    client = UwaziClient(url=url, user=user, password=password)
+    try:
+        entity = client.entities.get_one(args.shared_id, args.language)
+        segmentation = client.files.get_segmentation(args.shared_id, args.language)
+    except SegmentationNotFoundError as error:
+        print(f"error: {error}", file=sys.stderr)
+        print(
+            "hint: segment the document first — segmentation status shows in Mongo collection 'segmentations'.",
+            file=sys.stderr,
+        )
+        return 1
+    except Exception as error:  # driver boundary: one bad fetch must not crash the shell
+        print(f"error: fetch failed — is Uwazi reachable at {url}? | {error}", file=sys.stderr)
+        return 1
+
+    template = client.templates.get_by_id(entity.template) if entity.template else None
+    document = next((d for d in entity.documents if d.id == segmentation.file_id), None)
+    capture = raw_capture_json(
+        shared_id=entity.shared_id or args.shared_id,
+        language=args.language,
+        instance_key=configuration.instance_key(url),
+        title=entity.title or "",
+        template_id=entity.template,
+        template_name=template.name if template else "",
+        file_id=segmentation.file_id,
+        file_name=getattr(document, "originalname", None),
+        segmentation_status=segmentation.status,
+        paragraphs=segmentation_paragraphs(segmentation),
+    )
+    targets = write_raw_capture(capture, instance_key=configuration.instance_key(url), raw_dir=configuration.RAW_DIR)
+
+    pages = pages_covered(capture["paragraphs"])
+    print(f"entity : {capture['shared_id']} ({capture['language']}) — {capture['title']}")
+    print(f"file   : {capture['file']['name']} ({capture['file']['id']})")
+    print(
+        f"paras  : {len(capture['paragraphs'])} — status '{segmentation.status}'"
+        + (f", pages {pages[0]}..{pages[1]}" if pages else "")
+    )
+    for target in targets:
+        print(f"wrote  : {target}")
+    if segmentation.status != "ready":
+        print(f"warning: segmentation status is '{segmentation.status}', not 'ready'", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _stub(name: str) -> int:
     print(f"error: '{name}' is a stub — implemented in a later step of PLAN.md", file=sys.stderr)
     return 2
@@ -66,6 +123,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "hello":
         return _run_hello(args)
+    if args.command == "fetch":
+        return _run_fetch(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 
