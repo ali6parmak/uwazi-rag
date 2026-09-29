@@ -1,0 +1,1125 @@
+{
+  "instance_key": "bdd5a7c445847b35",
+  "shared_id": "ar22d4v4i5s",
+  "language": "es",
+  "title": "Corte IDH. El efecto de las reservas sobre la entrada en vigencia de la Convención Americana sobre Derechos Humanos. Opinión Consultiva OC-2/82 de 24 de septiembre de 1982. Serie A No. 2.",
+  "template": {
+    "id": "5bfbb1a0471dd0fc16ada146",
+    "name": "DOCUMENT"
+  },
+  "file": {
+    "id": "6a997c91fd83bf62469d249d",
+    "name": "Corte IDH. El efecto de las reservas sobre la entrada en vigencia de la Convención Americana sobre Derechos Humanos. Opinión Consultiva OC-282 de 24 de septiembre de 1982. Serie A No. 2..pdf"
+  },
+  "segmentation_status": "ready",
+  "fetched_at_utc": "2026-09-29T13:23:12+00:00",
+  "paragraphs": [
+    {
+      "left": 155.0,
+      "top": 90.0,
+      "width": 285.0,
+      "height": 9.0,
+      "pageNumber": 1,
+      "text": "CORTE INTERAMERICANA DE DERECHOS HUMANOS",
+      "type": "Section header"
+    },
+    {
+      "left": 209.0,
+      "top": 136.0,
+      "width": 180.0,
+      "height": 22.0,
+      "pageNumber": 1,
+      "text": "OPINIÓN CONSULTIVA OC-2/82 DEL 24 DE SETIEMBRE DE 1982",
+      "type": "Section header"
+    },
+    {
+      "left": 161.0,
+      "top": 195.0,
+      "width": 276.0,
+      "height": 45.0,
+      "pageNumber": 1,
+      "text": "EL EFECTO DE LAS RESERVAS SOBRE LA ENTRADA EN VIGENCIA DE LA CONVENCIÓN AMERICANA SOBRE DERECHOS HUMANOS (ARTS. 74 Y 75)",
+      "type": "Section header"
+    },
+    {
+      "left": 145.0,
+      "top": 254.0,
+      "width": 305.0,
+      "height": 21.0,
+      "pageNumber": 1,
+      "text": "SOLICITADA POR LA COMISIÓN INTERAMERICANA DE DERECHOS HUMANOS",
+      "type": "Section header"
+    },
+    {
+      "left": 52.0,
+      "top": 314.0,
+      "width": 109.0,
+      "height": 9.0,
+      "pageNumber": 1,
+      "text": "Estuvieron presentes:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 336.0,
+      "width": 165.0,
+      "height": 70.0,
+      "pageNumber": 1,
+      "text": "Carlos Roberto Reina, Presidente Pedro Nikken, Vicepresidente Huntley Eugene Munroe, Juez Máximo Cisneros, Juez Rodolfo E. Piza E., Juez Thomas Buergenthal, Juez",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 419.0,
+      "width": 157.0,
+      "height": 10.0,
+      "pageNumber": 1,
+      "text": "Estuvieron, además, presentes:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 442.0,
+      "width": 179.0,
+      "height": 23.0,
+      "pageNumber": 1,
+      "text": "Charles Moyer, Secretario, y Manuel Ventura, Secretario Adjunto",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 490.0,
+      "width": 60.0,
+      "height": 9.0,
+      "pageNumber": 1,
+      "text": "LA CORTE,",
+      "type": "Section header"
+    },
+    {
+      "left": 52.0,
+      "top": 514.0,
+      "width": 204.0,
+      "height": 9.0,
+      "pageNumber": 1,
+      "text": "integrada en la forma antes mencionada,",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 537.0,
+      "width": 187.0,
+      "height": 9.0,
+      "pageNumber": 1,
+      "text": "emite la siguiente opinión consultiva:",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 560.0,
+      "width": 493.0,
+      "height": 34.0,
+      "pageNumber": 1,
+      "text": "1. La Comisión Interamericana de Derechos Humanos (en adelante \"la Comisión\"), mediante un cable fechado el 28 de junio de 1982, solicitó la presente opinión consultiva de la Corte Interamericana de Derechos Humanos.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 608.0,
+      "width": 493.0,
+      "height": 46.0,
+      "pageNumber": 1,
+      "text": "2. Mediante notas de fecha 2 de julio de 1982, en cumplimiento de lo resuelto por la Corte en relación con el artículo 52 de su Reglamento, el Secretario solicitó sus observaciones a todos los Estados Miembros de la Organización de los Estados Americanos, así como, a través del Secretario General de ésta, a todos los órganos a que se refiere el Capítulo X de la Carta de la OEA.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 667.0,
+      "width": 493.0,
+      "height": 22.0,
+      "pageNumber": 1,
+      "text": "3. El Presidente de la Corte fijó el 23 de agosto de 1982, como fecha límite para remitir observaciones escritas u otros documentos relevantes.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 702.0,
+      "width": 494.0,
+      "height": 34.0,
+      "pageNumber": 1,
+      "text": "4. La comunicación del Secretario fue respondida por los siguientes Estados: Costa Rica, Estados Unidos de América, México y San Vicente y las Granadinas.  Se recibieron también respuestas de los siguientes órganos de la OEA: el Consejo Permanente, el Comité Jurídico",
+      "type": "Text"
+    },
+    {
+      "left": 293.0,
+      "top": 70.0,
+      "width": 9.0,
+      "height": 11.0,
+      "pageNumber": 2,
+      "text": "2",
+      "type": "Page header"
+    },
+    {
+      "left": 52.0,
+      "top": 88.0,
+      "width": 492.0,
+      "height": 22.0,
+      "pageNumber": 2,
+      "text": "Interamericano y la Secretaría General.  La mayoría de dichas respuestas contienen observaciones concretas sobre la materia de la consulta.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 124.0,
+      "width": 495.0,
+      "height": 34.0,
+      "pageNumber": 2,
+      "text": "5. Asimismo, las siguientes organizaciones ofrecieron sus puntos de vista sobre la consulta como amici curiae : el International Human Rights Law Group y el Urban Morgan Institute for Human Rights of the University of Cincinnati College of Law.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 171.0,
+      "width": 494.0,
+      "height": 34.0,
+      "pageNumber": 2,
+      "text": "6. La Corte, reunida en su Sexto Período Ordinario de Sesiones, fijó una audiencia pública para el lunes 20 de setiembre de 1982, con el fin de escuchar las opiniones de los Estados Miembros y de los órganos de la OEA sobre la petición de opinión consultiva.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 218.0,
+      "width": 493.0,
+      "height": 23.0,
+      "pageNumber": 2,
+      "text": "7. En la audiencia pública fueron hechas a la Corte manifestaciones orales por los siguientes representantes:",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 254.0,
+      "width": 275.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "Por la Comisión Interamericana de Derechos Humanos:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 277.0,
+      "width": 286.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "Don Marco Gerardo Monroy Cabra, Delegado y Presidente",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 301.0,
+      "width": 76.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "Por Costa Rica:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 323.0,
+      "width": 336.0,
+      "height": 11.0,
+      "pageNumber": 2,
+      "text": "Don Manuel Freer Jiménez, Consejero y Procurador de la República.",
+      "type": "Text"
+    },
+    {
+      "left": 294.0,
+      "top": 349.0,
+      "width": 8.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "I",
+      "type": "Section header"
+    },
+    {
+      "left": 206.0,
+      "top": 370.0,
+      "width": 186.0,
+      "height": 11.0,
+      "pageNumber": 2,
+      "text": "PLANTEAMIENTO DEL PROBLEMA",
+      "type": "Section header"
+    },
+    {
+      "left": 52.0,
+      "top": 407.0,
+      "width": 279.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "8. La Comisión hizo la siguiente consulta a la Corte:",
+      "type": "List item"
+    },
+    {
+      "left": 101.0,
+      "top": 430.0,
+      "width": 395.0,
+      "height": 59.0,
+      "pageNumber": 2,
+      "text": "¿desde qué momento se entiende que un Estado es parte de la Convención Americana sobre Derechos Humanos cuando ha ratificado o se ha adherido a dicha Convención con una o más reservas?, ¿desde la fecha del depósito del instrumento de ratificación o adhesión o al cumplirse el término previsto en el artículo 20 de la Convención de Viena sobre el Derecho de los Tratados?",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 501.0,
+      "width": 494.0,
+      "height": 94.0,
+      "pageNumber": 2,
+      "text": "9. La Comisión señala que la petición suscita la interpretación de los artículos 74 y 75 de la Convención Americana sobre Derechos Humanos (en adelante \"la Convención\").  En aquella se deduce que la cuestión sometida a la Corte cae dentro de la esfera de la competencia de la Comisión, tal y como se usa esa frase en el artículo 64 de la Convención.  En justificación de esta tesis, la Comisión indica la facultad que le ha sido otorgada por los artículos 33, 41 (f) y 44 a 51 de la Convención, además por los artículos 1, 19 y 20 del Estatuto de la Comisión.  La Comisión subraya que, para el ejercicio de sus funciones, es preciso distinguir entre los Estados que son Partes de la Convención y aquellos que no lo son.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 607.0,
+      "width": 278.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "10. Los artículos 74 y 75 de la Convención disponen:",
+      "type": "Text"
+    },
+    {
+      "left": 284.0,
+      "top": 631.0,
+      "width": 63.0,
+      "height": 10.0,
+      "pageNumber": 2,
+      "text": "Artículo 74",
+      "type": "Section header"
+    },
+    {
+      "left": 87.0,
+      "top": 653.0,
+      "width": 458.0,
+      "height": 23.0,
+      "pageNumber": 2,
+      "text": "1. Esta Convención queda abierta a la firma y a la ratificación o adhesión de todo Estado Miembro de la Organización de los Estados Americanos.",
+      "type": "List item"
+    },
+    {
+      "left": 88.0,
+      "top": 690.0,
+      "width": 458.0,
+      "height": 58.0,
+      "pageNumber": 2,
+      "text": "2. La ratificación de esta Convención o la adhesión a la misma se efectuará mediante el depósito de un instrumento de ratificación o de adhesión en la Secretaría General de la Organización de los Estados Americanos.  Tan pronto como once Estados hayan depositado sus respectivos instrumentos de ratificación o de adhesión, la Convención entrará en vigor.  Respecto a todo otro Estado que la ratifique o adhiera a ella",
+      "type": "List item"
+    },
+    {
+      "left": 293.0,
+      "top": 71.0,
+      "width": 10.0,
+      "height": 10.0,
+      "pageNumber": 3,
+      "text": "3",
+      "type": "Page header"
+    },
+    {
+      "left": 122.0,
+      "top": 88.0,
+      "width": 422.0,
+      "height": 22.0,
+      "pageNumber": 3,
+      "text": "ulteriormente, la Convención entrará en vigor en la fecha del depósito de su instrumento de ratificación o de adhesión.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 124.0,
+      "width": 458.0,
+      "height": 22.0,
+      "pageNumber": 3,
+      "text": "3. El Secretario General informará a todos los Estados Miembros de la Organización de la entrada en vigor de la Convención.",
+      "type": "List item"
+    },
+    {
+      "left": 284.0,
+      "top": 171.0,
+      "width": 62.0,
+      "height": 10.0,
+      "pageNumber": 3,
+      "text": "Artículo 75",
+      "type": "Section header"
+    },
+    {
+      "left": 87.0,
+      "top": 195.0,
+      "width": 457.0,
+      "height": 22.0,
+      "pageNumber": 3,
+      "text": "Esta Convención sólo puede ser objeto de reservas conforme a las disposiciones de la Convención de Viena sobre Derecho de los Tratados, suscrita el 23 de mayo de 1969.",
+      "type": "Text"
+    },
+    {
+      "left": 291.0,
+      "top": 242.0,
+      "width": 13.0,
+      "height": 10.0,
+      "pageNumber": 3,
+      "text": "II",
+      "type": "Section header"
+    },
+    {
+      "left": 220.0,
+      "top": 265.0,
+      "width": 157.0,
+      "height": 10.0,
+      "pageNumber": 3,
+      "text": "COMPETENCIA DE LA CORTE",
+      "type": "Section header"
+    },
+    {
+      "left": 52.0,
+      "top": 289.0,
+      "width": 494.0,
+      "height": 116.0,
+      "pageNumber": 3,
+      "text": "11.  Al considerar la solicitud de la Comisión, la Corte debe resolver ciertas cuestiones preliminares relacionadas con la misma.  Una de éstas se refiere a la competencia de la Corte para conocer de esta petición, dado no sólo que el Secretario General de la OEA ha sido designado como depositario de esta Convención (ver artículos 74, 76, 78, 79 y 81), sino que también éste, de acuerdo con la práctica tradicional de la OEA, realiza consultas con los Estados Miembros cuando se suscitan disputas concernientes a la ratificación, entrada en vigor, reservas de los tratados, etc. (Ver \"Normas sobre Reservas a los Tratados Multilaterales Interamericanos\", OEA/AG/RES.  102 (III-0/73); además, Monroy Cabra, M.G., Derecho de los Tratados, Bogotá, Colombia, 1978, págs. 58-72; Ruda, J.M., \"Reservations to Treatries\", Recueil des Cours, 1973, vol. 146, págs. 95 ss., esp. 128).",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 419.0,
+      "width": 494.0,
+      "height": 83.0,
+      "pageNumber": 3,
+      "text": "12. La Corte no alberga duda alguna en cuanto a su competencia para emitir la opinión consultiva solicitada por la Comisión.  El artículo 64 de la Convención es claro y explícito al facultar a la Corte a emitir opiniones consultivas \" acerca de la interpretación de esta Convención \", lo cual es precisamente lo que solicita la Comisión.  Además, el artículo 2.2 del Estatuto de la Corte, aprobado por la Asamblea General de la OEA en su Noveno Período Ordinario de Sesiones, en octubre de 1979, dispone que \" su función consultiva se rige por las disposiciones del artículo 64 de la Convención \".",
+      "type": "Text"
+    },
+    {
+      "left": 70.0,
+      "top": 514.0,
+      "width": 476.0,
+      "height": 140.0,
+      "pageNumber": 3,
+      "text": "13. También cabe resaltar que al contrario de otros tratados de los cuales el Secretario General de la OEA es depositario, la Convención establece un procedimiento formal judicial de supervisión diseñado para la resolución de las disputas que surjan de este instrumento y para su interpretación.  A este respecto, los artículos 62, 63, 64, 67 u 68, así como el 33 (b), fijan la competencia de la Corte al disponer que la tiene \" para conocer de los asuntos relacionados con el cumplimiento de los compromisos contraídos por los Estados Partes en esta Convención \".  De igual forma, el artículo primero del Estatuto de la Corte dispone que ésta es \" una institución judicial autónoma cuyo objetivo es la aplicación e interpretación de la Convención Americano sobre Derechos Humanos \".  Es evidente que la Corte tiene competencia para emitir con plena autoridad interpretaciones sobre todas las disposiciones de la Convención, incluso aquellas relativas a su entrada en vigencia, y es el organismo más apropiado para hacerlo.",
+      "type": "List item"
+    },
+    {
+      "left": 293.0,
+      "top": 70.0,
+      "width": 10.0,
+      "height": 11.0,
+      "pageNumber": 4,
+      "text": "4",
+      "type": "Page header"
+    },
+    {
+      "left": 289.0,
+      "top": 113.0,
+      "width": 18.0,
+      "height": 10.0,
+      "pageNumber": 4,
+      "text": "III",
+      "type": "Section header"
+    },
+    {
+      "left": 157.0,
+      "top": 135.0,
+      "width": 283.0,
+      "height": 22.0,
+      "pageNumber": 4,
+      "text": "LEGITIMACIÓN DE LA COMISIÓN PARA SOLICITAR ESTA OPINIÓN CONSULTIVA",
+      "type": "Section header"
+    },
+    {
+      "left": 52.0,
+      "top": 183.0,
+      "width": 494.0,
+      "height": 175.0,
+      "pageNumber": 4,
+      "text": "14. Lo que sigue por determinar es si la Comisión está legitimada para solicitar de la Corte esta opinión consultiva en particular.  La Corte señala, al respecto, que la Convención, al conferir el derecho de solicitar opiniones consultivas, distingue entre los Estados Miembros de la OEA y los órganos de ésta.  De acuerdo con el artículo 64, todos los Estados Miembros de la OEA, hayan o no ratificado la Convención, tienen el derecho de solicitar una opinión consultiva \" acerca de la interpretación de esta Convención o de otros tratados concernientes a la protección de los derechos humanos en los Estados Americanos \".  Asimismo, los órganos de la OEA disfrutan de ese mismo derecho, pero solamente en lo que les compete.  Así que, mientras los Estados Miembros de la OEA tienen un derecho absoluto a pedir opiniones consultivas, sus órganos sólo pueden hacerlo dentro de los límites de su competencia.  El derecho de éstos últimos de pedir opiniones consultivas está restringido, consecuentemente, a asuntos en lo que tales órganos tengan un legítimo interés institucional.  Mientras cada órgano decide inicialmente si la petición cae dentro de su esfera de competencia, la pregunta, en última instancia, debe ser respondida por la Corte mediante referencia a la Carta de la OEA, así como a los instrumentos constitutivos y a la práctica legal del órgano correspondiente.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 371.0,
+      "width": 494.0,
+      "height": 46.0,
+      "pageNumber": 4,
+      "text": "15. Con referencia a este caso en particular, la Corte señala, ante todo, que la Comisión es uno de los órganos enumerados en el Capítulo X de la Carta de la OEA (artículo 51 (e); además, que los poderes conferidos a la Comisión como órgano de la misma, están determinados en el artículo 112 de la Carta, que dice:",
+      "type": "Text"
+    },
+    {
+      "left": 86.0,
+      "top": 429.0,
+      "width": 425.0,
+      "height": 84.0,
+      "pageNumber": 4,
+      "text": "Habrá una Comisión Interamericana de Derechos Humanos que tendrá, como función principal, la de promover la observancia y la defensa de los derechos humanos y de servir como órgano consultivo de la Organización en esta materia. Una convención interamericana sobre derechos humanos determinará la estructura, competencia y procedimiento de dicha Comisión, así como los de los otros órganos encargados de esta materia;",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 526.0,
+      "width": 493.0,
+      "height": 116.0,
+      "pageNumber": 4,
+      "text": "Y finalmente, que los artículos 33, 41 y 44 a 51 de la Convención, y 1, 19 y 20 del Estatuto de la Comisión, le confieren a ésta amplios poderes.  la competencia de la Comisión para ejercer esas facultades depende, en parte, de una previa determinación sobre si se relaciona con Estados que han ratificado o no la Convención.  El artículo 112 de la Carta de la OEA, así como el 41 de la Convención y los 1, 18 y 20 de su Estatuto, facultan a la Comisión para \" promover la observancia y la defensa de los derechos humanos\" y \"servir como órgano consultivo de la Organización en esta materia \".  La Comisión realiza estas funciones con relación a todos los Estados Miembros de la OEA sin distinguir entre aquellos que han o que no han ratificado la Convención, y tiene funciones más amplias y específicas con respecto a los Estados Partes de la Convención (véase Convención, artículos 33, 41 (f), y 44 a 51; Estatuto de la Comisión, artículo 19).",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 655.0,
+      "width": 494.0,
+      "height": 81.0,
+      "pageNumber": 4,
+      "text": "16. Es evidente, por lo tanto, que la Comisión tiene un legítimo interés institucional en una consulta como la que presentó, que trata sobre la entrada en vigencia de la Convención.  Por consiguiente, la Corte estima que la opinión consultiva solicitada cae dentro de la esfera de competencia de la Comisión.  Más aún, dados los amplios poderes que el artículo 112 de la Carta de la OEA le confiere a la Comisión, en relación con la promoción y observancia de los derechos humanos, la Corte observa que, al contrario de otros órganos de la OEA, la Comisión posee un derecho absoluto a pedir opiniones consultivas dentro del marco del artículo 64.1 de la Convención.",
+      "type": "Text"
+    },
+    {
+      "left": 293.0,
+      "top": 71.0,
+      "width": 10.0,
+      "height": 11.0,
+      "pageNumber": 5,
+      "text": "5",
+      "type": "Page header"
+    },
+    {
+      "left": 290.0,
+      "top": 124.0,
+      "width": 15.0,
+      "height": 10.0,
+      "pageNumber": 5,
+      "text": "IV",
+      "type": "Section header"
+    },
+    {
+      "left": 175.0,
+      "top": 149.0,
+      "width": 247.0,
+      "height": 9.0,
+      "pageNumber": 5,
+      "text": "ENTRADA EN VIGENCIA DE LA CONVENCIÓN",
+      "type": "Section header"
+    },
+    {
+      "left": 52.0,
+      "top": 183.0,
+      "width": 493.0,
+      "height": 45.0,
+      "pageNumber": 5,
+      "text": "17. Una vez resueltas las anteriores cuestiones preliminares, la Corte está ahora en posición de contestar la pregunta específica sometida a ella por la Comisión, que busca determinar cuándo se considera que la Convención entra en vigor con respecto a un Estado que la ratifica o se adhiere a ella con reservas.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 242.0,
+      "width": 493.0,
+      "height": 22.0,
+      "pageNumber": 5,
+      "text": "18. Para responder a esta pregunta, la Corte hace notar que dos disposiciones de la Convención establecen un punto de partida para su examen.  El primero es el artículo 74.2, el cual reza:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 277.0,
+      "width": 387.0,
+      "height": 93.0,
+      "pageNumber": 5,
+      "text": "La ratificación de esta Convención o la adhesión a la misma se efectuará mediante el depósito de un instrumento de ratificación o de adhesión en la Secretaría General de la Organización de los Estados Americanos.  Tan pronto como once Estados hayan depositado sus respectivos instrumentos de ratificación o de adhesión, la Convención entrará en vigor.  Respecto a todo otro Estado que la ratifique o adhiera a ella ulteriormente, la Convención entrará en vigor en la fecha del depósito de su instrumento de ratificación o de adhesión.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 384.0,
+      "width": 205.0,
+      "height": 10.0,
+      "pageNumber": 5,
+      "text": "El segundo es el artículo 75, que declara:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 407.0,
+      "width": 387.0,
+      "height": 34.0,
+      "pageNumber": 5,
+      "text": "Esta Convención sólo puede ser objeto de reservas conforme a las disposiciones de la Convención de Viena sobre Derecho de los Tratados, suscrita el 23 de mayo de 1969.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 454.0,
+      "width": 494.0,
+      "height": 104.0,
+      "pageNumber": 5,
+      "text": "19. El artículo 74.2 guarda silencio sobre si es aplicable exclusivamente a ratificaciones y adhesiones que no contengan reservas o si además se aplica a los que las contengan.  Más aún, hasta qué punto puede el artículo 75 ayudar a resolver la pregunta presentada a la Corte, es algo que solamente es posible contestar después de un análisis de esa disposición, así como de otras pertinentes de la Convención, en su contexto, así como del objeto y fin de la misma (ver Convención de Viena, artículo 31) y, en su caso, por referencia a los trabajos preparatorios (Convención de Viena, artículo 32).  Además, dada la remisión hecha por el artículo 75 a la Convención de Viena, la Corte debe también examinar las disposiciones pertinentes de este instrumento.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 572.0,
+      "width": 493.0,
+      "height": 57.0,
+      "pageNumber": 5,
+      "text": "20. La remisión hecha en el artículo 75 a la Convención de Viena suscita casi tantas preguntas como respuestas.  Las normas de la misma referentes a reservas disponen la aplicación de diferentes reglas a diferentes categorías de tratados.  Debe determinarse, por lo tanto, cómo deba ser considerada la Convención Americana para efecto de las disposiciones pertinentes de la de Viena, teniendo en mente el texto del artículo 75 y el propósito que está destinado a servir.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 643.0,
+      "width": 493.0,
+      "height": 22.0,
+      "pageNumber": 5,
+      "text": "21. Las disposiciones de la Convención de Viena que se refieren a la cuestión presentada por la Comisión, son las siguientes:",
+      "type": "Text"
+    },
+    {
+      "left": 293.0,
+      "top": 71.0,
+      "width": 9.0,
+      "height": 11.0,
+      "pageNumber": 6,
+      "text": "6",
+      "type": "Page header"
+    },
+    {
+      "left": 245.0,
+      "top": 99.0,
+      "width": 139.0,
+      "height": 23.0,
+      "pageNumber": 6,
+      "text": "Artículo 19 Formulación de Reservas",
+      "type": "Section header"
+    },
+    {
+      "left": 87.0,
+      "top": 136.0,
+      "width": 457.0,
+      "height": 22.0,
+      "pageNumber": 6,
+      "text": "Un Estado podrá formular una reserva en el momento de firmar, ratificar, aceptar o aprobar un tratado o de adherirse al mismo, a menos:",
+      "type": "Text"
+    },
+    {
+      "left": 88.0,
+      "top": 171.0,
+      "width": 254.0,
+      "height": 10.0,
+      "pageNumber": 6,
+      "text": "a) que la reserva esté prohibida por el tratado;",
+      "type": "List item"
+    },
+    {
+      "left": 87.0,
+      "top": 194.0,
+      "width": 457.0,
+      "height": 22.0,
+      "pageNumber": 6,
+      "text": "b) que el tratado disponga que únicamente pueden hacerse determinadas reservas, entre las cuales no figure la reserva de que se trate; o",
+      "type": "List item"
+    },
+    {
+      "left": 87.0,
+      "top": 230.0,
+      "width": 458.0,
+      "height": 22.0,
+      "pageNumber": 6,
+      "text": "c) que, en los casos no previstos en los apartados a) y b), la reserva sea incompatible con el objeto y el fin del tratado.",
+      "type": "List item"
+    },
+    {
+      "left": 235.0,
+      "top": 277.0,
+      "width": 160.0,
+      "height": 35.0,
+      "pageNumber": 6,
+      "text": "Artículo 20 Aceptación de las Reservas y Objeción a las Reservas",
+      "type": "Section header"
+    },
+    {
+      "left": 87.0,
+      "top": 324.0,
+      "width": 458.0,
+      "height": 23.0,
+      "pageNumber": 6,
+      "text": "1. Una reserva expresamente autorizada por el tratado no exigirá la aceptación ulterior de los demás Estados contratantes, a menos que el tratado así lo disponga.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 360.0,
+      "width": 458.0,
+      "height": 46.0,
+      "pageNumber": 6,
+      "text": "2. Cuando del número reducido de Estados negociadores y del objeto y del fin del tratado se desprenda que la aplicación del tratado en su integridad entre todas las partes es condición esencial del consentimiento de cada una de ellas en obligarse por el tratado, una reserva exigirá la aceptación de todas las partes.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 419.0,
+      "width": 459.0,
+      "height": 34.0,
+      "pageNumber": 6,
+      "text": "3. Cuando el tratado sea un instrumento constitutivo de una organización internacional y a menos que en él se disponga otra cosa, una reserva exigirá la aceptación del órgano competente de esa organización.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 466.0,
+      "width": 458.0,
+      "height": 22.0,
+      "pageNumber": 6,
+      "text": "4. En los casos no previstos en los párrafos precedentes y a menos que el tratado disponga otra cosa:",
+      "type": "Text"
+    },
+    {
+      "left": 123.0,
+      "top": 501.0,
+      "width": 423.0,
+      "height": 35.0,
+      "pageNumber": 6,
+      "text": "a) la aceptación de una reserva por otro Estado contratante constituirá al Estado autor de la reserva en parte en el tratado en relación con ese Estado si el tratado ya está en vigor o cuando entre en vigor para esos Estados;",
+      "type": "List item"
+    },
+    {
+      "left": 123.0,
+      "top": 547.0,
+      "width": 423.0,
+      "height": 48.0,
+      "pageNumber": 6,
+      "text": "b) la objeción hecha por otro Estado contratante a una reserva no impedirá la entrada en vigor del tratado entre el Estado que haya hecho la objeción y el Estado autor de la reserva, a menos que el Estado autor de la objeción manifieste inequívocamente la intención contraria;",
+      "type": "List item"
+    },
+    {
+      "left": 123.0,
+      "top": 607.0,
+      "width": 422.0,
+      "height": 35.0,
+      "pageNumber": 6,
+      "text": "c) un acto por el que un Estado manifieste su consentimiento en obligarse por un tratado y que contenga una reserva surtirá efecto en cuanto acepte la reserva al menos otro Estado contratante.",
+      "type": "List item"
+    },
+    {
+      "left": 87.0,
+      "top": 654.0,
+      "width": 459.0,
+      "height": 58.0,
+      "pageNumber": 6,
+      "text": "5. Para los efectos de los párrafos 2 y 4, y a menos que el tratado disponga otra cosa, se considerará que una reserva ha sido aceptada por un Estado cuando éste no ha formulado ninguna objeción a la reserva dentro de los doce meses siguientes a la fecha en que haya recibido la notificación de la reserva o en la fecha en que haya manifestado su consentimiento en obligarse por el tratado, si esta última es posterior.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 725.0,
+      "width": 493.0,
+      "height": 22.0,
+      "pageNumber": 6,
+      "text": "22. Ante todo, respecto del artículo 19, la Corte considera que la referencia del artículo 75 de la Convención Americana a la de Viena, se hizo con el propósito de remitirse al inciso c) del artículo",
+      "type": "Text"
+    },
+    {
+      "left": 293.0,
+      "top": 71.0,
+      "width": 10.0,
+      "height": 10.0,
+      "pageNumber": 7,
+      "text": "7",
+      "type": "Page header"
+    },
+    {
+      "left": 52.0,
+      "top": 89.0,
+      "width": 493.0,
+      "height": 58.0,
+      "pageNumber": 7,
+      "text": "19 de esta última.  Es evidente que los incisos a) y b) del mismo no son aplicables, ya que la primera ni prohibe reservas, ni tampoco especifica las que son permitidas.  Se deduce de allí que el artículo 75 permite que los Estados ratifiquen o se adhieran a la Convención con cualquier reserva que ellos quieran hacer, siempre y cuando ésta no sea \" incompatible con el objeto y fin \" de la misma.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 159.0,
+      "width": 494.0,
+      "height": 140.0,
+      "pageNumber": 7,
+      "text": "23. La anterior interpretación del artículo 75 está confirmada por los trabajos preparatorios de la Convención, los cuales demuestran que sus redactores deseaban adoptar un sistema flexible de reservas.  Es bien conocido que la Convención fue adoptada en la Conferencia Especializada Interamericana sobre Derechos Humanos, la cual se celebró del 7 al 22 de noviembre de 1969 en San José, Costa Rica.  (Las actas y documentos de esta conferencia están contenidas en Conferencia Especializada Interamericana sobre Derechos Humanos, San José, Costa Rica, 7-22 de noviembre de 1969, Actas y Documentos , OEA/Ser.K/XVI/1.2, Washington, D.C. 1973 (en adelante \" Actas y Documentos \") ).  La conferencia de San José tuvo ante sí, como documento básico de trabajo, el Proyecto de la Convención preparado por la Comisión Interamericana de Derechos Humanos.  (Texto en español reproducido en Actas y Documentos, cit. pág. 13, el texto en inglés puede encontrarse en 1968 Inter-American Yearbook on Human Rights , ed. 1973, pág. 389).  En el tema de las reservas, el artículo 67 de ese texto disponía:",
+      "type": "Text"
+    },
+    {
+      "left": 88.0,
+      "top": 312.0,
+      "width": 457.0,
+      "height": 46.0,
+      "pageNumber": 7,
+      "text": "1. El Estado Parte podrá, en el momento del depósito de su instrumento de ratificación o adhesión de esta Convención, formular reserva si una norma constitucional vigente en su territorio estuviere en contradicción con alguna disposición de la Convención. La reserva debe ir acompañada del texto de la norma a que se refiere.",
+      "type": "List item"
+    },
+    {
+      "left": 87.0,
+      "top": 371.0,
+      "width": 459.0,
+      "height": 35.0,
+      "pageNumber": 7,
+      "text": "2. La disposición de que haya sido objeto de alguna reserva no se aplicará entre el Estado reservante y los demás Estados Partes.  Para que la reserva surta este efecto, no será necesaria la aceptación de los demás Estados Partes.",
+      "type": "List item"
+    },
+    {
+      "left": 51.0,
+      "top": 419.0,
+      "width": 495.0,
+      "height": 34.0,
+      "pageNumber": 7,
+      "text": "24.  Cabe señalar que algunos gobiernos expresaron, en sus comentarios al Proyecto de Convención, que el artículo 67 resultaba ser muy restrictivo.  la explicación más clara de este parecer puede encontrarse en la siguiente observación presentada por el Gobierno de Argentina:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 466.0,
+      "width": 458.0,
+      "height": 46.0,
+      "pageNumber": 7,
+      "text": "Artículo 67, párrafo 1: El sistema de reservas, establecido en este artículo está basado exclusivamente en la existencia de normas contradictorias contenidas en la constitución del Estado reservante, y es inaceptable, ya que restringe la facultad soberana de los estados de efectuar reservas.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 525.0,
+      "width": 458.0,
+      "height": 46.0,
+      "pageNumber": 7,
+      "text": "Se sugiere pues, como más conveniente, una fórmula de más amplitud, similar a la contenida en el artículo 86 del Proyecto del Comité Interamericano de Jurisconsultos, que hace extensivo el derecho de reserva a los casos de contradicción con una norma constitucional o legal vigente en el territorio del Estado reservante.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 584.0,
+      "width": 458.0,
+      "height": 70.0,
+      "pageNumber": 7,
+      "text": "Artículo 67, párrafo 2: Se sugiere su eliminación, pues se aparta del sistema previsto por el Proyecto de Convención sobre el Derecho de los Tratados de reciente elaboración de Viena (Conferencia de las Naciones Unidas sobre el Derecho de los Tratados, 22 de abril a 24 de mayo de 1968).  En el proyectado artículo 67 se elimina \"la aceptación\" como elemento del sistema, proponiendo que la reserva opere entre el \"Estado reservante y los demás Estados Partes\" desde su misma formulación.",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 666.0,
+      "width": 458.0,
+      "height": 35.0,
+      "pageNumber": 7,
+      "text": "No parece conveniente innovar en esta difícil materia, cuando una conferencia de ámbito mundial ha elaborado un régimen distinto y, además, más ajustado a la práctica y jurisprudencia internacionales (Actas y Documentos, págs. 45 ss., esp. 48).",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 713.0,
+      "width": 494.0,
+      "height": 34.0,
+      "pageNumber": 7,
+      "text": "25.  Otros gobiernos expresaron criterios parecidos en sus comentarios oficiales o en la Conferencia.  Al igual que Argentina, otros Estados también buscaron reformar el proyectado artículo 67 añadiendo la palabra \"legal\" después de \"constitucional\".  Este esfuerzo, que hubiera",
+      "type": "Text"
+    },
+    {
+      "left": 293.0,
+      "top": 71.0,
+      "width": 10.0,
+      "height": 11.0,
+      "pageNumber": 8,
+      "text": "8",
+      "type": "Page header"
+    },
+    {
+      "left": 52.0,
+      "top": 88.0,
+      "width": 494.0,
+      "height": 128.0,
+      "pageNumber": 8,
+      "text": "liberalizado de manera notable el derecho de hacer reservas, obtuvo la aprobación del grupo de trabajo de la Comisión II de la Conferencia de San José, pero fue derrotado a la postre en la propia Comisión II, por considerarse que podía ser conflictivo con el artículo 1.2 del Proyecto de Convención, ahora artículo 2 de la Convención ( Actas y Documentos , págs. 365-366 y 379). El intento de la delegación de los Estados Unidos de sustituir la referencia a la Convención de Viena por las disposiciones en conflicto fracasó en el grupo de trabajo ( Actas y Documentos , pág. 379), pero triunfó en la tercera sesión plenaria de la Conferencia, donde el presente texto del artículo 75 fue aprobado por moción de Uruguay ( Actas y Documentos , pág. 459).  Es imposible leer los trabajos preparatorios de la Convención sin reconocer que el propósito primordial de la referencia a la Convención de Viena en el artículo 75, fue el de permitir a los Estados adherirse a la Convención con un sistema de reservas muy liberal.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 230.0,
+      "width": 494.0,
+      "height": 152.0,
+      "pageNumber": 8,
+      "text": "26. Habiendo concluido que los Estados que ratifiquen o se adhieran a la Convención pueden hacerlo con cualesquiera reservas que no sean incompatibles con su objeto y fin, la Corte debe ahora determinar cuáles disposiciones del artículo 20 de la Convención de Viena se aplican a las reservas hechas a la Convención Americana.  Esta investigación conducirá también a contestar la consulta de la Comisión.  Esto es así, porque si, conforme a la Convención de Viena, se considera que las reservas a la Americana no requieren aceptación de los otros Estados Partes, entonces el artículo 74 de la última, para los efectos que interesan aquí, es el aplicable, de manera que un Estado que la ratifique o se adhiera a ella, con o sin reservas, es tenido como Estado Parte desde el día del depósito de su instrumento de ratificación o adhesión (Convención de Viena, artículo 20.1). Por otra parte, si la aceptación de la reserva fuera necesaria de acuerdo con la Convención de Viena, un Estado reservante podría ser tenido como Parte solamente en la fecha en que por lo menos otro Estado Parte haya aceptado la reserva, expresa o tácticamente (Convención de Viena, artículos 20.4.c) y 20.5).",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 395.0,
+      "width": 494.0,
+      "height": 82.0,
+      "pageNumber": 8,
+      "text": "27. En opinión de la Corte, únicamente el párrafo 1 ó 4 del artículo 20 de la Convención de Viena pueden ser considerados pertinentes al aplicar los artículos 74 y 75 de la Convención.  El párrafo 2 del artículo 20 es inaplicable, entre otras razones, porque el objeto y fin de la Convención no son el intercambio recíproco de derechos entre un número limitado de Estados, sino la protección de los derechos de todos los seres humanos en América, independientemente de su nacionalidad.  Además, la Convención no es el instrumento constitutivo de una organización internacional; por lo tanto, el artículo 20.3 es inaplicable.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 489.0,
+      "width": 495.0,
+      "height": 128.0,
+      "pageNumber": 8,
+      "text": "28. Al considerar si la Convención contempla la aplicación del párrafo 1 ó 4 del artículo 20 de la Convención de Viena, la Corte observa que los principios enunciados en el artículo 20.4 reflejan las necesidades de los tradicionales convenios multilaterales internacionales, que tienen por objeto un intercambio recíproco de derechos y obligaciones, para el beneficio mútuo de los Estados Partes. En este contexto, y dado el gran incremento de los Estados que forman la comunidad internacional hoy en día, el sistema establecido por el artículo 20.4 tiene gran sentido, porque, por una parte, permite a los Estados ratificar muchos tratados multilaterales con las reservas que estimen necesarias; por la otra, capacita a los otros Estados contratantes para aceptar o rechazar las reservas y resolver si desean entrar en una relación convencional con el Estado reservante, disponiendo que, tan pronto como otro Estado Parte haya aceptado la reserva, el tratado entra en vigencia con respecto al Estado reservante.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 631.0,
+      "width": 495.0,
+      "height": 116.0,
+      "pageNumber": 8,
+      "text": "29. La Corte debe enfatizar, sin embargo, que los tratados modernos sobre derechos humanos, en general, y, en particular, la Convención Americana, no son tratados multilaterales de tipo tradicional, concluidos en función de un intercambio recíproco de derechos, para el beneficio mútuo de los Estados contratantes.  Su objeto y fin son la protección de los derechos fundamentales de los seres humanos, independientemente de su nacionalidad, tanto frente a su propio Estado como frente a los otros Estados contratantes.  Al aprobar estos tratados sobre derechos humanos, los Estados se someten a un orden legal dentro del cual ellos, por el bien común, asumen varias obligaciones, no en relación con otros Estados, sino hacia los individuos bajo su jurisdicción.  El carácter especial de estos tratados ha sido reconocido, entre otros, por la Comisión Europea de Derechos Humanos cuando declaró",
+      "type": "Text"
+    },
+    {
+      "left": 293.0,
+      "top": 71.0,
+      "width": 10.0,
+      "height": 11.0,
+      "pageNumber": 9,
+      "text": "9",
+      "type": "Page header"
+    },
+    {
+      "left": 87.0,
+      "top": 100.0,
+      "width": 460.0,
+      "height": 70.0,
+      "pageNumber": 9,
+      "text": "que las obligaciones asumidas por las Altas Partes Contratantes en la Convención (Europea) son esencialmente de carácter objetivo, diseñadas para proteger los derechos fundamentales de los seres humanos de violaciones de parte de las Altas Partes Contratantes en vez de crear derechos subjetivos y recíprocos entre las Altas Partes Contratantes (\"Austria vs. Italy\", Application No. 788/60, European Yearbook of Human Rights, (1961), vol. 4, pág. 140).",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 184.0,
+      "width": 473.0,
+      "height": 10.0,
+      "pageNumber": 9,
+      "text": "La Comisión Europea, basándose en el Preámbulo de la Convención Europea, enfatizó, además,",
+      "type": "Text"
+    },
+    {
+      "left": 88.0,
+      "top": 206.0,
+      "width": 459.0,
+      "height": 59.0,
+      "pageNumber": 9,
+      "text": "que el propósito de las Altas Partes Contratantes al aprobar la Convención no fue concederse derechos y obligaciones recíprocas con el fin de satisfacer sus intereses nacionales sino realizar los fines e ideales del Consejo de Europa... y establecer un orden público común de las democracias libres de Europa con el objetivo de salvaguardar su herencia común de tradiciones políticas, ideas y régimen de derecho ( Ibid ., pág. 138).",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 277.0,
+      "width": 495.0,
+      "height": 81.0,
+      "pageNumber": 9,
+      "text": "30. Ideas similares acerca de la naturaleza de los tratados humanitarios modernos han sido sustentados por la Corte Internacional de Justicia en su Advisory Opinion on Reservations to the Convention on the Prevention and Punishment of the Crime of Genocide (1951 I.C.J. 15); también están contenidas en la propia Convención de Viena, particularmente en el artículo 60.5.  (Ver en general E. Schwelb, \"The Law of Treaties and Human Rights\", 16 Archiv des Volkerrechts (1973), pág. 1, reproducido en Toward World Order and Human Dignity (W.M. Reisman & B. Weston, eds. 1976, pág. 262) ).",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 371.0,
+      "width": 495.0,
+      "height": 34.0,
+      "pageNumber": 9,
+      "text": "31.  Tales pareceres acerca del carácter especial de los tratados humanitarios y las consecuencias que de ellos se derivan, se aplican aun con mayor razón a la Convención Americana, cuyo Preámbulo, en sus dos primeros párrafos, establece:",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 419.0,
+      "width": 458.0,
+      "height": 34.0,
+      "pageNumber": 9,
+      "text": "Reafirmando su propósito de consolidar en este Continente, dentro del cuadro de las instituciones democráticas, un régimen de libertad personal y de justicia social, fundado en el respeto de los derechos esenciales del hombre;",
+      "type": "Text"
+    },
+    {
+      "left": 87.0,
+      "top": 466.0,
+      "width": 459.0,
+      "height": 58.0,
+      "pageNumber": 9,
+      "text": "Reconociendo que los derechos esenciales del hombre no nacen del hecho de ser nacional de determinado Estado, sino que tienen como fundamento los atributos de la persona humana, razón por la cual justifican una protección internacional, de naturaleza convencional coadyuvante o complementaria de la que ofrece el derecho interno de los Estados americanos.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 537.0,
+      "width": 494.0,
+      "height": 93.0,
+      "pageNumber": 9,
+      "text": "32. Debe destacarse, además, que la Convención al contrario de otros tratados internacionales sobre derechos humanos, inclusive la Convención Europea, confiere a los individuos el derecho de presentar una petición contra cualquier Estado tan pronto como éste haya ratificado la Convención (artículo 44).  En contraste, para que un Estado pueda presentar una denuncia contra otro Estado cada uno de ellos debe haber aceptado la competencia de la Comisión para tramitar denuncias entre Estados (artículo 45).  Esto indica la gran importancia que la Convención atribuye a las obligaciones de los Estados Partes frente a los individuos, las cuales pueden ser exigidas de una vez, sin la mediación de otro Estado.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 643.0,
+      "width": 495.0,
+      "height": 57.0,
+      "pageNumber": 9,
+      "text": "33. Desde este punto de vista, y considerando que fue diseñada para proteger los derechos fundamentales del hombre independientemente de su nacionalidad, frente a su propio Estado o a cualquier otro, la Convención no puede ser vista sino como lo que ella es en realidad:  un instrumento o marco jurídico multilateral que capacita a los Estados para comprometerse, unilateralmente, a no violar los derechos humanos de los individuos bajo su jurisdicción.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 713.0,
+      "width": 493.0,
+      "height": 35.0,
+      "pageNumber": 9,
+      "text": "34. En este contexto sería manifiestamente irrazonable concluir que la referencia del artículo 75 a la Convención de Viena, obliga a la aplicación del régimen legal establecido por el artículo 20.4 de la última, según el cual la entrada en vigor de una ratificación con reserva, depende de su",
+      "type": "Text"
+    },
+    {
+      "left": 290.0,
+      "top": 71.0,
+      "width": 15.0,
+      "height": 10.0,
+      "pageNumber": 10,
+      "text": "10",
+      "type": "Page header"
+    },
+    {
+      "left": 52.0,
+      "top": 89.0,
+      "width": 494.0,
+      "height": 58.0,
+      "pageNumber": 10,
+      "text": "aceptación por otro Estado.  Un tratado que da tal importancia a la protección del individuo, que abre el derecho de petición individual desde el momento de la ratificación, difícilmente puede decirse que tienda a retrasar la entrada en vigencia del tratado hasta que por lo menos otro Estado esté dispuesto a aceptar al Estado reservante como Parte.  Dado el marco institucional y normativo de la Convención, tal atraso no cumpliría ningún propósito útil.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 159.0,
+      "width": 494.0,
+      "height": 70.0,
+      "pageNumber": 10,
+      "text": "35. Para los fines del presente análisis, la referencia del artículo 75 a la Convención de Viena sólo tiene sentido si se entiende como una autorización expresa destinada a permitir a los Estados cualesquiera reservas que consideren apropiadas, siempre y cuando éstas no sean incompatibles con el objeto y fin del tratado.  Como tales, se puede decir que ellas se rigen por el artículo 20.1 de la Convención de Viena y, consecuentemente, no están sujetas a la aceptación de ningún otro Estado Parte.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 242.0,
+      "width": 495.0,
+      "height": 104.0,
+      "pageNumber": 10,
+      "text": "36.  Al respecto, la Corte hace ver que dicho artículo 20.1, al hablar de \" una reserva expresamente autorizada por el tratado \", no se está limitando por su propio texto, a reservas específicas.  Un tratado puede expresamente autorizar una o más reservas específicas, o reservas en general.  Esto último, que es lo que la Corte estima que ocurre en la Convención Americana, significa que las reservas, así expresamente autorizadas en general, no requieren un tratamiento diferente al de las específicas igualmente autorizadas.  En este sentido, la Corte desea enfatizar que, al contrario del artículo 19(b) de la Convención de Viena, que sí se refiere a \" determinadas reservas \", el artículo 20.1 no contiene tal restricción y, por lo tanto, permite la interpretación del artículo 75 de la Convención Americana en la forma indicada en la presente opinión.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 360.0,
+      "width": 495.0,
+      "height": 46.0,
+      "pageNumber": 10,
+      "text": "37. Habiendo concluido que las reservas expresamente autorizadas por el artículo 75, esto es, todas las compatibles con el objeto y fin de la Convención, no requieren aceptación de los Estados Partes, la Corte opina que los instrumentos de ratificación o adhesión que las contienen entran en vigor, de acuerdo con el artículo 74, desde el momento de su depósito.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 419.0,
+      "width": 495.0,
+      "height": 58.0,
+      "pageNumber": 10,
+      "text": "38. Desde luego, los Estados Partes tienen un legítimo interés en excluir reservas incompatibles con el objeto y fin de la Convención, y son libres de afirmar ese su interés mediante los mecanismos consultivos y jurisdiccionales establecidos por aquélla; pero no tienen interés en retrasar la entrada en vigor de la misma ni, por ende, la protección que ésta ofrece a los individuos en relación con los Estados que la ratifiquen o se adhieran a ella con reservas.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 489.0,
+      "width": 494.0,
+      "height": 59.0,
+      "pageNumber": 10,
+      "text": "39. Puesto que el presente caso se refiere solamente a cuestiones relacionadas con la entrada en vigor de la Convención, la Corte no considera necesario pronunciarse sobre otros problemas que podrían surgir en un futuro en relación con la interpretación y aplicación del artículo 75 de la Convención y que, a su vez, podrían requerir que la Corte examine las disposiciones de la Convención de Viena aplicables a reservas no consideradas en esta Opinión.",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 560.0,
+      "width": 494.0,
+      "height": 35.0,
+      "pageNumber": 10,
+      "text": "40. Por las razones expuestas, en interpretación de los artículos 74 y 75 de la Convención Americana sobre Derechos Humanos, sobre la fecha efectiva de entrada en vigencia de ésta respecto de un Estado que la ratifique o se adhiera a ella con una o más reservas,",
+      "type": "Text"
+    },
+    {
+      "left": 290.0,
+      "top": 71.0,
+      "width": 14.0,
+      "height": 10.0,
+      "pageNumber": 11,
+      "text": "11",
+      "type": "Page header"
+    },
+    {
+      "left": 51.0,
+      "top": 90.0,
+      "width": 148.0,
+      "height": 9.0,
+      "pageNumber": 11,
+      "text": "LA CORTE ES DE OPINIÓN,",
+      "type": "Section header"
+    },
+    {
+      "left": 86.0,
+      "top": 112.0,
+      "width": 82.0,
+      "height": 10.0,
+      "pageNumber": 11,
+      "text": "por unanimidad",
+      "type": "Text"
+    },
+    {
+      "left": 51.0,
+      "top": 136.0,
+      "width": 492.0,
+      "height": 22.0,
+      "pageNumber": 11,
+      "text": "que la Convención entra en vigencia para un Estado que la ratifique o se adhiera a ella con o sin reservas, en la fecha del depósito de su instrumento de ratificación o adhesión.",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 171.0,
+      "width": 493.0,
+      "height": 22.0,
+      "pageNumber": 11,
+      "text": "Redactada en inglés y español, haciendo fe el texto en inglés, en la sede de la Corte en San José, Costa Rica, el día 24 de setiembre de 1982.",
+      "type": "Text"
+    },
+    {
+      "left": 245.0,
+      "top": 242.0,
+      "width": 105.0,
+      "height": 22.0,
+      "pageNumber": 11,
+      "text": "Carlos Roberto Reina Presidente",
+      "type": "Text"
+    },
+    {
+      "left": 52.0,
+      "top": 277.0,
+      "width": 85.0,
+      "height": 35.0,
+      "pageNumber": 11,
+      "text": "Pedro Nikken Máximo Cisneros",
+      "type": "Text"
+    },
+    {
+      "left": 401.0,
+      "top": 272.0,
+      "width": 124.0,
+      "height": 39.0,
+      "pageNumber": 11,
+      "text": "Huntley Eugene-Munroe Rodolfo E. Piza E.",
+      "type": "Text"
+    },
+    {
+      "left": 247.0,
+      "top": 320.0,
+      "width": 103.0,
+      "height": 51.0,
+      "pageNumber": 11,
+      "text": "Thomas Buergenthal Charles Moyer Secretario",
+      "type": "Text"
+    }
+  ]
+}

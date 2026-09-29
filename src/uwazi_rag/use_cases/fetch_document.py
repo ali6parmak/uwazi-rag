@@ -60,16 +60,42 @@ def segmentation_paragraphs(segmentation: Segmentation) -> list[dict]:
     return [p.model_dump(mode="json", by_alias=True) for p in segmentation.paragraphs]
 
 
-def write_raw_capture(capture: dict, *, instance_key: str, raw_dir: Path) -> list[Path]:
-    """Write the capture to the ``data/raw`` cache and the tests fixtures dir."""
+def fixture_is_up_to_date(existing: dict | None, capture: dict) -> bool:
+    """True when the committed fixture already holds this content.
+
+    Compares everything except ``fetched_at_utc`` so a re-fetch of an unchanged
+    document does not dirty-diff the committed fixture with a new timestamp.
+    """
+    if existing is None:
+        return False
+
+    def stable(capture: dict) -> dict:
+        return {key: value for key, value in capture.items() if key != "fetched_at_utc"}
+
+    return stable(existing) == stable(capture)
+
+
+def write_raw_capture(capture: dict, *, instance_key: str, raw_dir: Path) -> tuple[Path, Path, bool]:
+    """Write the capture to the ``data/raw`` cache and the tests fixtures dir.
+
+    The raw copy is always rewritten (disposable cache); the fixture is only
+    rewritten when its content effectively changed. Returns
+    ``(raw_path, fixture_path, fixture_updated)``.
+    """
     filename = f"{capture['shared_id']}_{capture['language']}.json"
-    data_dir = raw_dir / instance_key
-    data_dir.mkdir(parents=True, exist_ok=True)
-    targets = [data_dir / filename, FIXTURES_DIR / filename]
-    for path in targets:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(capture, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return targets
+    json_text = json.dumps(capture, ensure_ascii=False, indent=2) + "\n"
+
+    raw_path = raw_dir / instance_key / filename
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_path.write_text(json_text, encoding="utf-8")
+
+    fixture_path = FIXTURES_DIR / filename
+    existing = json.loads(fixture_path.read_text(encoding="utf-8")) if fixture_path.exists() else None
+    if fixture_is_up_to_date(existing, capture):
+        return raw_path, fixture_path, False
+    fixture_path.parent.mkdir(parents=True, exist_ok=True)
+    fixture_path.write_text(json_text, encoding="utf-8")
+    return raw_path, fixture_path, True
 
 
 def pages_covered(paragraphs: list[dict]) -> tuple[int, int] | None:

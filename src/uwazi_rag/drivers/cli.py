@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 
 from uwazi_api.client import UwaziClient
@@ -8,6 +9,7 @@ from uwazi_api.domain.exceptions import SegmentationNotFoundError
 
 from uwazi_rag import configuration
 from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
+from uwazi_rag.use_cases.chunking import build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
 from uwazi_rag.use_cases.fetch_document import (
     pages_covered,
@@ -30,6 +32,10 @@ def _build_parser() -> argparse.ArgumentParser:
     fetch = subparsers.add_parser("fetch", help="capture one entity's text from Uwazi as a fixture (Step 1)")
     fetch.add_argument("shared_id")
     fetch.add_argument("--language", default="en")
+
+    chunk = subparsers.add_parser("chunk", help="dev: chunk a captured segmentation offline and print stats (Step 2)")
+    chunk.add_argument("shared_id")
+    chunk.add_argument("--language", default="en")
 
     index = subparsers.add_parser("index", help="index a template's published entities (Step 4)")
     index.add_argument("--template")
@@ -96,7 +102,9 @@ def _run_fetch(args: argparse.Namespace) -> int:
         segmentation_status=segmentation.status,
         paragraphs=segmentation_paragraphs(segmentation),
     )
-    targets = write_raw_capture(capture, instance_key=configuration.instance_key(url), raw_dir=configuration.RAW_DIR)
+    raw_path, fixture_path, fixture_updated = write_raw_capture(
+        capture, instance_key=configuration.instance_key(url), raw_dir=configuration.RAW_DIR
+    )
 
     pages = pages_covered(capture["paragraphs"])
     print(f"entity : {capture['shared_id']} ({capture['language']}) — {capture['title']}")
@@ -105,11 +113,45 @@ def _run_fetch(args: argparse.Namespace) -> int:
         f"paras  : {len(capture['paragraphs'])} — status '{segmentation.status}'"
         + (f", pages {pages[0]}..{pages[1]}" if pages else "")
     )
-    for target in targets:
-        print(f"wrote  : {target}")
+    print(f"wrote  : {raw_path}")
+    print(f"{'wrote' if fixture_updated else 'kept'}  : {fixture_path}")
+    if not fixture_updated:
+        print("(fixture content unchanged — fetch timestamp excluded)")
     if segmentation.status != "ready":
         print(f"warning: segmentation status is '{segmentation.status}', not 'ready'", file=sys.stderr)
         return 1
+    return 0
+
+
+def _run_chunk(args: argparse.Namespace) -> int:
+    url, _, _ = configuration.uwazi_credentials()
+    capture_path = configuration.RAW_DIR / configuration.instance_key(url) / f"{args.shared_id}_{args.language}.json"
+    if not capture_path.exists():
+        print(
+            f"error: no capture at {capture_path} — run `uwazi-rag fetch {args.shared_id} --language {args.language}` first",
+            file=sys.stderr,
+        )
+        return 1
+    capture = json.loads(capture_path.read_text(encoding="utf-8"))
+    chunks = build_chunks(
+        capture["paragraphs"],
+        instance_key=capture["instance_key"],
+        shared_id=capture["shared_id"],
+        language=capture["language"],
+        file_id=capture["file"]["id"],
+        entity_title=capture["title"],
+        template_name=capture["template"]["name"],
+    )
+    if not chunks:
+        print("warning: capture produced no chunks (no keepable text)", file=sys.stderr)
+        return 1
+    sizes = [len(chunk.text) for chunk in chunks]
+    pages_start = [chunk.page_start for chunk in chunks if chunk.page_start is not None]
+    pages_end = [chunk.page_end for chunk in chunks if chunk.page_end is not None]
+    print(f"entity : {capture['shared_id']} ({capture['language']}) — {capture['title']}")
+    print(f"chunks : {len(chunks)} — avg {sum(sizes) // len(sizes)} chars, range {min(sizes)}..{max(sizes)}")
+    if pages_start:
+        print(f"pages  : {min(pages_start)}..{max(pages_end)}")
     return 0
 
 
@@ -125,6 +167,8 @@ def main() -> int:
         return _run_hello(args)
     if args.command == "fetch":
         return _run_fetch(args)
+    if args.command == "chunk":
+        return _run_chunk(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 
