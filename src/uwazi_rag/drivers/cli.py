@@ -3,11 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from uwazi_api.client import UwaziClient
 from uwazi_api.domain.exceptions import SegmentationNotFoundError
 
 from uwazi_rag import configuration
+from uwazi_rag.adapters.naive_vector_store import NaiveStoreMismatchError, NaiveVectorStore
 from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
 from uwazi_rag.use_cases.chunking import build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
@@ -16,6 +18,8 @@ from uwazi_rag.use_cases.fetch_document import (
     pages_covered,
     write_raw_capture,
 )
+from uwazi_rag.use_cases.index_captures import index_captures
+from uwazi_rag.use_cases.semantic_search import format_search_results, semantic_search
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -40,8 +44,22 @@ def _build_parser() -> argparse.ArgumentParser:
     index.add_argument("--template")
     index.add_argument("--all", action="store_true")
 
-    search = subparsers.add_parser("search", help="search the index (semantic way in Step 3, hybrid in Step 5)")
+    build_index = subparsers.add_parser(
+        "build-index",
+        help="chunk + embed every capture of the configured instance into the naive store (Step 3)",
+    )
+    build_index.add_argument("--source", default=None, help="captures dir (default: data/raw/<instance_key> from .env)")
+    build_index.add_argument("--output", default=None, help="store path (default: data/naive_store.json)")
+    build_index.add_argument("--batch-size", type=int, default=32)
+    build_index.add_argument("--limit", type=int, default=None, help="index at most N captures (smoke test)")
+
+    search = subparsers.add_parser(
+        "search",
+        help="embed the query, cosine-scan the naive store, print the top hits (Step 3; hybrid in Step 5)",
+    )
     search.add_argument("query")
+    search.add_argument("--top", type=int, default=5, help="how many hits to print (default 5)")
+    search.add_argument("--store", default=None, help="naive store path (default: data/naive_store.json)")
 
     ask = subparsers.add_parser("ask", help="RAG answer with citations (Step 6)")
     ask.add_argument("question")
@@ -139,6 +157,71 @@ def _run_chunk(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_build_index(args: argparse.Namespace) -> int:
+    """Step 3: chunk + embed all captured docs of the configured instance, once."""
+    try:
+        url, _, _ = configuration.uwazi_credentials()
+        store = NaiveVectorStore(
+            dimensions=configuration.EMBEDDING_DIMENSIONS,
+            embedding_model=configuration.EMBEDDING_MODEL,
+        )
+        raw_dir = Path(args.source) if args.source else configuration.RAW_DIR / configuration.instance_key(url)
+        stats = index_captures(
+            raw_dir=raw_dir,
+            store=store,
+            embedder=OllamaEmbeddings(),
+            expected_dimensions=configuration.EMBEDDING_DIMENSIONS,
+            batch_size=args.batch_size,
+            limit=args.limit,
+        )
+        output = Path(args.output) if args.output else configuration.NAIVE_STORE_PATH
+        store.save(output)
+    except (ValueError, RuntimeError, OSError) as error:
+        print(f"error: build-index failed — {error}", file=sys.stderr)
+        print(
+            f"hint: embedding needs Ollama serving '{configuration.EMBEDDING_MODEL}'"
+            f" at {configuration.OLLAMA_BASE_URL}; captures come from `uwazi-rag fetch` / the seed script",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"model   : {configuration.EMBEDDING_MODEL} ({configuration.EMBEDDING_DIMENSIONS} dims)")
+    print(
+        f"captures: {stats.captures_indexed}/{stats.captures_seen} indexed"
+        f" — {stats.skipped_not_ready} not ready, {stats.skipped_no_chunks} without keepable text"
+    )
+    print(f"chunks  : {stats.chunks_indexed}")
+    print(f"wrote   : {output}")
+    return 0
+
+
+def _run_search(args: argparse.Namespace) -> int:
+    store_path = Path(args.store) if args.store else configuration.NAIVE_STORE_PATH
+    if not store_path.exists():
+        print(f"error: no naive index at {store_path} — run `uwazi-rag build-index` first", file=sys.stderr)
+        return 1
+    try:
+        store = NaiveVectorStore.load(
+            store_path,
+            embedding_model=configuration.EMBEDDING_MODEL,
+            dimensions=configuration.EMBEDDING_DIMENSIONS,
+        )
+        hits = semantic_search(query=args.query, store=store, embedder=OllamaEmbeddings(), k=args.top)
+    except (NaiveStoreMismatchError, RuntimeError, ValueError) as error:
+        print(f"error: search failed — {error}", file=sys.stderr)
+        print(
+            f"hint: the query embedding needs Ollama at {configuration.OLLAMA_BASE_URL}"
+            " (`ollama serve`); a store/model mismatch → rebuild with `uwazi-rag build-index`",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"query  : {args.query}")
+    print(f"index  : {store_path} — {len(store)} chunks, model '{store.embedding_model}'")
+    print(format_search_results(hits, base_url=configuration.UWAZI_URL or None))
+    return 0
+
+
 def _stub(name: str) -> int:
     print(f"error: '{name}' is a stub — implemented in a later step of PLAN.md", file=sys.stderr)
     return 2
@@ -153,6 +236,10 @@ def main() -> int:
         return _run_fetch(args)
     if args.command == "chunk":
         return _run_chunk(args)
+    if args.command == "build-index":
+        return _run_build_index(args)
+    if args.command == "search":
+        return _run_search(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 

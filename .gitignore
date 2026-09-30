@@ -17,3 +17,6 @@ dist/
 # disposable and rebuildable from Uwazi alone — PLAN.md golden rule 4),
 # except the eval harness artifacts which are versioned in git.
 data/raw/
+# Step 3 naive index — disposable, rebuildable from data/raw captures.
+data/naive_store.json
+data/*.tmp

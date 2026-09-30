@@ -28,6 +28,9 @@ ROOT_PATH: Path = Path(__file__).parent.parent.parent.resolve()
 DATA_DIR: Path = ROOT_PATH / "data"
 # Uwazi captures (Step 1) — disposable, rebuildable from Uwazi alone.
 RAW_DIR: Path = DATA_DIR / "raw"
+# Step 3 naive index — one JSON file of (chunk, vector) pairs; disposable
+# (rebuildable from data/raw captures) and never committed.
+NAIVE_STORE_PATH: Path = DATA_DIR / "naive_store.json"
 # Real captured data for offline unit tests (AGENTS.md testing policy). Committed.
 FIXTURES_DIR: Path = Path(__file__).parent / "tests" / "fixtures"
 
@@ -63,6 +66,11 @@ def uwazi_credentials() -> tuple[str, str, str]:
         )
     return url, user, password
 
+
+# Base URL of the configured Uwazi instance, read like OLLAMA_BASE_URL above
+# (credentials stay lazy in :func:`uwazi_credentials`). ``build-index`` uses
+# it to namespace the captures dir, ``search`` to print entity links.
+UWAZI_URL: str = (os.environ.get("UWAZI_URL") or "").rstrip("/")
 
 OLLAMA_BASE_URL: str = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "bge-m3")
