@@ -12,9 +12,8 @@ from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
 from uwazi_rag.use_cases.chunking import build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
 from uwazi_rag.use_cases.fetch_document import (
+    capture_entity,
     pages_covered,
-    raw_capture_json,
-    segmentation_paragraphs,
     write_raw_capture,
 )
 
@@ -37,7 +36,7 @@ def _build_parser() -> argparse.ArgumentParser:
     chunk.add_argument("shared_id")
     chunk.add_argument("--language", default="en")
 
-    index = subparsers.add_parser("index", help="index a template's published entities (Step 4)")
+    index = subparsers.add_parser("index", help="index a template's pubhed entities (Step 4)")
     index.add_argument("--template")
     index.add_argument("--all", action="store_true")
 
@@ -75,8 +74,7 @@ def _run_fetch(args: argparse.Namespace) -> int:
     url, user, password = configuration.uwazi_credentials()
     client = UwaziClient(url=url, user=user, password=password)
     try:
-        entity = client.entities.get_one(args.shared_id, args.language)
-        segmentation = client.files.get_segmentation(args.shared_id, args.language)
+        capture = capture_entity(client, shared_id=args.shared_id, language=args.language, url=url)
     except SegmentationNotFoundError as error:
         print(f"error: {error}", file=sys.stderr)
         print(
@@ -88,20 +86,6 @@ def _run_fetch(args: argparse.Namespace) -> int:
         print(f"error: fetch failed — is Uwazi reachable at {url}? | {error}", file=sys.stderr)
         return 1
 
-    template = client.templates.get_by_id(entity.template) if entity.template else None
-    document = next((d for d in entity.documents if d.id == segmentation.file_id), None)
-    capture = raw_capture_json(
-        shared_id=entity.shared_id or args.shared_id,
-        language=args.language,
-        instance_key=configuration.instance_key(url),
-        title=entity.title or "",
-        template_id=entity.template,
-        template_name=template.name if template else "",
-        file_id=segmentation.file_id,
-        file_name=getattr(document, "originalname", None),
-        segmentation_status=segmentation.status,
-        paragraphs=segmentation_paragraphs(segmentation),
-    )
     raw_path, fixture_path, fixture_updated = write_raw_capture(
         capture, instance_key=configuration.instance_key(url), raw_dir=configuration.RAW_DIR
     )
@@ -110,15 +94,15 @@ def _run_fetch(args: argparse.Namespace) -> int:
     print(f"entity : {capture['shared_id']} ({capture['language']}) — {capture['title']}")
     print(f"file   : {capture['file']['name']} ({capture['file']['id']})")
     print(
-        f"paras  : {len(capture['paragraphs'])} — status '{segmentation.status}'"
+        f"paras  : {len(capture['paragraphs'])} — status '{capture['segmentation_status']}'"
         + (f", pages {pages[0]}..{pages[1]}" if pages else "")
     )
     print(f"wrote  : {raw_path}")
     print(f"{'wrote' if fixture_updated else 'kept'}  : {fixture_path}")
     if not fixture_updated:
         print("(fixture content unchanged — fetch timestamp excluded)")
-    if segmentation.status != "ready":
-        print(f"warning: segmentation status is '{segmentation.status}', not 'ready'", file=sys.stderr)
+    if capture["segmentation_status"] != "ready":
+        print(f"warning: segmentation status is '{capture['segmentation_status']}', not 'ready'", file=sys.stderr)
         return 1
     return 0
 

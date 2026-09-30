@@ -18,9 +18,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from uwazi_api.client import UwaziClient
 from uwazi_api.domain.segmentation import Segmentation
 
-from uwazi_rag.configuration import FIXTURES_DIR
+from uwazi_rag.configuration import FIXTURES_DIR, instance_key
 
 
 def raw_capture_json(
@@ -60,6 +61,31 @@ def segmentation_paragraphs(segmentation: Segmentation) -> list[dict]:
     return [p.model_dump(mode="json", by_alias=True) for p in segmentation.paragraphs]
 
 
+def capture_entity(client: UwaziClient, *, shared_id: str, language: str, url: str) -> dict:
+    """Network part of Step 1 for one entity-language: entity -> segmentation -> capture dict.
+
+    Shared by the CLI driver and the bulk seed script so both capture with the
+    exact same logic. Raises ``SegmentationNotFoundError`` when the entity has
+    no (file-)segmentation for that language.
+    """
+    entity = client.entities.get_one(shared_id, language)
+    segmentation = client.files.get_segmentation(shared_id, language)
+    template = client.templates.get_by_id(entity.template) if entity.template else None
+    document = next((d for d in entity.documents if d.id == segmentation.file_id), None)
+    return raw_capture_json(
+        shared_id=entity.shared_id or shared_id,
+        language=language,
+        instance_key=instance_key(url),
+        title=entity.title or "",
+        template_id=entity.template,
+        template_name=template.name if template else "",
+        file_id=segmentation.file_id,
+        file_name=getattr(document, "originalname", None),
+        segmentation_status=segmentation.status,
+        paragraphs=segmentation_paragraphs(segmentation),
+    )
+
+
 def fixture_is_up_to_date(existing: dict | None, capture: dict) -> bool:
     """True when the committed fixture already holds this content.
 
@@ -75,7 +101,9 @@ def fixture_is_up_to_date(existing: dict | None, capture: dict) -> bool:
     return stable(existing) == stable(capture)
 
 
-def write_raw_capture(capture: dict, *, instance_key: str, raw_dir: Path) -> tuple[Path, Path, bool]:
+def write_raw_capture(
+    capture: dict, *, instance_key: str, raw_dir: Path, update_fixtures: bool = True
+) -> tuple[Path, Path, bool]:
     """Write the capture to the ``data/raw`` cache and the tests fixtures dir.
 
     The raw copy is always rewritten (disposable cache); the fixture is only
@@ -91,11 +119,11 @@ def write_raw_capture(capture: dict, *, instance_key: str, raw_dir: Path) -> tup
 
     fixture_path = FIXTURES_DIR / filename
     existing = json.loads(fixture_path.read_text(encoding="utf-8")) if fixture_path.exists() else None
-    if fixture_is_up_to_date(existing, capture):
-        return raw_path, fixture_path, False
-    fixture_path.parent.mkdir(parents=True, exist_ok=True)
-    fixture_path.write_text(json_text, encoding="utf-8")
-    return raw_path, fixture_path, True
+    if update_fixtures and not fixture_is_up_to_date(existing, capture):
+        fixture_path.parent.mkdir(parents=True, exist_ok=True)
+        fixture_path.write_text(json_text, encoding="utf-8")
+        return raw_path, fixture_path, True
+    return raw_path, fixture_path, False
 
 
 def pages_covered(paragraphs: list[dict]) -> tuple[int, int] | None:
