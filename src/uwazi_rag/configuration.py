@@ -87,8 +87,9 @@ EMBEDDING_DIMENSIONS: int = int(os.environ.get("EMBEDDING_DIMENSIONS", "1024"))
 # Step 3.5 scorecard: cosine similarity above which an unanswerable golden row
 # (expected nothing relevant, e.g. m013-m015) counts as a false retrieval.
 # A knob in config, not code — its right value depends on each embedding
-# model's score scale; the baseline runs in data/eval/results.md decide it.
-FALSE_RETRIEVAL_THRESHOLD: float = float(os.environ.get("FALSE_RETRIEVAL_THRESHOLD", "0.50"))
+# model's score scale. 0.55 separates bge-m3's baseline: unanswerable top-1
+# 0.5040-0.5081 vs answerable top-1 p25 0.581 (data/eval/results.md baseline).
+FALSE_RETRIEVAL_THRESHOLD: float = float(os.environ.get("FALSE_RETRIEVAL_THRESHOLD", "0.55"))
 SERVICE_PORT: int = int(os.environ.get("SERVICE_PORT", "5057"))
 # Languages golden questions are written in; a capture in one of these languages may
 # have its questions generated in the other one (cross-language recall rows). Comma
