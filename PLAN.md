@@ -105,6 +105,7 @@ Two products come out of this:
 | 1 | Fetch one document | real Uwazi text saved as a fixture | the Uwazi data plane (segmentation) |
 | 2 | Chunking | tested chunk builder | chunk size, overlap, context headers |
 | 3 | Naive search | CLI search over one document | cosine similarity, top-k |
+| 3.5 | Eval harness, early | golden set + recall/MRR scorecard on the 77-doc index | measurement before scale |
 | 4 | Index a collection | whole template indexed | pipelines, idempotency, caching |
 | 5 | pgvector + hybrid | real vector store with keyword fusion | ANN indexes, hybrid search, RRF |
 | 6 | Answers + citations | `ask` command with linked sources | grounding, prompt design |
@@ -246,6 +247,68 @@ correct paragraphs come back. That's the "it works" moment of embeddings.
 
 ---
 
+## Step 3.5 — Eval harness, early (a 77-document measuring stick)
+
+**Goal:** before mass indexing makes every experiment expensive, build the scorecard that
+turns "my chunks feel fine" into recall@k and MRR numbers — then use it to settle chunking
+and embedding-model decisions *before* Step 4 commits thousands of chunks to disk. Runs
+entirely on the existing 77-capture / 2,850-chunk index; no new infrastructure beyond one
+thin port.
+
+**Build:**
+- A thin `LlmPort` (`ports/llm_port.py`) + `OllamaLlm` adapter (`POST /api/chat`, no
+  streaming) — fleshed out in Step 6; the golden builder only needs "answer this prompt".
+  The LLM model name comes from config (`LLM_MODEL` in `.env`; any instruct model already
+  pulled in Ollama works — config, never code).
+- `use_cases/build_golden.py`: LLM-generates 2–3 *varied* questions per sampled chunk
+  (stratified by language; some questions asked in the **other** language of the chunk,
+  previewing cross-language recall) and writes `data/eval/golden.jsonl` rows:
+  `{id, question, origin, expected: {instance_key, shared_id, file_id, chunk_id}}` —
+  self-grounded by construction: the chunk a question was generated *from* is its gold
+  pair. Known bias ("self-echo": the question shares vocabulary with its chunk, inflating
+  absolute scores) — push against it with question-form variety (definition-style,
+  "which document says…", paraphrase, numeric/specific), generate from chunk text
+  *without the header*, and treat scores as **relative** (config A vs config B), never
+  absolute. Stratified-by-subgroup scoring waits for Step 4 (the subgroup label isn't
+  recorded in captures yet).
+- **Human verification is part of the step:** sample-review the synthetic rows, delete
+  junk, and hand-write ~15–20 questions (`origin: manual`) — the Step 3 cross-language
+  demo query is already #1. `data/eval/` is committed versioned material (an exception
+  to "data is disposable", already carved out in `.gitignore`).
+- `use_cases/eval_retrieval.py` (pure): ranked `chunk_id`s per question → **recall@k**
+  and **MRR**, reported at *both* chunk level and document level. Document-level keeps
+  comparisons fair across chunk sizes (bigger chunks trivially inflate chunk-level
+  recall); chunk-level shows precision of the granule itself. Aggregate per language.
+- `uwazi-rag eval --label "…" (--store …)` un-stubs: embeds every golden question,
+  retrieves top-k from a store, prints the scorecard, appends a dated row to
+  `data/eval/results.md` (append-only log — re-run freely, never overwrite).
+- `build-index` grows a small benchmark surface: `--max-chars`, `--overlap`, `--no-header`
+  (defaulting to the Step 2 constants from `use_cases/chunking.py`). Chunking parameters
+  were hypotheses until now; this step is where they become decisions.
+- The benchmark protocol: fix `golden.jsonl`; sweep chunk configs, then Ollama embedding
+  models (bge-m3 vs shortlisted alternates, e.g. `nomic-embed-text` / arctic-embed-class,
+  one store per model — the store's model/dims fingerprint keeps them apart); record both
+  sweeps in `results.md` and let the numbers pick what Step 4 ships with.
+- Optional external cross-check (embedding-model shortlist ONLY): a ready-made bilingual
+  retrieval set in BeIR format (e.g. MIRACL-es or mMARCO-es), run from a throwaway script
+  outside the core pipeline as a second opinion on the model ranking. It never gates
+  chunking or pipeline decisions — foreign questions can't vote on foreign-corpus shape —
+  and the in-domain protection (hand-written rows + the post-Step-4 scale-up re-check)
+  stays the real anti-overfit device. Skip it unless two models tie on the golden set.
+
+**Learn:** a small in-domain harness beats any public benchmark here — the questions users
+ask human-rights collections only resemble those collections, and recall@k against a
+corpus you didn't index is meaningless. Synthetic-question generation converts labeling
+labor into compute; verification labor replaces authoring labor. Relative scores from
+biased-but-shared questions are still fair races — the hand-written rows are the
+tiebreaker when two configs look equal.
+
+**Done when:** `data/eval/golden.jsonl` (verified) is committed; `data/eval/results.md`
+has ≥2 recorded sweep blocks (one chunking, one embedding-model) with a chosen default;
+Step 4 inherits those parameters.
+
+---
+
 ## Step 4 — Index a whole collection
 
 **Goal:** from one document to a template's worth of content, resiliently.
@@ -302,7 +365,9 @@ catches those. RRF (reciprocal rank fusion) merges two ranked lists by rewarding
 rank high in either one — dead simple and hard to beat. True BM25 scoring is a later
 upgrade (e.g. ParadeDB's `pg_search`) if the eval harness says you need it. This is also
 your first taste of *metadata filtering* — the same mechanism that will enforce permissions
-later (filter by template, language, and eventually per-user access sets).
+later (filter by template, language, and eventually per-user access sets). Also: the
+harness from Step 3.5 grades the migration itself — vector search over pgvector on the
+golden questions must match or beat the naive scan it replaces.
 
 **Done when:** the same query works against Postgres; a keyword-heavy query (e.g. a specific
 article number) now finds exact matches that pure vector search missed.
@@ -344,11 +409,14 @@ in your collection, and an unanswerable question returns "not found", not fictio
 
 **Goal:** numbers that tell you whether retrieval/answers got better or worse.
 
-**Build:**
-- `data/eval/golden.jsonl`: 15–30 real questions **you** write about your own collection,
-  each with the expected `sharedId`(s). Mix: keyword-y questions, paraphrases, wrong-language
-  questions, one or two answerable-only-with-metadata questions, a couple with no good
-  answer (should return "not found").
+**Build:** (Step 3.5 already built the harness early, on the 77-document index — `LlmPort`,
+the golden builder, `eval_retrieval.py`, the `eval` CLI, and the chunk-parameter knobs.
+This step runs it at scale and keeps it as the regression gate.)
+- `data/eval/golden.jsonl`: merge your hand-written rows into Step 3.5's verified
+  synthetic set; after Step 4's full indexing, extend with questions written directly
+  against the indexed templates, each with the expected `sharedId`(s). Mix: keyword-y
+  questions, paraphrases, wrong-language questions, one or two answerable-only-with-
+  metadata questions, a couple with no good answer (should return "not found").
 - Command `uwazi-rag eval`:
   - Retrieval metrics: **recall@k** (did the expected entity appear in top-k?) and **MRR**
     (mean reciprocal rank — 1.0 if expected hit is always first, ~0 if deep in the list).
@@ -364,8 +432,10 @@ from "did we phrase it well" (generation). From now on: change chunk size → ru
 swap embedding model → run eval; edit prompt → run eval. You'll likely do a small sweep of
 chunk sizes and k here — that's the harness doing its job.
 
-**Done when:** a baseline scorecard exists, and you've made (and recorded) at least one
-decision with it — e.g. "1,500-char chunks beat 3,000-char on recall@10."
+**Done when:** the full-index scorecard runs stratified (language, and subgroup once the
+Step 4 inventory records it) and is appended to `results.md` after every
+chunking/retrieval/prompt change — the Step 3.5 baseline now becomes the standing
+regression gate.
 
 ---
 
