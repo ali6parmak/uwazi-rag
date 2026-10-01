@@ -97,7 +97,7 @@ Manual rows: 15 appended (origin `manual`, ids `m001`–`m015`; re-running
 `build-golden --merge-manual` skips them as already-merged):
 
 - 3 keyword-literal probes quoting exact distinctive terms: "Serie A No. 2"
-  (OC-2/83's citation label — lives in the doc title, so it also tests chunk-header
+  (OC-2/82's citation label — lives in the doc title, so it also tests chunk-header
   indexing), IACHR case number 11.769 (registration date, Report 27/08), and
   Law 1084 (the 180-day judgment deadline in Report 58/14).
 - 3 paraphrases written to near-zero token overlap with their gold passage
