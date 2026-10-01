@@ -569,3 +569,32 @@ note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a differe
 | nomic-v2-moe-bm25 | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 | — | reuse / 0.9s |
 | nomic-v2-moe-rrf | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 34.1% | 61.0% | 69.3% | 0.497 | 58.1% | 85.0% | 95.1% | 0.706 | — | reuse / 3.0s |
 
+## 2026-10-01T15:29:26+00:00 — VERDICT — Step 4 defaults (evidence: the sweep + method blocks above)
+
+Chunk config: **keep the merge chunker at 1800 chars / 0.15 overlap / header ON** (Step 2 constants stand).
+
+- 2400 is strictly worse everywhere that matters (doc R@1 59.6% vs 62.5%, chunk MRR 0.465 vs 0.490) — bigger chunks dilute the target passage.
+- 1200 is a wash: doc R@5 91.8% (+2.3) but chunk R@5 62.8% (−3.1) and chunk R@10 down; within self-echo tolerance, not a win. No reason to move a settled pipeline.
+- no-header helps chunk R@1 (+1.1 pt) but costs doc R@1 (−0.7 pt) and manual chunk R@1 badly (29.2% → 20.8%) — the header rows m001/m011/m012 retrieve through the title. Header stays on.
+
+Embedding model: **nomic-embed-text-v2-moe (768d) becomes the Step 4 default; bge-m3 stays the standby (stores kept, not deleted).**
+
+- nomic wins the aggregate at chunk level (R@1 33.0% vs 30.0%, R@10 78.3% vs 75.7%, MRR 0.508 vs 0.490) and the depths citations care about (doc R@10 95.1% vs 92.5%).
+- Cross-language (65 rows): chunk R@1 30.0% vs 23.1% (+6.9), doc R@10 96.9% vs 98.5% (~par); es scope doc R@1 58.2% vs 53.1%. The long-term roadmap is a global multilingual repository, so the CL/es edge compounds.
+- Manual rows (12 hand-written): doc level is a tie (R@1 75.0% both, MRR 0.833 vs 0.826 — nomic slightly ahead); nomic loses chunk R@1 (12.5% vs 29.2%) while chunk R@5 (62.5% vs 66.7%) and R@10 (75.0% vs 75.0%) are near-level. The losing rows are the header/number probes — the exact queries the lexical arm fixes (see BM25 below). 12 rows is small; doc-level tie + chunk-level R@5/R@10 tie reads as acceptable.
+- qwen3-embedding:0.6b drops (doc R@1 59.9% trails; only its es doc R@1 60.2% leads, and nomic already improved es).
+- Unanswerable margins survive the model switch at the 0.55 threshold: nomic top-1 max 0.5017 (m013) vs bge 0.5081 — both cleanly separated from answerable top-1s. FALSE_RETRIEVAL_THRESHOLD stays 0.55; re-derive from data if future models join.
+
+Retrieval method: **embedding-only for Step 4. BM25/RRF stay benchmarked, not shipped.**
+
+- Pure BM25 does exactly what vectors can't — m002 (number probe) chunk rank 3 → 1, m001 (header-driven) 98 → 15, m011 24 → 3 — but it cannot cross languages (cross-language chunk R@5 12.3% vs embedding 62.3%; doc R@10 29.2% vs 96.9%) and it ejects paraphrase rows from the ranking (m004, m006 → rank 0). It is a repair arm, never the only arm, in a multilingual repository.
+- RRF (unweighted, k=60) improves same-language retrieval meaningfully (chunk R@1 38.1% vs 32.2%, doc R@1 69.8% vs 63.9%, MRR 0.580 vs 0.508) but lets BM25's junk cross-language rankings poison good embedding rankings (cross-language chunk R@10 34.6% vs 71.5%, doc R@10 89.2% vs 98.5%). Fusion needs language-awareness before it ships: detect the query language or fuse the lexical arm only for same-language rows / at reduced weight. That is Step 5 work, where hybrid lands in the retrieval path properly; m002/m003's before/after (3→1, 1→1 at chunk rank) is the acceptance evidence recorded above.
+
+Open chunker knobs (NOT implemented — awaiting explicit OK, evidence gathered):
+
+- drop_footnotes: 2,696 footnote paragraphs, ~660k chars (~15% of corpus volume) — cheap to build, data invites it — but it changes the keepable-paragraph drop rule, and **36 of 267 answerable golden rows (13.5%) anchor footnote paragraphs**: those rows degrade to ungradable (or force golden re-anchoring decisions later). Needs a deliberate decision, not a knob flip.
+- section-based chunking: 1,117 typed Section header paragraphs; 76/267 rows anchor at least one section-header paragraph, but a section chunker only re-grouping keepable paragraphs (drop rule unchanged) leaves every row gradeable via the paragraph_ids contract — safe to try later as a new pure strategy in the stores spec (`chunker = "section"`), once a real need shows up.
+
+Corpus locality caveat: everything here is 77 IACHR-style reports from one instance with self-echo-biased questions (255 synthetic). Scores are relative (A vs B), never absolute; absolute recall will read lower on the full collection and, after Step 4's scale-up, chunking conclusions must be re-checked first (chunk geometry interacts with corpus mix). An external legal-RAG dataset (user-supplied, preferred over generic MIRACL) can still be added as a second opinion on the MODEL ranking only — never on chunking — and only if two models tie here (they do not: nomic leads on the shared corpus, bge leads on manual chunk R@1; the doc-level tie + CL edge broke it for nomic).
+
+Step 4 inherits: chunker merge / 1800 / 0.15 / header on; model nomic-embed-text-v2-moe (EMBEDDING_DIMENSIONS → 768, .env); retrieval embedding-only; false-retrieval threshold 0.55 unchanged.
