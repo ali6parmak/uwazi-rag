@@ -260,25 +260,50 @@ thin port.
   streaming) — fleshed out in Step 6; the golden builder only needs "answer this prompt".
   The LLM model name comes from config (`LLM_MODEL` in `.env`; any instruct model already
   pulled in Ollama works — config, never code).
-- `use_cases/build_golden.py`: LLM-generates 2–3 *varied* questions per sampled chunk
-  (stratified by language; some questions asked in the **other** language of the chunk,
-  previewing cross-language recall) and writes `data/eval/golden.jsonl` rows:
-  `{id, question, origin, expected: {instance_key, shared_id, file_id, chunk_id}}` —
-  self-grounded by construction: the chunk a question was generated *from* is its gold
-  pair. Known bias ("self-echo": the question shares vocabulary with its chunk, inflating
-  absolute scores) — push against it with question-form variety (definition-style,
-  "which document says…", paraphrase, numeric/specific), generate from chunk text
-  *without the header*, and treat scores as **relative** (config A vs config B), never
-  absolute. Stratified-by-subgroup scoring waits for Step 4 (the subgroup label isn't
-  recorded in captures yet).
+- `use_cases/passage_groups.py` + `use_cases/build_golden.py`: questions anchor to
+  **paragraphs**, never to chunk ids — chunk anchors die the moment the
+  `--max-chars`/`--overlap` sweep changes the chunker, paragraph anchors survive any chunk
+  config. The grouping unit is a *passage group*: consecutive keepable paragraphs (same
+  drop rule as the chunker, shared code not a copy) packed up to ~1,200 chars; a single
+  longer paragraph is its own (unsplittable) group. Keepable paragraphs are anchored by
+  their 0-based position in the raw capture (dropped paragraphs leave gaps) — the
+  deterministic canonical index. Sampling is
+  seeded/deterministic: 2 passage groups per capture, every document covered, stratified
+  by language (captures are per-language); a seeded 25% subset of groups gets its
+  questions generated in the **other** language (cross-language rows, previewing
+  cross-language recall). One LLM call per group asks for exactly 2 questions (one very
+  specific, one broader/vaguer, ≤ ~20 words, natural phrasing, no 5-consecutive-word
+  copies from the excerpt, strict JSON array), excerpt WITHOUT title/header/page numbers.
+  `data/eval/golden.jsonl` rows:
+  `{id, question, origin, query_language, source_group_id, expected: {instance_key,
+  shared_id, language, file_id, paragraph_ids, text}}` — self-grounded by construction:
+  the passage a question was generated *from* is its gold pair. Known bias ("self-echo":
+  the question shares vocabulary with its passage, inflating absolute scores) — push
+  against it with the specific/broader pair, generate from passage text *without the
+  header*, and treat scores as **relative** (config A vs config B), never absolute.
+  Stratified-by-subgroup scoring waits for Step 4 (the subgroup label isn't recorded in
+  captures yet).
+- `uwazi-rag build-golden` writes: `golden.jsonl` (the synthetic draft), `passages.jsonl`
+  (the sampled groups — derived/disposable, gitignored), `about.md` (the full recipe:
+  model, defaults, prompt text, sampling rule, counts, date) and `manual.jsonl` — a
+  2-example-row template (`origin: "example"`, shown for schema only, never merged).
+  `--merge-manual` is a merge-only mode (no LLM calls): it validates hand-written rows
+  (`origin: "manual"`, must reference a real `source_group_id`) and appends them to
+  `golden.jsonl`, keeping manual rows separable by origin. Generated rows are streamed to
+  a temp file and renamed on completion, so a killed run never corrupts the previous
+  dataset; individual group failures (unparseable reply, junk questions) are counted and
+  skipped, never fatal.
 - **Human verification is part of the step:** sample-review the synthetic rows, delete
-  junk, and hand-write ~15–20 questions (`origin: manual`) — the Step 3 cross-language
-  demo query is already #1. `data/eval/` is committed versioned material (an exception
-  to "data is disposable", already carved out in `.gitignore`).
-- `use_cases/eval_retrieval.py` (pure): ranked `chunk_id`s per question → **recall@k**
-  and **MRR**, reported at *both* chunk level and document level. Document-level keeps
-  comparisons fair across chunk sizes (bigger chunks trivially inflate chunk-level
-  recall); chunk-level shows precision of the granule itself. Aggregate per language.
+  junk, and hand-write ~15–20 questions into `data/eval/manual.jsonl` (`origin: "manual"`;
+  the Step 3 cross-language demo query is already #1). `data/eval/` is committed
+  versioned material (an exception to "data is disposable", already carved out in
+  `.gitignore`).
+- `use_cases/eval_retrieval.py` (pure): golden rows anchor `paragraph_ids`, so first map
+  expected paragraphs → `chunk_id`s under the chunk config being graded, then from ranked
+  `chunk_id`s → **recall@k** and **MRR**, reported at *both* chunk level and document
+  level. Document-level keeps comparisons fair across chunk sizes (bigger chunks trivially
+  inflate chunk-level recall); chunk-level shows precision of the granule itself.
+  Aggregate per language.
 - `uwazi-rag eval --label "…" (--store …)` un-stubs: embeds every golden question,
   retrieves top-k from a store, prints the scorecard, appends a dated row to
   `data/eval/results.md` (append-only log — re-run freely, never overwrite).
