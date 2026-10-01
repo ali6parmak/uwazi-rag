@@ -687,8 +687,11 @@ def format_about(
             f"`{ROW_SCHEMA}`",
             "",
             "- `origin`: `synthetic` (LLM-drafted) or `manual` (hand-written, merged via",
-            '  `uwazi-rag build-golden --merge-manual`). The two `"example"` rows in `manual.jsonl`',
-            "  are schema demos and are never merged.",
+            "  `uwazi-rag build-golden --merge-manual`).",
+            "- unanswerable manual rows (a real topic the corpus does not contain) carry",
+            '  `"source_group_id": null, "expected": null`; the scorecard expects nothing relevant for them.',
+            "- `manual.jsonl` starts as an origin-example schema template; the reviewed dataset",
+            "  has human-written `manual` rows in its place.",
             "- `passages.jsonl` holds the sampled groups (ground truth for review; paragraph ids indexed",
             f"  as above) and is derived/disposable, so it is gitignored. `{GOLDEN_FILE}`, `{MANUAL_FILE}`,",
             f"  `{ABOUT_FILE}` are committed.",
@@ -713,7 +716,8 @@ STOP here — human verification is the next step:
    - cross-language questions (query_language different from expected.language)
    - broad topical queries a human would really type
    - near-duplicate fact pairs across documents (does retrieval discriminate?)
-   - 2-3 questions with no good answer in the corpus (the scorecard expects empty hits)
+   - 2-3 questions with no good answer in the corpus, carrying null for both
+     source_group_id and expected (the scorecard expects no relevant hits)
 3. `uv run uwazi-rag build-golden --merge-manual` validates + appends your rows to golden.jsonl.
 4. Commit golden.jsonl, manual.jsonl and about.md (passages.jsonl stays untracked)."""
 
@@ -758,8 +762,10 @@ def merge_manual_rows(*, eval_dir: Path, eval_languages: Sequence[str] = EVAL_LA
     Merge-only: no LLM calls. Every ``origin: "manual"`` row must reference a
     ``source_group_id`` that exists in ``passages.jsonl`` and copy that
     group's ``expected`` block exactly; missing ids are auto-assigned
-    ``m<NNN>``. ``origin: "example"`` template rows are skipped with a count;
-    any other problem aborts the merge before the golden file is touched.
+    ``m<NNN>``. Unanswerable rows (``source_group_id`` and ``expected`` both
+    ``None``) need no passage anchor. ``origin: "example"`` template rows are
+    skipped with a count; any other problem aborts the merge before the
+    golden file is touched.
     """
     golden_path = eval_dir / GOLDEN_FILE
     manual_path = eval_dir / MANUAL_FILE
@@ -841,6 +847,12 @@ def _manual_row_problem(
     if not isinstance(query_language, str) or query_language not in eval_languages:
         return f"query_language must be one of {', '.join(eval_languages)}"
     source_group_id = row.get("source_group_id")
+    if source_group_id is None and row.get("expected") is None:
+        # Unanswerable row: a real topic the corpus does not contain — no anchor
+        # exists, so the scorecard later expects nothing relevant to come back.
+        return None
+    if (source_group_id is None) != (row.get("expected") is None):
+        return "an unanswerable row needs source_group_id and expected to be null together, or neither of them null"
     if not isinstance(source_group_id, str) or not source_group_id:
         return "source_group_id must be a non-empty string"
     passage = passages.get(source_group_id)

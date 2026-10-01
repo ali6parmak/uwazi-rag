@@ -391,6 +391,19 @@ def _valid_manual_row(passages: list[dict[str, Any]], *, query_language: str = "
     return row
 
 
+def _unanswerable_row(**overrides: Any) -> dict[str, Any]:
+    """A manual row for a real topic the corpus does not contain (no anchor)."""
+    row: dict[str, Any] = {
+        "origin": "manual",
+        "question": "What is documented about conditions in the North Korean political prison camps?",
+        "query_language": "en",
+        "source_group_id": None,
+        "expected": None,
+    }
+    row.update(overrides)
+    return row
+
+
 def test_merge_appends_valid_manual_rows_and_skips_examples(tmp_path: Path) -> None:
     stats, eval_dir = _run(tmp_path, [FIXTURES[0]])
     passages = _jsonl(eval_dir, PASSAGES_FILE)
@@ -463,3 +476,50 @@ def test_merge_validates_and_aborts_without_touching_golden(tmp_path: Path) -> N
 def test_merge_requires_an_existing_dataset(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="build-golden"):
         merge_manual_rows(eval_dir=tmp_path / "empty")
+
+
+def test_merge_accepts_unanswerable_rows_without_an_anchor(tmp_path: Path) -> None:
+    _, eval_dir = _run(tmp_path, [FIXTURES[0]])
+    manual_examples = _jsonl(eval_dir, MANUAL_FILE)  # the 2 template rows
+    write_jsonl(eval_dir / MANUAL_FILE, manual_examples + [_unanswerable_row()])
+
+    stats = merge_manual_rows(eval_dir=eval_dir)
+
+    assert stats.manual_rows_merged == 1 and stats.ids_autoassigned == 1
+    golden = _jsonl(eval_dir, GOLDEN_FILE)
+    row = golden[-1]
+    assert row["id"] == "m001" and row["origin"] == "manual"
+    assert row["source_group_id"] is None and row["expected"] is None
+    assert "camps" in row["question"]  # question survives untouched
+
+
+def test_merge_rejects_rows_with_only_one_null_field(tmp_path: Path) -> None:
+    _, eval_dir = _run(tmp_path, [FIXTURES[0]])
+    passages = _jsonl(eval_dir, PASSAGES_FILE)
+    manual_examples = _jsonl(eval_dir, MANUAL_FILE)
+    golden_bytes = (eval_dir / GOLDEN_FILE).read_bytes()
+
+    only_null_anchor = _valid_manual_row(passages)
+    only_null_anchor["source_group_id"] = None
+    only_null_expected = _valid_manual_row(passages)
+    only_null_expected["expected"] = None
+    cases = [only_null_anchor, only_null_expected]
+
+    for index, bad in enumerate(cases):
+        write_jsonl(eval_dir / MANUAL_FILE, manual_examples + [bad])
+        with pytest.raises(ValueError, match="null together"):
+            merge_manual_rows(eval_dir=eval_dir)
+        assert (eval_dir / GOLDEN_FILE).read_bytes() == golden_bytes, f"case {index}"
+
+
+def test_merging_an_unanswerable_row_twice_skips_instead_of_duplicating(tmp_path: Path) -> None:
+    _, eval_dir = _run(tmp_path, [FIXTURES[0]])
+    manual_examples = _jsonl(eval_dir, MANUAL_FILE)  # the 2 template rows
+    write_jsonl(eval_dir / MANUAL_FILE, manual_examples + [_unanswerable_row()])
+    first = merge_manual_rows(eval_dir=eval_dir)
+    assert first.manual_rows_merged == 1
+
+    second = merge_manual_rows(eval_dir=eval_dir)  # same manual file again
+    assert second.manual_rows_merged == 0 and second.manual_rows_skipped_duplicated == 1
+    golden = _jsonl(eval_dir, GOLDEN_FILE)
+    assert sum(1 for row in golden if row.get("question") == _unanswerable_row()["question"]) == 1
