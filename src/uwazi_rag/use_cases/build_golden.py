@@ -81,7 +81,7 @@ Excerpt (title removed, just text):
 
 ROW_SCHEMA = (
     "{id, question, origin, query_language, source_group_id, "
-    "expected: {instance_key, shared_id, language, file_id, paragraph_ids, text}}"
+    "expected: {instance_key, shared_id, title, language, file_id, paragraph_ids, text}}"
 )
 
 # The manual.jsonl template's example rows anchor to a real sampled group's
@@ -242,6 +242,7 @@ def make_golden_rows(
             "expected": {
                 "instance_key": group.instance_key,
                 "shared_id": group.shared_id,
+                "title": group.title,
                 "language": group.language,
                 "file_id": group.file_id,
                 "paragraph_ids": list(group.paragraph_ids),
@@ -816,7 +817,7 @@ def merge_manual_rows(*, eval_dir: Path, eval_languages: Sequence[str] = EVAL_LA
                 candidate = f"m{auto:03d}"
                 if candidate not in taken:
                     break
-            row = {**row, "id": candidate}
+            row = {"id": candidate, **row}
             ids_autoassigned += 1
         merged.append(row)
 
@@ -864,6 +865,7 @@ def _manual_row_problem(
     for name, want in (
         ("instance_key", passage["instance_key"]),
         ("shared_id", passage["shared_id"]),
+        ("title", passage["title"]),
         ("language", passage["language"]),
         ("file_id", passage["file_id"]),
         ("paragraph_ids", passage["paragraph_ids"]),

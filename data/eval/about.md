@@ -58,7 +58,7 @@ Excerpt (title removed, just text):
 
 ## Row schema
 
-`{id, question, origin, query_language, source_group_id, expected: {instance_key, shared_id, language, file_id, paragraph_ids, text}}`
+`{id, question, origin, query_language, source_group_id, expected: {instance_key, shared_id, title, language, file_id, paragraph_ids, text}}`
 
 - `origin`: `synthetic` (LLM-drafted) or `manual` (hand-written, merged via
   `uwazi-rag build-golden --merge-manual`).
@@ -119,3 +119,16 @@ Manual rows: 15 appended (origin `manual`, ids `m001`–`m015`; re-running
   grep): Guantánamo Bay detention, treatment of Rohingya people, North Korean
   political prison camps. `"source_group_id": null, "expected": null`, en × 2 /
   es × 1; the scorecard must treat them as expected-nothing-relevant.
+
+## expected.title (added 2026-10-01)
+
+`expected` carries `title` — the capture's Uwazi document title, next to
+`shared_id` — migrated into the committed rows by an offline join with
+`passages.jsonl` (no regeneration; every question is unchanged). The committed
+dataset is now self-describing without the gitignored review file, and rows whose
+question keys on a token that lives in the title rather than the passage body
+(m001 "Serie A No. 2", m011, m012) are visible as header-driven at review time:
+v1 indexes the chunk header (`{title} — {template} (page {n})`), so those rows
+can still be answered, and a `--no-header` config should make them collapse.
+The merge validator requires `expected.title` to match the passage title on
+anchored manual rows.

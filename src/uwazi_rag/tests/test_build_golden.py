@@ -48,7 +48,7 @@ from uwazi_rag.use_cases.passage_groups import (
 
 FIXTURES = ["64hnagcpvk_en.json", "ar22d4v4i5s_en.json", "ar22d4v4i5s_es.json"]
 GOLD_SCHEMA = ["id", "question", "origin", "query_language", "source_group_id", "expected"]
-EXPECTED_SCHEMA = ["instance_key", "shared_id", "language", "file_id", "paragraph_ids", "text"]
+EXPECTED_SCHEMA = ["instance_key", "shared_id", "title", "language", "file_id", "paragraph_ids", "text"]
 PASSAGE_SCHEMA = [
     "group_id",
     "instance_key",
@@ -352,6 +352,7 @@ def test_make_golden_rows_follows_the_schema_exactly() -> None:
         assert row["question"] == question and row["origin"] == "synthetic"
         assert row["query_language"] == "es"  # query language, NOT the capture's
         assert row["expected"]["language"] == "en" == capture["language"]
+        assert row["expected"]["title"] == capture["title"]
         assert row["expected"]["text"] == group.text
         assert list(row["expected"]) == EXPECTED_SCHEMA
 
@@ -452,6 +453,8 @@ def test_merge_validates_and_aborts_without_touching_golden(tmp_path: Path) -> N
 
     mismatched = _valid_manual_row(passages)
     mismatched["expected"] = {**mismatched["expected"], "paragraph_ids": [0, 99]}
+    mistitled = _valid_manual_row(passages)
+    mistitled["expected"] = {**mistitled["expected"], "title": "a different document's title"}
     golden = _jsonl(eval_dir, GOLDEN_FILE)
     cases = [
         _valid_manual_row(passages, origin="synthetic"),
@@ -460,6 +463,7 @@ def test_merge_validates_and_aborts_without_touching_golden(tmp_path: Path) -> N
         {**_valid_manual_row(passages), "source_group_id": "bdd5a7c445847b35:none:en:g9999"},
         {**_valid_manual_row(passages), "expected": "not an object"},
         mismatched,
+        mistitled,
         _valid_manual_row(passages, id=golden[0]["id"]),  # id collides with a synthetic row
     ]
     for index, bad in enumerate(cases):
