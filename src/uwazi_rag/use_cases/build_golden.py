@@ -366,6 +366,59 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+@dataclass
+class CapturePlan:
+    """One capture's sampled plan — shared by generation, dry-run and passages-only."""
+
+    name: str
+    capture: dict
+    groups: list[PassageGroup]
+    plan: list[tuple[PassageGroup, bool]]
+
+
+def _collect_plans(
+    captures: list[dict], *, samples_per_document: int, cross_language_ratio: float, failures: list[str]
+) -> tuple[list[CapturePlan], int, int]:
+    """Walk captures → per-capture sampled plans (pure, offline).
+
+    Skips (and counts) captures that are not ``ready``, lack a file id (reason
+    appended to ``failures``) or yield no keepable text; the walk is stable
+    because ready segmentations never change.
+    """
+    plans: list[CapturePlan] = []
+    skipped_not_ready = 0
+    skipped_no_groups = 0
+    for capture in captures:
+        name = f"{capture['shared_id']}_{capture['language']}"
+        if capture.get("segmentation_status") != "ready":
+            skipped_not_ready += 1
+            continue
+        file_id = (capture.get("file") or {}).get("id")
+        if not file_id:
+            skipped_no_groups += 1
+            failures.append(f"{name}: capture has no file id (skipped)")
+            continue
+        groups = build_passage_groups(
+            capture["paragraphs"],
+            instance_key=capture["instance_key"],
+            shared_id=capture["shared_id"],
+            language=capture["language"],
+            file_id=str(file_id),
+            title=capture["title"],
+        )
+        if not groups:
+            skipped_no_groups += 1
+            continue
+        plan = sample_groups(
+            groups,
+            seed=sampling_seed(capture["instance_key"], capture["shared_id"], capture["language"]),
+            per_document=samples_per_document,
+            cross_language_ratio=cross_language_ratio,
+        )
+        plans.append(CapturePlan(name=name, capture=capture, groups=groups, plan=plan))
+    return plans, skipped_not_ready, skipped_no_groups
+
+
 def build_golden_dataset(
     *,
     raw_dir: Path,
@@ -404,44 +457,31 @@ def build_golden_dataset(
         output_dir.mkdir(parents=True, exist_ok=True)
         golden_stream = golden_tmp.open("w", encoding="utf-8")
 
-    for capture in captures:
-        name = f"{capture['shared_id']}_{capture['language']}"
-        if capture.get("segmentation_status") != "ready":
-            stats.skipped_not_ready += 1
-            continue
-        file_id = (capture.get("file") or {}).get("id")
-        if not file_id:
-            stats.skipped_no_groups += 1
-            stats.failures.append(f"{name}: capture has no file id (skipped)")
-            continue
-        groups = build_passage_groups(
-            capture["paragraphs"],
-            instance_key=capture["instance_key"],
-            shared_id=capture["shared_id"],
-            language=capture["language"],
-            file_id=str(file_id),
-            title=capture["title"],
-        )
-        if not groups:
-            stats.skipped_no_groups += 1
-            continue
+    plans, skipped_not_ready, skipped_no_groups = _collect_plans(
+        captures,
+        samples_per_document=samples_per_document,
+        cross_language_ratio=cross_language_ratio,
+        failures=stats.failures,
+    )
+    stats.skipped_not_ready = skipped_not_ready
+    stats.skipped_no_groups = skipped_no_groups
+
+    for capture_plan in plans:
         stats.captures_used += 1
-        stats.groups_total += len(groups)
-        plan = sample_groups(
-            groups,
-            seed=sampling_seed(capture["instance_key"], capture["shared_id"], capture["language"]),
-            per_document=samples_per_document,
-            cross_language_ratio=cross_language_ratio,
-        )
-        stats.groups_sampled += len(plan)
+        stats.groups_total += len(capture_plan.groups)
+        stats.groups_sampled += len(capture_plan.plan)
         if not dry_run:
-            sampled_passages.extend(group for group, _ in plan)
-            logger.info(f"golden: {name} — {len(groups)} groups, sampling {len(plan)}")
+            sampled_passages.extend(group for group, _ in capture_plan.plan)
+            logger.info(
+                f"golden: {capture_plan.name} — {len(capture_plan.groups)} groups, sampling {len(capture_plan.plan)}"
+            )
         if dry_run:
-            stats.plan_lines.append(_describe_group_plan(name, len(groups), plan, eval_languages))
+            stats.plan_lines.append(
+                _describe_group_plan(capture_plan.name, len(capture_plan.groups), capture_plan.plan, eval_languages)
+            )
             continue
 
-        for group, cross_language in plan:
+        for group, cross_language in capture_plan.plan:
             swap = other_language(group.language, eval_languages) if cross_language else None
             query_language = swap or group.language
             if query_language != group.language:
@@ -500,6 +540,46 @@ def build_golden_dataset(
     if template and not manual_path.exists():
         write_jsonl(manual_path, build_manual_template(*template))
         stats.outputs.append(str(manual_path))
+    return stats
+
+
+def write_passages_file(
+    *,
+    raw_dir: Path,
+    output_dir: Path,
+    samples_per_document: int = GROUPS_PER_DOCUMENT,
+    limit: int | None = None,
+    cross_language_ratio: float = CROSS_LANGUAGE_RATIO,
+) -> GoldenStats:
+    """Recreate ``passages.jsonl`` offline — the sampled groups, no LLM calls.
+
+    Deterministic: same seed and walk as a full run, so the file matches what
+    a real generation would consult (byte-for-byte). Useful when the
+    gitignored review file is lost or stale, without re-drafting questions.
+    """
+    if samples_per_document < 1:
+        raise ValueError(f"samples_per_document must be >= 1, got {samples_per_document}")
+    if limit is not None and limit < 1:
+        raise ValueError(f"limit must be >= 1, got {limit}")
+    captures = load_captures(raw_dir)
+    if limit is not None:
+        captures = captures[:limit]
+    stats = GoldenStats(captures_seen=len(captures))
+    plans, skipped_not_ready, skipped_no_groups = _collect_plans(
+        captures,
+        samples_per_document=samples_per_document,
+        cross_language_ratio=cross_language_ratio,
+        failures=stats.failures,
+    )
+    stats.skipped_not_ready = skipped_not_ready
+    stats.skipped_no_groups = skipped_no_groups
+    stats.captures_used = len(plans)
+    stats.groups_total = sum(len(capture_plan.groups) for capture_plan in plans)
+    groups_all = [group for capture_plan in plans for group, _ in capture_plan.plan]
+    stats.groups_sampled = len(groups_all)
+    passages_path = output_dir / PASSAGES_FILE
+    write_jsonl(passages_path, [group.model_dump() for group in groups_all])
+    stats.outputs.append(str(passages_path))
     return stats
 
 
@@ -620,7 +700,8 @@ def format_about(
 REVIEW_GUIDE = """\
 STOP here — human verification is the next step:
 1. Triage the draft rows in golden.jsonl. Ground truth for each question is its passage in
-   passages.jsonl (join on source_group_id). Delete junk — watch for:
+   passages.jsonl (join on source_group_id) — open one in context with
+   `uv run uwazi-rag show-group <group_id>`. Delete junk — watch for:
    - questions that talk about "this document/excerpt" (the model never saw a document)
    - questions the whole corpus answers equally well (nothing makes this passage best)
    - questions copying 5+ consecutive words from the passage

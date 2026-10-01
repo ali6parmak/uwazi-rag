@@ -14,6 +14,7 @@ from uwazi_rag.use_cases.passage_groups import (
     SAMPLING_SEED,
     SEED_PREFIX,
     build_passage_groups,
+    format_group_view,
     numbered_keepable_paragraphs,
     sample_groups,
     sampling_seed,
@@ -191,3 +192,31 @@ def test_sampling_seed_documentation_matches_the_rule() -> None:
         f"uwazi-rag/golden/v1/{SAMPLING_SEED}/bdd5a7c445847b35/64hnagcpvk/en"
     )
     assert SEED_PREFIX  # referenced by data/eval/about.md — the seed must stay explainable
+
+
+def test_format_group_view_shows_text_neighbors_and_sampled_status() -> None:
+    paragraphs = [
+        {"type": "Text", "pageNumber": page, "text": f"Paragraph {index} " + "contenido relevante" * 28}
+        for index, page in enumerate((1, 1, 2, 2, 3), start=0)
+    ]
+    groups = build_passage_groups(
+        paragraphs,
+        instance_key="bdd5a7c445847b35",
+        shared_id="aaaaaa1111",
+        language="es",
+        file_id="ffffffff11",
+        title="Doc title",
+    )
+    assert len(groups) == 3  # [2, 2, 1] packing
+
+    middle = format_group_view(groups[1], all_groups=groups, sampled_ids={groups[0].group_id})
+    assert groups[1].group_id in middle
+    assert groups[1].text.splitlines()[0] in middle  # the full passage is shown
+    assert "← g0000 (sampled)" in middle and "→ g0002 (not sampled)" in middle
+    assert "sampled groups: g0000" in middle  # hint names the anchoring targets
+    assert "Doc title" in middle and "ffffffff11" in middle
+
+    first = format_group_view(groups[0], all_groups=groups, sampled_ids={groups[0].group_id})
+    assert "← " not in first and "→ g0001" in first
+    last = format_group_view(groups[2], all_groups=groups, sampled_ids=set())
+    assert "← g0001 (not sampled)" in last and "\n→ " not in last

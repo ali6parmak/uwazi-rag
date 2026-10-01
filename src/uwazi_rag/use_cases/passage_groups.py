@@ -103,6 +103,50 @@ def sampling_seed(instance_key: str, shared_id: str, language: str) -> str:
     return f"{SEED_PREFIX}/{SAMPLING_SEED}/{instance_key}/{shared_id}/{language}"
 
 
+def format_group_view(group: PassageGroup, *, all_groups: list[PassageGroup], sampled_ids: set[str]) -> str:
+    """Dev view of one passage group plus its neighbors, for triage and manual authoring.
+
+    ``sampled_ids`` marks which groups of the capture appear in
+    ``passages.jsonl`` — those are the anchoring targets for manual rows. The
+    view still renders a neighbor that is not sampled, so you can read the
+    passage in context and decide whether to anchor it (then ask for a merge
+    that accepts unsampled groups — or re-anchor to the nearest sampled one).
+    """
+    total = len(all_groups)
+    pages = f"pages {group.page_start}..{group.page_end}" if group.page_start is not None else "no pages"
+    heading = f"{group.shared_id} ({group.language}) — {group.title}"
+    lines = [
+        f"capture : {heading}",
+        f"file    : {group.file_id}",
+        f"group   : {group.group_id} (g{group.group_index:04d} of {total}) — paragraphs "
+        f"{group.paragraph_ids[0]}..{group.paragraph_ids[-1]}, {pages}, {len(group.text)} chars",
+    ]
+    if group.group_id in sampled_ids:
+        lines.append("status  : sampled — valid manual-row anchor; its expected block is in passages.jsonl")
+    else:
+        sampled_here = sorted(other.group_id.rsplit(":", 1)[-1] for other in all_groups if other.group_id in sampled_ids)
+        hint = (
+            f"this capture's sampled groups: {', '.join(sampled_here)}"
+            if sampled_here
+            else "this capture has no sampled groups"
+        )
+        lines.append(f"status  : NOT sampled — `--merge-manual` only accepts groups listed in passages.jsonl; {hint}")
+    lines.append("text    :")
+    lines.extend(f"    {line}" for line in group.text.splitlines())
+    lines.append("neighbors:")
+    for position, label in ((group.group_index - 1, "←"), (group.group_index + 1, "→")):
+        if not 0 <= position < total:
+            continue
+        neighbor = all_groups[position]
+        status = "sampled" if neighbor.group_id in sampled_ids else "not sampled"
+        preview = " ".join(neighbor.text.split())[:90]
+        neighbor_pages = f"page {neighbor.page_start}" if neighbor.page_start is not None else "—"
+        lines.append(
+            f"  {label} g{neighbor.group_index:04d} ({status}), {neighbor_pages}, {len(neighbor.text)} ch — {preview}"
+        )
+    return "\n".join(lines)
+
+
 def sample_groups(
     groups: list[PassageGroup],
     *,

@@ -38,6 +38,7 @@ from uwazi_rag.use_cases.build_golden import (
     read_jsonl,
     select_questions,
     write_jsonl,
+    write_passages_file,
 )
 from uwazi_rag.use_cases.passage_groups import (
     build_passage_groups,
@@ -214,6 +215,25 @@ def test_run_samples_every_capture_even_below_the_default(tmp_path: Path) -> Non
 
     stats_all, _ = _run(tmp_path, ["64hnagcpvk_en.json"], samples_per_document=999)
     assert stats_all.groups_sampled == stats_all.groups_total  # bounded by the group count
+
+
+def test_passages_only_rebuilds_the_review_file_byte_identically_offline(tmp_path: Path) -> None:
+    stats, eval_dir = _run(tmp_path, FIXTURES)  # a full (echo-LLM) run for reference
+
+    offline_dir = tmp_path / "offline"
+    only_stats = write_passages_file(raw_dir=_capture_dir(tmp_path, FIXTURES), output_dir=offline_dir)
+
+    assert only_stats.captures_used == stats.captures_used
+    assert only_stats.groups_sampled == stats.groups_sampled > 0
+    assert only_stats.outputs and only_stats.outputs[0].endswith(PASSAGES_FILE)
+    # same seed + same walk → byte-identical to the full run's passages.jsonl
+    assert (offline_dir / PASSAGES_FILE).read_bytes() == (eval_dir / PASSAGES_FILE).read_bytes()
+    assert not (offline_dir / GOLDEN_FILE).exists()  # passages-only writes nothing else
+    assert not (offline_dir / MANUAL_FILE).exists()
+    assert not (offline_dir / "about.md").exists()
+
+    write_passages_file(raw_dir=_capture_dir(tmp_path, FIXTURES), output_dir=tmp_path / "again")
+    assert (tmp_path / "again" / PASSAGES_FILE).read_bytes() == (offline_dir / PASSAGES_FILE).read_bytes()
 
 
 def test_template_rows_come_from_the_committed_fixture_when_present(tmp_path: Path) -> None:

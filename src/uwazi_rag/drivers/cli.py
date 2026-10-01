@@ -14,9 +14,12 @@ from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
 from uwazi_rag.adapters.ollama_llm import OllamaLlm
 from uwazi_rag.use_cases.build_golden import (
     GOLDEN_FILE,
+    PASSAGES_FILE,
     build_golden_dataset,
     describe_run,
     merge_manual_rows,
+    read_jsonl,
+    write_passages_file,
 )
 from uwazi_rag.use_cases.chunking import build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
@@ -26,7 +29,7 @@ from uwazi_rag.use_cases.fetch_document import (
     write_raw_capture,
 )
 from uwazi_rag.use_cases.index_captures import index_captures
-from uwazi_rag.use_cases.passage_groups import GROUPS_PER_DOCUMENT
+from uwazi_rag.use_cases.passage_groups import GROUPS_PER_DOCUMENT, build_passage_groups, format_group_view
 from uwazi_rag.use_cases.semantic_search import format_search_results, semantic_search
 
 
@@ -84,10 +87,22 @@ def _build_parser() -> argparse.ArgumentParser:
         help="merge-only: validate + merge hand-written manual.jsonl rows into golden.jsonl (no LLM calls)",
     )
     build_golden.add_argument(
+        "--passages-only",
+        action="store_true",
+        help="recreate passages.jsonl offline (no LLM) from the captures — for a lost/stale review file",
+    )
+    build_golden.add_argument(
         "--dry-run",
         action="store_true",
         help="print the sampling plan (groups, sizes, cross-language picks) without LLM calls",
     )
+
+    show_group = subparsers.add_parser(
+        "show-group",
+        help="dev: pretty-print one passage group + neighbors, offline from the captures (Step 3.5)",
+    )
+    show_group.add_argument("group_id", help="e.g. bdd5a7c445847b35:00r9afbvijp6:en:g0000")
+    show_group.add_argument("--source", default=None, help="captures dir (default: data/raw/<instance_key> from .env)")
 
     ask = subparsers.add_parser("ask", help="RAG answer with citations (Step 6)")
     ask.add_argument("question")
@@ -251,8 +266,41 @@ def _run_search(args: argparse.Namespace) -> int:
 
 
 def _run_build_golden(args: argparse.Namespace) -> int:
-    """Step 3.5 (dataset half): draft golden questions, or merge hand-written rows."""
+    """Step 3.5 (dataset half): draft golden questions, or run an offline mode."""
     output_dir = Path(args.output) if args.output else configuration.EVAL_DIR
+    modes = [
+        flag
+        for requested, flag in (
+            (args.merge_manual, "--merge-manual"),
+            (args.passages_only, "--passages-only"),
+            (args.dry_run, "--dry-run"),
+        )
+        if requested
+    ]
+    if len(modes) > 1:
+        print(f"error: pick exactly one of {' or '.join(modes)}", file=sys.stderr)
+        return 2
+
+    if args.passages_only:
+        try:
+            url = configuration.uwazi_url()
+            stats = write_passages_file(
+                raw_dir=configuration.RAW_DIR / configuration.instance_key(url),
+                output_dir=output_dir,
+                samples_per_document=args.samples_per_document,
+                limit=args.limit,
+            )
+        except (ValueError, RuntimeError, OSError) as error:
+            print(f"error: passages-only failed — {error}", file=sys.stderr)
+            return 1
+        print(
+            f"captures : {stats.captures_used}/{stats.captures_seen} used — "
+            f"{stats.skipped_not_ready} not ready, {stats.skipped_no_groups} skipped"
+        )
+        print(f"passages : {stats.groups_sampled} sampled groups of {stats.groups_total} built")
+        print("wrote    : " + "; ".join(stats.outputs))
+        return 0
+
     if args.merge_manual:
         try:
             merge_stats = merge_manual_rows(eval_dir=output_dir)
@@ -310,6 +358,61 @@ def _run_build_golden(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_show_group(args: argparse.Namespace) -> int:
+    """Step 3.5 dev tool: one passage group + neighbors, fully offline from the captures."""
+    parts = str(args.group_id).split(":")
+    if len(parts) != 4 or not parts[3].startswith("g") or not parts[3][1:].isdigit():
+        print(
+            f'error: group ids look like "<instance_key>:<shared_id>:<lang>:g0004" — got {args.group_id!r}',
+            file=sys.stderr,
+        )
+        return 1
+    _, shared_id, language, suffix = parts
+    try:
+        url = configuration.uwazi_url()
+        raw_dir = Path(args.source) if args.source else configuration.RAW_DIR / configuration.instance_key(url)
+        capture_path = raw_dir / f"{shared_id}_{language}.json"
+        if not capture_path.exists():
+            print(
+                f"error: no capture at {capture_path} — run `uwazi-rag fetch {shared_id} --language {language}` "
+                "or point --source at the right captures dir",
+                file=sys.stderr,
+            )
+            return 1
+        capture = json.loads(capture_path.read_text(encoding="utf-8"))
+        if str(capture["instance_key"]) != parts[0]:
+            print(
+                f"error: {args.group_id} names instance {parts[0]!r} but that capture belongs to "
+                f"{capture['instance_key']!r} — point --source at the right captures dir",
+                file=sys.stderr,
+            )
+            return 1
+        groups = build_passage_groups(
+            capture["paragraphs"],
+            instance_key=capture["instance_key"],
+            shared_id=capture["shared_id"],
+            language=capture["language"],
+            file_id=capture["file"]["id"],
+            title=capture["title"],
+        )
+        index = int(suffix[1:])
+        if not 0 <= index < len(groups):
+            print(
+                f"error: {args.group_id} is out of range — {shared_id}_{language} has {len(groups)} groups "
+                f"(g0000..g{len(groups) - 1:04d})",
+                file=sys.stderr,
+            )
+            return 1
+    except (ValueError, RuntimeError, OSError) as error:
+        print(f"error: show-group failed — {error}", file=sys.stderr)
+        return 1
+    sampled: set[str] = set()
+    if (configuration.EVAL_DIR / PASSAGES_FILE).exists():
+        sampled = {str(row["group_id"]) for row in read_jsonl(configuration.EVAL_DIR / PASSAGES_FILE)}
+    print(format_group_view(groups[index], all_groups=groups, sampled_ids=sampled))
+    return 0
+
+
 def _stub(name: str) -> int:
     print(f"error: '{name}' is a stub — implemented in a later step of PLAN.md", file=sys.stderr)
     return 2
@@ -330,6 +433,8 @@ def main() -> int:
         return _run_search(args)
     if args.command == "build-golden":
         return _run_build_golden(args)
+    if args.command == "show-group":
+        return _run_show_group(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 
