@@ -109,14 +109,23 @@ def test_parse_rejects_unimplemented_strategies_and_junk_types(tmp_path: Path) -
                 name="s1.toml",
             )
         )
-    with pytest.raises(BenchmarkSpecError, match="retrieval 'bm25' is not implemented"):
+    with pytest.raises(BenchmarkSpecError, match="retrieval 'sparse-vector' is not implemented"):
         parse_benchmark_toml(
             _write(
                 tmp_path,
-                '[stores.a]\nmodel = "m"\n\n[[experiments]]\nname = "e"\nstore = "a"\nretrieval = "bm25"',
+                '[stores.a]\nmodel = "m"\n\n[[experiments]]\nname = "e"\nstore = "a"\nretrieval = "sparse-vector"',
                 name="s2.toml",
             )
         )
+    # bm25/rrf are implemented now (the hybrid preview) and must parse.
+    spec = parse_benchmark_toml(
+        _write(
+            tmp_path,
+            '[stores.a]\nmodel = "m"\n\n[[experiments]]\nname = "e"\nstore = "a"\nretrieval = "bm25"',
+            name="s2-ok.toml",
+        )
+    )
+    assert spec.experiments[0].retrieval == "bm25"
     with pytest.raises(BenchmarkSpecError, match="needs a model"):
         parse_benchmark_toml(_write(tmp_path, "[stores.a]\n\n[[experiments]]\nname = 'e'\nstore = 'a'", name="s3.toml"))
     with pytest.raises(BenchmarkSpecError, match="overlap"):
