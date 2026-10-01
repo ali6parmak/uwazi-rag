@@ -20,6 +20,9 @@ data/raw/
 # Step 3 naive index — disposable, rebuildable from data/raw captures.
 data/naive_store.json
 data/*.tmp
+# Step 3.5 benchmark stores — one JSON per sweep-spec slug (same deal as the
+# naive index: disposable, rebuildable, too big and too derived to commit).
+data/benchmark_stores/
 # Step 3.5 — the sampled passage groups behind golden.jsonl are derived/disposable
 # (re-generable with `uwazi-rag build-golden`); golden.jsonl, manual.jsonl and
 # about.md are the committed half.

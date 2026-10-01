@@ -27,6 +27,9 @@ class HashingEmbedding(EmbeddingPort):
             raise ValueError(f"dimensions must be >= 1, got {dimensions}")
         self.dimensions = dimensions
         self.ngram = ngram
+        # Named like the real adapters' ``.model`` so the store/model guard in
+        # eval_run can be exercised offline (a store carries its own model).
+        self.model = "hashing"
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         return [self._embed_one(text) for text in texts]

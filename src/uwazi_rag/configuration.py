@@ -31,6 +31,10 @@ RAW_DIR: Path = DATA_DIR / "raw"
 # Step 3 naive index — one JSON file of (chunk, vector) pairs; disposable
 # (rebuildable from data/raw captures) and never committed.
 NAIVE_STORE_PATH: Path = DATA_DIR / "naive_store.json"
+# Step 3.5 benchmark stores — one JSON per sweep-spec slug. Same deal as
+# naive_store.json: disposable, rebuildable, never committed. Benchmark specs
+# that want the baseline store reuse data/naive_store.json read-only instead.
+BENCHMARK_STORES_DIR: Path = DATA_DIR / "benchmark_stores"
 # Step 3.5 eval artifacts. golden.jsonl / manual.jsonl / about.md are committed
 # (the "data is disposable" exception); passages.jsonl is derived and gitignored.
 EVAL_DIR: Path = DATA_DIR / "eval"
