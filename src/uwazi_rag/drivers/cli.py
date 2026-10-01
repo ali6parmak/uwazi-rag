@@ -596,11 +596,11 @@ def _run_eval(args: argparse.Namespace) -> int:
         label=args.label,
         started_at_utc=started_at.isoformat(timespec="seconds"),
         elapsed_seconds=time.monotonic() - clock_start,
-        golden_path=str(configuration.EVAL_DIR / GOLDEN_FILE),
+        golden_path=_display_path(configuration.EVAL_DIR / GOLDEN_FILE),
         rows=len(rows),
         synthetic_rows=sum(1 for row in rows if row.get("origin") == "synthetic"),
         manual_rows=sum(1 for row in rows if row.get("origin") == "manual"),
-        store_path=str(store_path),
+        store_path=_display_path(store_path),
         store_chunks=len(store),
         store_model=store.embedding_model,
         store_dimensions=store.dimensions,
@@ -619,6 +619,14 @@ def _run_eval(args: argparse.Namespace) -> int:
     print(render(run, card, heading=False), end="")
     print(f"results : appended to {results_path}")
     return 0
+
+
+def _display_path(path: Path) -> str:
+    """Repo-relative when the path lives inside the repo (results.md stays portable)."""
+    try:
+        return str(path.relative_to(configuration.ROOT_PATH))
+    except ValueError:
+        return str(path)
 
 
 def _embed_batch(

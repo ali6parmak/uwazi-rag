@@ -524,7 +524,8 @@ def render(run: RunFacts, card: Scorecard, *, heading: bool) -> str:
     if heading:
         lines.append(f"## {run.started_at_utc} — {run.label}")
         lines.append("")
-    lines.append(f"label: {run.label}")
+    else:
+        lines.append(f"label: {run.label}")
     lines.append(
         f"store: `{run.store_path}` — {run.store_chunks:,} chunks, {run.store_model} "
         f"({run.store_dimensions}d), built {run.store_created_at_utc}"
