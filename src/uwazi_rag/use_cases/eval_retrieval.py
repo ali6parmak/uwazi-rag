@@ -360,10 +360,16 @@ class ScopeScore:
 
 @dataclass(frozen=True)
 class UnanswerableScore:
-    """The expected-nothing rows: excluded from recall/MRR, judged by top-1 only."""
+    """The expected-nothing rows: excluded from recall/MRR, judged by top-1 only.
+
+    ``threshold`` is ``None`` when the retrieval method's score scale is not
+    cosine (BM25, RRF) — the false-retrieval rate is then *not measured*
+    rather than guessed, and top-1 scores are not shown (their scale would
+    be read against a cosine threshold).
+    """
 
     rows: int
-    threshold: float
+    threshold: float | None
     top1_scores: dict[str, float]
     false_retrievals: tuple[str, ...]
 
@@ -388,15 +394,17 @@ def score_rows(
     hits_by_row: Mapping[str, Sequence[Hit]],
     *,
     recall_ks: Sequence[int] = RECALL_KS,
-    false_retrieval_threshold: float,
+    false_retrieval_threshold: float | None,
 ) -> Scorecard:
     """Compute the scorecard from per-row ranked hits (pure; caller did retrieval).
 
     ``graded`` comes from :func:`row_golds`, ``hits_by_row`` maps row id →
     ranked ``Hit``s (``RETRIEVAL_DEPTH`` deep). Rows without hits score 0.
+    ``false_retrieval_threshold=None`` (non-cosine methods) skips the
+    unanswerable side-metric instead of comparing alien score scales.
     """
-    if not 0.0 <= false_retrieval_threshold <= 1.0:
-        raise ValueError(f"false_retrieval_threshold must be in [0, 1], got {false_retrieval_threshold}")
+    if false_retrieval_threshold is not None and not 0.0 <= false_retrieval_threshold <= 1.0:
+        raise ValueError(f"false_retrieval_threshold must be in [0, 1] (or None), got {false_retrieval_threshold}")
     ks = tuple(sorted(dict.fromkeys(recall_ks)))
 
     row_scores = [_score_one(gold, hits_by_row.get(gold.row_id, ()), ks) for gold in graded.golds]
@@ -412,12 +420,13 @@ def score_rows(
 
     top1_scores: dict[str, float] = {}
     false_rows: list[str] = []
-    for gold in graded.unanswerable:
-        hits = hits_by_row.get(gold.row_id, ())
-        top1 = hits[0].score if hits else 0.0
-        top1_scores[gold.row_id] = top1
-        if top1 >= false_retrieval_threshold:
-            false_rows.append(gold.row_id)
+    if false_retrieval_threshold is not None:
+        for gold in graded.unanswerable:
+            hits = hits_by_row.get(gold.row_id, ())
+            top1 = hits[0].score if hits else 0.0
+            top1_scores[gold.row_id] = top1
+            if top1 >= false_retrieval_threshold:
+                false_rows.append(gold.row_id)
 
     return Scorecard(
         scopes=scopes,
@@ -543,15 +552,21 @@ def render(run: RunFacts, card: Scorecard, *, heading: bool) -> str:
     lines.extend(_table_lines(card.scopes, ks))
     lines.append("")
     unans = card.unanswerable
-    per_row = (
-        " (top-1: " + ", ".join(f"{rid} {score:.4f}" for rid, score in unans.top1_scores.items()) + ")"
-        if unans.top1_scores
-        else ""
-    )
-    lines.append(
-        f"Unanswerable: {unans.rows} rows, threshold ≥ {unans.threshold:.3f} → false-retrieval "
-        f"{len(unans.false_retrievals)}/{unans.rows} ({_percent(unans.false_retrieval_rate)})" + per_row
-    )
+    if unans.threshold is None:
+        lines.append(
+            f"Unanswerable: {unans.rows} rows — false-retrieval not measured "
+            "(the ranking method's top-1 score is not cosine-calibrated)"
+        )
+    else:
+        per_row = (
+            " (top-1: " + ", ".join(f"{rid} {score:.4f}" for rid, score in unans.top1_scores.items()) + ")"
+            if unans.top1_scores
+            else ""
+        )
+        lines.append(
+            f"Unanswerable: {unans.rows} rows, threshold ≥ {unans.threshold:.3f} → false-retrieval "
+            f"{len(unans.false_retrievals)}/{unans.rows} ({_percent(unans.false_retrieval_rate)})" + per_row
+        )
     for note in card.ungradable:
         lines.append(f"ungradable: {note}")
     for note in card.anomalies:

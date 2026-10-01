@@ -8,9 +8,11 @@ by construction; the commands differ only in labels, console output, and how
 many experiments they wrap.
 
 Ranking methods (``RETRIEVAL_METHODS``) grow with the PLAN steps: ``embedding``
-(cosine over the store's own embedding model) today; ``bm25``/``rrf`` come
-with the hybrid preview. Whatever the method, hits keep the same ``Hit``
-shape so ``score_rows`` grades all methods identically.
+(cosine over the store's own embedding model), ``bm25`` (lexical BM25 over the
+store's chunk texts) and ``rrf`` (reciprocal rank fusion of both). Whatever
+the method, hits keep the same ``Hit`` shape so ``score_rows`` grades all
+methods identically — cosine-specific metrics (false-retrieval) simply stay
+empty for the non-cosine ones.
 
 Impure but offline-deterministic: the file loads here are the ones the CLI
 already made (tested offline against committed fixtures); embedding goes
@@ -27,12 +29,14 @@ from typing import Any
 from uwazi_rag.adapters.naive_vector_store import NaiveVectorStore
 from uwazi_rag.configuration import ROOT_PATH
 from uwazi_rag.ports.embedding_port import EmbeddingPort
+from uwazi_rag.use_cases.bm25 import Bm25Index
 from uwazi_rag.use_cases.build_golden import read_jsonl
 from uwazi_rag.use_cases.eval_retrieval import (
     RESULTS_HEADER,
     RETRIEVAL_DEPTH,
     ChunkConfig,
     ConfigCheck,
+    DocKey,
     GradedSet,
     Hit,
     RunFacts,
@@ -43,11 +47,12 @@ from uwazi_rag.use_cases.eval_retrieval import (
     verify_store_chunks,
 )
 from uwazi_rag.use_cases.index_captures import capture_to_chunks, load_captures
+from uwazi_rag.use_cases.rank_fusion import fused_ranking, rrf_scores
 
 # Ranking methods a benchmark experiment (or a later `eval` flag) may ask
-# for; anything else is rejected loudly at spec-parse rank. Grows with the
-# hybrid preview in PLAN.md.
-RETRIEVAL_METHODS: tuple[str, ...] = ("embedding",)
+# for; anything else is rejected loudly at spec-parse rank. ``bm25``/``rrf``
+# are the Step 3.5 hybrid preview: lexical scoring and fused cosine+lexical.
+RETRIEVAL_METHODS: tuple[str, ...] = ("embedding", "bm25", "rrf")
 # One POST /api/embed per batch of golden questions (eval's proven batch size).
 EMBED_BATCH_SIZE = 64
 
@@ -135,6 +140,12 @@ def rank_rows(prepared: PreparedRun, *, retrieval: str, embedder: EmbeddingPort 
         if embedder is None:
             raise ValueError("retrieval 'embedding' needs an embedder — build one for the store's model")
         return _rank_by_embedding(prepared, embedder)
+    if retrieval == "rrf":
+        if embedder is None:
+            raise ValueError("retrieval 'rrf' needs an embedder — build one for the store's model")
+        return _rank_by_rrf(prepared, embedder)
+    if retrieval == "bm25":
+        return _rank_by_bm25(prepared)
     raise ValueError(f"retrieval method {retrieval!r} is in RETRIEVAL_METHODS but has no ranker wired")
 
 
@@ -170,6 +181,42 @@ def _embed_batch(
     vectors = embedder.embed([str(row["question"]) for row in rows])
     for row, vector in zip(rows, vectors, strict=True):
         hits_by_row[str(row["id"])] = hits_from_store(store.search(vector, k=RETRIEVAL_DEPTH))
+
+
+def _rank_by_bm25(prepared: PreparedRun) -> dict[str, list[Hit]]:
+    """Rank chunks lexicographically — the store contributes texts only, no embeddings."""
+    chunks = prepared.store.chunks()
+    doc_keys: dict[str, DocKey] = {chunk.chunk_id: (chunk.instance_key, chunk.shared_id, chunk.language) for chunk in chunks}
+    index = Bm25Index({chunk.chunk_id: chunk.text for chunk in chunks})
+    hits_by_row: dict[str, list[Hit]] = {}
+    for row in prepared.rows:
+        hits_by_row[str(row["id"])] = [
+            Hit(chunk_id=chunk_id, doc_key=doc_keys[chunk_id], score=score)
+            for chunk_id, score in index.score(str(row["question"]))[:RETRIEVAL_DEPTH]
+        ]
+    return hits_by_row
+
+
+def _rank_by_rrf(prepared: PreparedRun, embedder: EmbeddingPort) -> dict[str, list[Hit]]:
+    """Fuse the store's cosine ranking with BM25 (reciprocal rank, k = 60)."""
+    embed_hits = _rank_by_embedding(prepared, embedder)
+    bm25_hits = _rank_by_bm25(prepared)
+    doc_keys: dict[str, DocKey] = {
+        chunk.chunk_id: (chunk.instance_key, chunk.shared_id, chunk.language) for chunk in prepared.store.chunks()
+    }
+    fused: dict[str, list[Hit]] = {}
+    for row in prepared.rows:
+        row_id = str(row["id"])
+        rankings = [
+            [hit.chunk_id for hit in embed_hits.get(row_id, ())],
+            [hit.chunk_id for hit in bm25_hits.get(row_id, ())],
+        ]
+        scores = rrf_scores(rankings)
+        fused[row_id] = [
+            Hit(chunk_id=chunk_id, doc_key=doc_keys[chunk_id], score=scores[chunk_id])
+            for chunk_id in fused_ranking(rankings)[:RETRIEVAL_DEPTH]
+        ]
+    return fused
 
 
 def build_run_facts(

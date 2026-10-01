@@ -480,6 +480,37 @@ def test_scorecard_scopes_match_hand_computed_means() -> None:
     assert card.unanswerable.false_retrievals == ("u1",)  # 0.6531 ≥ 0.5
 
 
+def test_unanswerable_side_metric_is_skipped_for_non_cosine_methods() -> None:
+    """BM25/RRF score scales are not cosine — threshold=None must report 'not measured'."""
+    graded = _graded_set()
+    hits_by_row = {"u1": [_hit("whatever", 12.3)]}  # a BM25-scale top-1, meaningless against 0.55
+
+    with pytest.raises(ValueError, match="false_retrieval_threshold"):  # raw BM25 vs a cosine threshold would lie
+        score_rows(graded, hits_by_row, false_retrieval_threshold=12.3)
+
+    card = score_rows(graded, hits_by_row, false_retrieval_threshold=None)
+    assert card.unanswerable.threshold is None
+    assert card.unanswerable.top1_scores == {}  # raw-scale numbers never reach the scorecard
+    assert card.unanswerable.false_retrievals == ()
+    run = RunFacts(
+        label="none-threshold",
+        started_at_utc="2026-10-01T00:00:00+00:00",
+        elapsed_seconds=0.0,
+        golden_path="g",
+        rows=5,
+        synthetic_rows=4,
+        manual_rows=1,
+        store_path="s",
+        store_chunks=3,
+        store_model="m",
+        store_dimensions=8,
+        store_created_at_utc="0",
+        config=ChunkConfig(),
+        false_retrieval_threshold=0.55,
+    )
+    assert "Unanswerable: 1 rows — false-retrieval not measured" in render(run, card, heading=False)
+
+
 def test_unanswerable_rows_never_enter_recall_or_mrr() -> None:
     graded = _graded_set()
     hits_by_row = {

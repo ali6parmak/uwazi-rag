@@ -712,7 +712,11 @@ def _run_benchmark(args: argparse.Namespace) -> int:
             )
             hits_by_row = rank_rows(prepared, retrieval=experiment.retrieval, embedder=embedder)
             card = score_rows(
-                prepared.graded, hits_by_row, false_retrieval_threshold=configuration.FALSE_RETRIEVAL_THRESHOLD
+                prepared.graded,
+                hits_by_row,
+                false_retrieval_threshold=(
+                    configuration.FALSE_RETRIEVAL_THRESHOLD if experiment.retrieval == "embedding" else None
+                ),
             )
         except (NaiveStoreMismatchError, EvalInputsError, RuntimeError, ValueError, OSError) as error:
             message = str(error).replace("\n", " ")[:240]

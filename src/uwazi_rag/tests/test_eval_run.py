@@ -216,6 +216,36 @@ def test_rank_rows_rejects_wrong_method_missing_embedder_and_model_mismatch(
         rank_rows(other_prepared, retrieval="embedding", embedder=HashingEmbedding(dimensions=DIMENSIONS))
 
 
+def test_rank_rows_bm25_and_rrf_run_through_the_same_shared_path(
+    corpus: tuple[Path, Path, Path, NaiveVectorStore],
+) -> None:
+    raw_dir, store_path, golden_path, _store = corpus
+    prepared = prepare_run(store_path=store_path, raw_dir=raw_dir, golden_path=golden_path)
+
+    bm25_hits = rank_rows(prepared, retrieval="bm25", embedder=None)
+    assert set(bm25_hits) == {"q-en", "q-es", "q-un", "q-gone"}
+    for gold in prepared.graded.golds:  # lexical BM25: the verbatim-paragraph queries must win too
+        assert first_gold_rank(bm25_hits[gold.row_id], gold.gold_chunk_ids) == 1, gold.row_id
+
+    rrf_hits = rank_rows(prepared, retrieval="rrf", embedder=HashingEmbedding(dimensions=DIMENSIONS))
+    for gold in prepared.graded.golds:  # fusion of two perfect rankings stays perfect
+        assert first_gold_rank(rrf_hits[gold.row_id], gold.gold_chunk_ids) == 1, gold.row_id
+    with pytest.raises(ValueError, match="needs an embedder"):
+        rank_rows(prepared, retrieval="rrf", embedder=None)
+
+
+def test_rrf_scores_are_fused_not_cosine(corpus: tuple[Path, Path, Path, NaiveVectorStore]) -> None:
+    raw_dir, store_path, golden_path, _store = corpus
+    prepared = prepare_run(store_path=store_path, raw_dir=raw_dir, golden_path=golden_path)
+    embedder = HashingEmbedding(dimensions=DIMENSIONS)
+    embedding_hits = rank_rows(prepared, retrieval="embedding", embedder=embedder)
+    rrf_hits = rank_rows(prepared, retrieval="rrf", embedder=embedder)
+
+    # A fused top-1 score is a 1/(k + rank) sum (≤ 2/61 here), never the cosine.
+    assert rrf_hits["q-en"][0].score <= 2 / 61 + 1e-12
+    assert embedding_hits["q-en"][0].score > 0.7  # hashing cosine of a paragraph against its own chunk
+
+
 def test_prepare_run_refuses_a_store_that_lies_about_its_chunk_config(
     corpus: tuple[Path, Path, Path, NaiveVectorStore],
 ) -> None:
