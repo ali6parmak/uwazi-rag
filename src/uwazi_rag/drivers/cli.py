@@ -11,6 +11,13 @@ from uwazi_api.domain.exceptions import SegmentationNotFoundError
 from uwazi_rag import configuration
 from uwazi_rag.adapters.naive_vector_store import NaiveStoreMismatchError, NaiveVectorStore
 from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
+from uwazi_rag.adapters.ollama_llm import OllamaLlm
+from uwazi_rag.use_cases.build_golden import (
+    GOLDEN_FILE,
+    build_golden_dataset,
+    describe_run,
+    merge_manual_rows,
+)
 from uwazi_rag.use_cases.chunking import build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
 from uwazi_rag.use_cases.fetch_document import (
@@ -19,6 +26,7 @@ from uwazi_rag.use_cases.fetch_document import (
     write_raw_capture,
 )
 from uwazi_rag.use_cases.index_captures import index_captures
+from uwazi_rag.use_cases.passage_groups import GROUPS_PER_DOCUMENT
 from uwazi_rag.use_cases.semantic_search import format_search_results, semantic_search
 
 
@@ -60,6 +68,26 @@ def _build_parser() -> argparse.ArgumentParser:
     search.add_argument("query")
     search.add_argument("--top", type=int, default=5, help="how many hits to print (default 5)")
     search.add_argument("--store", default=None, help="naive store path (default: data/naive_store.json)")
+
+    build_golden = subparsers.add_parser(
+        "build-golden",
+        help="LLM-drafts the golden retrieval-eval questions, anchored to passage groups (Step 3.5)",
+    )
+    build_golden.add_argument(
+        "--samples-per-document", type=int, default=GROUPS_PER_DOCUMENT, help="passage groups per capture (default 2)"
+    )
+    build_golden.add_argument("--limit", type=int, default=None, help="process at most N captures (smoke run)")
+    build_golden.add_argument("--output", default=None, help="evaluation dir (default: data/eval)")
+    build_golden.add_argument(
+        "--merge-manual",
+        action="store_true",
+        help="merge-only: validate + merge hand-written manual.jsonl rows into golden.jsonl (no LLM calls)",
+    )
+    build_golden.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print the sampling plan (groups, sizes, cross-language picks) without LLM calls",
+    )
 
     ask = subparsers.add_parser("ask", help="RAG answer with citations (Step 6)")
     ask.add_argument("question")
@@ -222,6 +250,66 @@ def _run_search(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_build_golden(args: argparse.Namespace) -> int:
+    """Step 3.5 (dataset half): draft golden questions, or merge hand-written rows."""
+    output_dir = Path(args.output) if args.output else configuration.EVAL_DIR
+    if args.merge_manual:
+        try:
+            merge_stats = merge_manual_rows(eval_dir=output_dir)
+        except (OSError, ValueError, RuntimeError) as error:
+            print(f"error: merge-manual failed — {error}", file=sys.stderr)
+            print(
+                "hint: manual rows need origin 'manual', a real source_group_id, and the "
+                f"expected block copied from the passages.jsonl of {output_dir}",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"golden  : {merge_stats.golden_rows_before} → {merge_stats.golden_rows_after} rows")
+        print(
+            f"manual  : {merge_stats.manual_rows_merged} merged — {merge_stats.example_rows_skipped} template rows "
+            f"skipped, {merge_stats.manual_rows_skipped_duplicated} already present, "
+            f"{merge_stats.ids_autoassigned} ids auto-assigned"
+        )
+        print(f"wrote   : {output_dir / GOLDEN_FILE}")
+        return 0
+
+    try:
+        url = configuration.uwazi_url()
+        raw_dir = configuration.RAW_DIR / configuration.instance_key(url)
+        llm = OllamaLlm()
+        stats = build_golden_dataset(
+            raw_dir=raw_dir,
+            llm=llm,
+            output_dir=output_dir,
+            samples_per_document=args.samples_per_document,
+            limit=args.limit,
+            dry_run=args.dry_run,
+            llm_description=f"Ollama chat '{llm.model}' at {llm.base_url} (Ollama defaults, non-streaming)",
+        )
+    except (ValueError, RuntimeError, OSError) as error:
+        print(f"error: build-golden failed — {error}", file=sys.stderr)
+        print(
+            f"hint: question drafts need Ollama serving '{configuration.LLM_MODEL}' at {configuration.OLLAMA_BASE_URL} "
+            f"(`ollama serve`, `ollama pull {configuration.LLM_MODEL}`); captures come from `uwazi-rag fetch`",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.dry_run:
+        for line in stats.plan_lines:
+            print(line)
+        print(
+            f"plan     : {stats.groups_sampled} groups over {stats.captures_used}/{stats.captures_seen} captures "
+            "(seeded sampling — see data/eval/about.md after a real run); nothing written"
+        )
+        return 0
+    print(describe_run(stats))
+    if stats.rows_written == 0 and stats.captures_used:
+        print("error: no questions were generated — see the failures above", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _stub(name: str) -> int:
     print(f"error: '{name}' is a stub — implemented in a later step of PLAN.md", file=sys.stderr)
     return 2
@@ -240,6 +328,8 @@ def main() -> int:
         return _run_build_index(args)
     if args.command == "search":
         return _run_search(args)
+    if args.command == "build-golden":
+        return _run_build_golden(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 

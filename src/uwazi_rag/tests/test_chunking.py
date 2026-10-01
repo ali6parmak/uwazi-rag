@@ -5,9 +5,9 @@ from uwazi_rag.use_cases.chunking import (
     OVERLAP_RATIO,
     TARGET_MAX_CHARS,
     TARGET_MIN_CHARS,
-    _keepable,
     _split_long,
     build_chunks,
+    keepable,
 )
 
 FIXTURES = ["64hnagcpvk_en.json", "ar22d4v4i5s_en.json", "ar22d4v4i5s_es.json"]
@@ -34,7 +34,7 @@ def _chunks(name: str) -> list:
 def test_no_text_is_lost_from_real_fixtures() -> None:
     for name in FIXTURES:
         capture = _capture(name)
-        expected = "\n".join(p["text"].strip() for p in capture["paragraphs"] if _keepable(p))
+        expected = "\n".join(p["text"].strip() for p in capture["paragraphs"] if keepable(p))
         actual = "\n".join("\n".join(chunk.text.split("\n")[1:]) for chunk in _chunks(name))
         assert actual == expected, name
 
@@ -75,7 +75,7 @@ def test_identity_is_deterministic_and_sequential() -> None:
 def test_page_ranges_are_consistent() -> None:
     for name in FIXTURES:
         capture = _capture(name)
-        pages = [p["pageNumber"] for p in capture["paragraphs"] if p.get("pageNumber") is not None and _keepable(p)]
+        pages = [p["pageNumber"] for p in capture["paragraphs"] if p.get("pageNumber") is not None and keepable(p)]
         for chunk in _chunks(name):
             if chunk.page_start is not None:
                 assert chunk.page_start <= chunk.page_end

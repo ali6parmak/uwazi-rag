@@ -26,7 +26,12 @@ OVERLAP_RATIO = 0.15
 DROP_TYPES = {"page header", "page footer"}
 
 
-def _keepable(paragraph: dict) -> bool:
+def keepable(paragraph: dict) -> bool:
+    """True when a raw Uwazi paragraph can carry content (Step 2 drop rule).
+
+    Public because the golden dataset must anchor passages to the exact
+    paragraphs the chunker uses — one rule, two consumers, no drift.
+    """
     text = paragraph.get("text")
     if not text or not text.strip():
         return False
@@ -78,7 +83,7 @@ def build_chunks(
     """
     parts: list[tuple[str, int | None]] = []
     for paragraph in paragraphs:
-        if not _keepable(paragraph):
+        if not keepable(paragraph):
             continue
         page = paragraph.get("pageNumber")
         for piece in _split_long(paragraph["text"].strip()):

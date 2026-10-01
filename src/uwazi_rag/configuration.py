@@ -31,6 +31,9 @@ RAW_DIR: Path = DATA_DIR / "raw"
 # Step 3 naive index — one JSON file of (chunk, vector) pairs; disposable
 # (rebuildable from data/raw captures) and never committed.
 NAIVE_STORE_PATH: Path = DATA_DIR / "naive_store.json"
+# Step 3.5 eval artifacts. golden.jsonl / manual.jsonl / about.md are committed
+# (the "data is disposable" exception); passages.jsonl is derived and gitignored.
+EVAL_DIR: Path = DATA_DIR / "eval"
 # Real captured data for offline unit tests (AGENTS.md testing policy). Committed.
 FIXTURES_DIR: Path = Path(__file__).parent / "tests" / "fixtures"
 
@@ -73,8 +76,31 @@ def uwazi_credentials() -> tuple[str, str, str]:
 UWAZI_URL: str = (os.environ.get("UWAZI_URL") or "").rstrip("/")
 
 OLLAMA_BASE_URL: str = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+# Instruct model behind question drafts (Step 3.5 golden set) and answers (Step 6).
+# May be a cloud-served model the local daemon proxies. Required for anything that
+# chats: empty here → the adapter raises with setup instructions.
+LLM_MODEL: str = os.environ.get("LLM_MODEL", "")
 EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "bge-m3")
 # Dimensions come from config, never code (PLAN.md golden rule 7). The real
 # size is verified at startup by embedding one probe text (see `hello`).
 EMBEDDING_DIMENSIONS: int = int(os.environ.get("EMBEDDING_DIMENSIONS", "1024"))
 SERVICE_PORT: int = int(os.environ.get("SERVICE_PORT", "5057"))
+# Languages golden questions are written in; a capture in one of these languages may
+# have its questions generated in the other one (cross-language recall rows). Comma
+# separated in .env, e.g. EVAL_LANGUAGES=en,es.
+EVAL_LANGUAGES: tuple[str, ...] = tuple(
+    code.strip() for code in os.environ.get("EVAL_LANGUAGES", "en,es").split(",") if code.strip()
+)
+
+
+def uwazi_url() -> str:
+    """The configured Uwazi base URL, checked lazily.
+
+    Like :func:`uwazi_credentials` but without login: capture-only jobs
+    (``build-golden``) need the URL for the ``instance_key`` namespace, not
+    credentials.
+    """
+    url = os.environ.get("UWAZI_URL", "")
+    if not url:
+        raise RuntimeError("UWAZI_URL is not set. Copy .env.example to .env and fill it in.")
+    return url
