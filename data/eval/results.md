@@ -125,3 +125,69 @@ Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1:
 | merge-2400 | bge-m3 | 2400/0.15/on | 267 | 29.6% | 63.5% | 71.2% | 0.465 | 59.6% | 89.1% | 93.3% | 0.722 | 0/3 | 29s / 2.8s |
 | merge-1800-noheader | bge-m3 | 1800/0.15/off | 267 | 31.1% | 64.8% | 74.3% | 0.488 | 61.8% | 91.0% | 92.9% | 0.739 | 0/3 | 28s / 3.1s |
 
+
+## 2026-10-01T15:16:54+00:00 — benchmark sweep2-models: bge-m3-baseline
+
+store: `data/naive_store.json` — 2,850 chunks, bge-m3 (1024d), built 2026-09-30T08:58:30+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 |
+| en | 169 | 32.5% | 70.4% | 76.3% | 0.506 | 68.0% | 90.5% | 93.5% | 0.777 |
+| es | 98 | 25.5% | 58.2% | 74.5% | 0.462 | 53.1% | 87.8% | 90.8% | 0.691 |
+| synthetic | 255 | 30.0% | 65.9% | 75.7% | 0.492 | 62.0% | 89.4% | 92.5% | 0.742 |
+| manual | 12 | 29.2% | 66.7% | 75.0% | 0.445 | 75.0% | 91.7% | 91.7% | 0.826 |
+| cross-language | 65 | 23.1% | 62.3% | 71.5% | 0.436 | 58.5% | 93.8% | 98.5% | 0.729 |
+| same-language | 202 | 32.2% | 67.1% | 77.0% | 0.508 | 63.9% | 88.1% | 90.6% | 0.751 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5081, m014 0.5040, m015 0.4606)
+
+
+## 2026-10-01T15:16:57+00:00 — benchmark sweep2-models: qwen3-embedding-06b
+
+store: `data/benchmark_stores/qwen3-06b.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-01T15:17:16+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 62.2% | 74.2% | 0.483 | 59.9% | 88.8% | 93.6% | 0.722 |
+| en | 169 | 29.6% | 61.2% | 73.1% | 0.469 | 59.8% | 87.0% | 92.9% | 0.716 |
+| es | 98 | 30.1% | 63.8% | 76.0% | 0.506 | 60.2% | 91.8% | 94.9% | 0.733 |
+| synthetic | 255 | 30.6% | 62.4% | 74.5% | 0.489 | 59.6% | 88.2% | 93.3% | 0.718 |
+| manual | 12 | 12.5% | 58.3% | 66.7% | 0.343 | 66.7% | 100.0% | 100.0% | 0.819 |
+| cross-language | 65 | 32.3% | 63.8% | 73.1% | 0.502 | 58.5% | 92.3% | 96.9% | 0.720 |
+| same-language | 202 | 29.0% | 61.6% | 74.5% | 0.477 | 60.4% | 87.6% | 92.6% | 0.723 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4671, m014 0.4360, m015 0.3119)
+
+
+## 2026-10-01T15:18:35+00:00 — benchmark sweep2-models: nomic-embed-v2-moe
+
+store: `data/benchmark_stores/nomic-v2-moe.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-01T15:18:43+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 |
+| en | 169 | 35.2% | 67.8% | 79.3% | 0.523 | 66.3% | 88.2% | 94.1% | 0.755 |
+| es | 98 | 29.1% | 62.2% | 76.5% | 0.483 | 58.2% | 88.8% | 96.9% | 0.728 |
+| synthetic | 255 | 33.9% | 65.9% | 78.4% | 0.515 | 62.7% | 88.2% | 95.3% | 0.741 |
+| manual | 12 | 12.5% | 62.5% | 75.0% | 0.354 | 75.0% | 91.7% | 91.7% | 0.833 |
+| cross-language | 65 | 30.0% | 62.3% | 76.9% | 0.475 | 60.0% | 89.2% | 96.9% | 0.714 |
+| same-language | 202 | 33.9% | 66.8% | 78.7% | 0.519 | 64.4% | 88.1% | 94.6% | 0.755 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5017, m014 0.4497, m015 0.4142)
+
+
+## 2026-10-01T15:19:07+00:00 — benchmark sweep2-models — comparison (3 experiments)
+
+| experiment | model | chunk cfg | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| bge-m3-baseline | bge-m3 | 1800/0.15/on | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 | 0/3 | reuse / 2.7s |
+| qwen3-embedding-06b | qwen3-embedding:0.6b | 1800/0.15/on | 267 | 29.8% | 62.2% | 74.2% | 0.483 | 59.9% | 88.8% | 93.6% | 0.722 | 0/3 | 93s / 5.4s |
+| nomic-embed-v2-moe | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 0/3 | 30s / 2.1s |
+
