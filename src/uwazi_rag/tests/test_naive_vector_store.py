@@ -143,3 +143,38 @@ def test_loading_a_non_store_file_is_refused(tmp_path: Path) -> None:
     path.write_text('{"schema": "something_else"}', encoding="utf-8")
     with pytest.raises(NaiveStoreMismatchError, match="naive_store_v1"):
         NaiveVectorStore.load(path)
+
+
+def test_chunk_config_survives_save_and_load(tmp_path: Path) -> None:
+    """The graded chunk config rides along the store file (Step 3.5)."""
+    store = _store(dimensions=2)
+    store.chunk_config = {"target_max_chars": 900, "overlap_ratio": 0.3, "prepend_header": False}
+    store.upsert([_chunk(0)], [[1.0, 0.0]])
+    path = tmp_path / "naive.json"
+    store.save(path)
+
+    loaded = NaiveVectorStore.load(path)
+    assert loaded.chunk_config == {"target_max_chars": 900, "overlap_ratio": 0.3, "prepend_header": False}
+
+
+def test_legacy_store_without_chunk_config_loads_empty(tmp_path: Path) -> None:
+    """Entries persisted before ``paragraph_ids``/``chunk_config`` existed still load."""
+    import json
+
+    store = _store(dimensions=2)
+    store.upsert([_chunk(0)], [[1.0, 0.0]])
+    path = tmp_path / "legacy.json"
+    store.chunk_config = None
+    store.save(path)
+
+    # Simulate the pre-provenance legacy shape: no chunk_config key, no
+    # paragraph_ids on entries (like the committed baseline store on disk).
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data.pop("chunk_config", None)
+    for entry in data["entries"]:
+        entry["chunk"].pop("paragraph_ids", None)
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    loaded = NaiveVectorStore.load(path)
+    assert loaded.chunk_config is None
+    assert loaded.chunks()[0].paragraph_ids == []

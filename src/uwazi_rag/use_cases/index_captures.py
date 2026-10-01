@@ -19,7 +19,7 @@ from loguru import logger
 
 from uwazi_rag.domain.chunk import Chunk
 from uwazi_rag.ports.embedding_port import EmbeddingPort
-from uwazi_rag.use_cases.chunking import build_chunks
+from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, TARGET_MAX_CHARS, build_chunks
 
 
 class ChunkVectorStore(Protocol):
@@ -54,7 +54,13 @@ def load_captures(raw_dir: Path) -> list[dict]:
     return [json.loads(path.read_text(encoding="utf-8")) for path in sorted(raw_dir.glob("*.json"))]
 
 
-def capture_to_chunks(capture: dict) -> list[Chunk]:
+def capture_to_chunks(
+    capture: dict,
+    *,
+    target_max_chars: int = TARGET_MAX_CHARS,
+    overlap_ratio: float = OVERLAP_RATIO,
+    prepend_header: bool = True,
+) -> list[Chunk]:
     """One raw capture → ``Chunk``s (exactly the ``chunk`` command's logic)."""
     return build_chunks(
         capture["paragraphs"],
@@ -64,6 +70,9 @@ def capture_to_chunks(capture: dict) -> list[Chunk]:
         file_id=capture["file"]["id"],
         entity_title=capture["title"],
         template_name=capture["template"]["name"],
+        target_max_chars=target_max_chars,
+        overlap_ratio=overlap_ratio,
+        prepend_header=prepend_header,
     )
 
 
@@ -75,6 +84,9 @@ def index_captures(
     expected_dimensions: int,
     batch_size: int = 32,
     limit: int | None = None,
+    target_max_chars: int = TARGET_MAX_CHARS,
+    overlap_ratio: float = OVERLAP_RATIO,
+    prepend_header: bool = True,
 ) -> IndexStats:
     """Chunk + embed every capture under ``raw_dir`` into ``store``.
 
@@ -82,7 +94,9 @@ def index_captures(
     ``chunk_id``. Captures whose segmentation is not ``ready`` (or that yield
     no keepable text) are skipped and counted, never fatal — Step 4's
     resilience rule, rehearsed early. Embeds in ``batch_size`` batches so one
-    ``POST /api/embed`` stays reasonably sized and progress is visible.
+    ``POST /api/embed`` stays reasonably sized and progress is visible. The
+    chunking knobs (Step 3.5 benchmark surface) default to the Step 2
+    constants so existing calls keep the committed baseline behavior.
     """
     if batch_size < 1:
         raise ValueError(f"batch_size must be >= 1, got {batch_size}")
@@ -104,7 +118,12 @@ def index_captures(
                 f"segmentation status '{capture['segmentation_status']}' is not 'ready'"
             )
             continue
-        capture_chunks = capture_to_chunks(capture)
+        capture_chunks = capture_to_chunks(
+            capture,
+            target_max_chars=target_max_chars,
+            overlap_ratio=overlap_ratio,
+            prepend_header=prepend_header,
+        )
         if not capture_chunks:
             skipped_no_chunks += 1
             logger.warning(f"skipping {capture['shared_id']} ({capture['language']}): no keepable text")

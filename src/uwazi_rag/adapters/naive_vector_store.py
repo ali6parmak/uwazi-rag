@@ -13,6 +13,7 @@ import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -33,11 +34,21 @@ class NaiveVectorStore:
     must never be compared silently — cosine across models is meaningless.
     """
 
-    def __init__(self, *, dimensions: int, embedding_model: str) -> None:
+    def __init__(
+        self,
+        *,
+        dimensions: int,
+        embedding_model: str,
+        chunk_config: dict[str, Any] | None = None,
+    ) -> None:
         if dimensions < 1:
             raise ValueError(f"dimensions must be >= 1, got {dimensions}")
         self.dimensions = dimensions
         self.embedding_model = embedding_model
+        # The chunking parameters the store was built with (Step 3.5 benchmark
+        # surface) — recorded so `eval` grades the right config without its own
+        # flags. ``None`` on legacy stores (Step 2 constants were in force).
+        self.chunk_config: dict[str, Any] | None = dict(chunk_config) if chunk_config else None
         self.created_at_utc = datetime.now(timezone.utc).isoformat(timespec="seconds")
         self._vectors = np.zeros((0, dimensions), dtype=np.float64)
         self._chunks: list[Chunk] = []
@@ -111,7 +122,7 @@ class NaiveVectorStore:
 
     def save(self, path: Path) -> None:
         """Persist everything to one JSON file (atomic rename) so dev never re-embeds."""
-        payload = {
+        payload: dict[str, Any] = {
             "schema": STORE_SCHEMA,
             "embedding_model": self.embedding_model,
             "dimensions": self.dimensions,
@@ -121,6 +132,8 @@ class NaiveVectorStore:
                 for index, chunk in enumerate(self._chunks)
             ],
         }
+        if self.chunk_config is not None:
+            payload["chunk_config"] = self.chunk_config
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(path.suffix + ".tmp")
         tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
@@ -153,6 +166,8 @@ class NaiveVectorStore:
         created = data.get("created_at_utc")
         if created:
             store.created_at_utc = str(created)
+        if isinstance(data.get("chunk_config"), dict):  # legacy stores carry none
+            store.chunk_config = dict(data["chunk_config"])
         entries = data.get("entries", [])
         store.upsert(
             [Chunk.model_validate(entry["chunk"]) for entry in entries],

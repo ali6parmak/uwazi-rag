@@ -13,6 +13,12 @@ class Chunk(BaseModel):
     the same ids — re-runs overwrite, never duplicate. ``text`` carries a
     context header (title — template, page) so a chunk retrieved alone still
     says who/what it is about.
+
+    ``paragraph_ids`` records the raw capture positions (0-based, gaps kept)
+    whose text contributed to this chunk — the eval scorecard maps golden
+    rows' ``expected.paragraph_ids`` to chunk ids through it (Step 3.5).
+    A paragraph cut by the splitter appears in the (2+) chunks that own its
+    pieces. Empty for chunks persisted before the field existed.
     """
 
     chunk_id: str
@@ -24,3 +30,4 @@ class Chunk(BaseModel):
     text: str
     page_start: int | None = None
     page_end: int | None = None
+    paragraph_ids: list[int] = []

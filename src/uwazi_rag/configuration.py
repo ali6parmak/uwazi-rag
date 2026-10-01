@@ -84,6 +84,11 @@ EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "bge-m3")
 # Dimensions come from config, never code (PLAN.md golden rule 7). The real
 # size is verified at startup by embedding one probe text (see `hello`).
 EMBEDDING_DIMENSIONS: int = int(os.environ.get("EMBEDDING_DIMENSIONS", "1024"))
+# Step 3.5 scorecard: cosine similarity above which an unanswerable golden row
+# (expected nothing relevant, e.g. m013-m015) counts as a false retrieval.
+# A knob in config, not code — its right value depends on each embedding
+# model's score scale; the baseline runs in data/eval/results.md decide it.
+FALSE_RETRIEVAL_THRESHOLD: float = float(os.environ.get("FALSE_RETRIEVAL_THRESHOLD", "0.50"))
 SERVICE_PORT: int = int(os.environ.get("SERVICE_PORT", "5057"))
 # Languages golden questions are written in; a capture in one of these languages may
 # have its questions generated in the other one (cross-language recall rows). Comma
