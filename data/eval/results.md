@@ -191,3 +191,381 @@ Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1:
 | qwen3-embedding-06b | qwen3-embedding:0.6b | 1800/0.15/on | 267 | 29.8% | 62.2% | 74.2% | 0.483 | 59.9% | 88.8% | 93.6% | 0.722 | 0/3 | 93s / 5.4s |
 | nomic-embed-v2-moe | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 0/3 | 30s / 2.1s |
 
+
+## 2026-10-01T15:26:38+00:00 — benchmark method-comparison: baseline-embedding
+
+store: `data/naive_store.json` — 2,850 chunks, bge-m3 (1024d), built 2026-09-30T08:58:30+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 |
+| en | 169 | 32.5% | 70.4% | 76.3% | 0.506 | 68.0% | 90.5% | 93.5% | 0.777 |
+| es | 98 | 25.5% | 58.2% | 74.5% | 0.462 | 53.1% | 87.8% | 90.8% | 0.691 |
+| synthetic | 255 | 30.0% | 65.9% | 75.7% | 0.492 | 62.0% | 89.4% | 92.5% | 0.742 |
+| manual | 12 | 29.2% | 66.7% | 75.0% | 0.445 | 75.0% | 91.7% | 91.7% | 0.826 |
+| cross-language | 65 | 23.1% | 62.3% | 71.5% | 0.436 | 58.5% | 93.8% | 98.5% | 0.729 |
+| same-language | 202 | 32.2% | 67.1% | 77.0% | 0.508 | 63.9% | 88.1% | 90.6% | 0.751 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5081, m014 0.5040, m015 0.4606)
+
+
+## 2026-10-01T15:26:43+00:00 — benchmark method-comparison: baseline-bm25
+
+store: `data/naive_store.json` — 2,850 chunks, bge-m3 (1024d), built 2026-09-30T08:58:30+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 |
+| en | 169 | 30.2% | 54.7% | 61.2% | 0.437 | 53.8% | 71.6% | 75.7% | 0.623 |
+| es | 98 | 34.2% | 56.1% | 63.8% | 0.476 | 56.1% | 81.6% | 85.7% | 0.671 |
+| synthetic | 255 | 32.4% | 56.7% | 63.1% | 0.461 | 53.7% | 74.9% | 78.8% | 0.634 |
+| manual | 12 | 16.7% | 25.0% | 41.7% | 0.231 | 75.0% | 83.3% | 91.7% | 0.781 |
+| cross-language | 65 | 4.6% | 12.3% | 14.6% | 0.085 | 10.8% | 26.2% | 29.2% | 0.173 |
+| same-language | 202 | 40.3% | 69.1% | 77.5% | 0.569 | 68.8% | 91.1% | 95.5% | 0.791 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'bm25' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:26:44+00:00 — benchmark method-comparison: baseline-rrf
+
+store: `data/naive_store.json` — 2,850 chunks, bge-m3 (1024d), built 2026-09-30T08:58:30+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.5% | 60.9% | 71.5% | 0.487 | 58.1% | 85.4% | 95.1% | 0.705 |
+| en | 169 | 31.4% | 63.9% | 70.4% | 0.489 | 59.8% | 84.0% | 95.3% | 0.710 |
+| es | 98 | 31.6% | 55.6% | 73.5% | 0.483 | 55.1% | 87.8% | 94.9% | 0.695 |
+| synthetic | 255 | 32.5% | 61.8% | 72.0% | 0.497 | 57.6% | 84.7% | 94.9% | 0.700 |
+| manual | 12 | 8.3% | 41.7% | 62.5% | 0.281 | 66.7% | 100.0% | 100.0% | 0.799 |
+| cross-language | 65 | 10.8% | 21.5% | 34.6% | 0.197 | 21.5% | 63.1% | 89.2% | 0.379 |
+| same-language | 202 | 38.1% | 73.5% | 83.4% | 0.580 | 69.8% | 92.6% | 97.0% | 0.809 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:26:47+00:00 — benchmark method-comparison: merge-2400-embedding
+
+store: `data/benchmark_stores/merge-2400.json` — 2,069 chunks, bge-m3 (1024d), built 2026-10-01T15:15:32+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.6% | 63.5% | 71.2% | 0.465 | 59.6% | 89.1% | 93.3% | 0.722 |
+| en | 169 | 29.6% | 66.9% | 74.9% | 0.472 | 62.7% | 89.9% | 94.1% | 0.744 |
+| es | 98 | 29.6% | 57.7% | 64.8% | 0.453 | 54.1% | 87.8% | 91.8% | 0.683 |
+| synthetic | 255 | 29.8% | 64.1% | 72.2% | 0.469 | 58.8% | 89.0% | 92.9% | 0.717 |
+| manual | 12 | 25.0% | 50.0% | 50.0% | 0.373 | 75.0% | 91.7% | 100.0% | 0.831 |
+| cross-language | 65 | 25.4% | 66.2% | 73.8% | 0.448 | 53.8% | 93.8% | 98.5% | 0.694 |
+| same-language | 202 | 30.9% | 62.6% | 70.3% | 0.470 | 61.4% | 87.6% | 91.6% | 0.731 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5167, m014 0.5154, m015 0.4686)
+
+
+## 2026-10-01T15:26:49+00:00 — benchmark method-comparison: merge-2400-bm25
+
+store: `data/benchmark_stores/merge-2400.json` — 2,069 chunks, bge-m3 (1024d), built 2026-10-01T15:15:32+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 26.8% | 56.6% | 64.8% | 0.416 | 49.8% | 76.0% | 79.8% | 0.612 |
+| en | 169 | 27.8% | 56.2% | 63.6% | 0.423 | 51.5% | 72.8% | 76.3% | 0.610 |
+| es | 98 | 25.0% | 57.1% | 66.8% | 0.404 | 46.9% | 81.6% | 85.7% | 0.614 |
+| synthetic | 255 | 27.3% | 58.0% | 65.9% | 0.424 | 48.6% | 75.7% | 79.2% | 0.603 |
+| manual | 12 | 16.7% | 25.0% | 41.7% | 0.243 | 75.0% | 83.3% | 91.7% | 0.804 |
+| cross-language | 65 | 1.5% | 13.1% | 15.4% | 0.073 | 7.7% | 26.2% | 29.2% | 0.155 |
+| same-language | 202 | 34.9% | 70.5% | 80.7% | 0.526 | 63.4% | 92.1% | 96.0% | 0.759 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'bm25' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:26:50+00:00 — benchmark method-comparison: merge-2400-rrf
+
+store: `data/benchmark_stores/merge-2400.json` — 2,069 chunks, bge-m3 (1024d), built 2026-10-01T15:15:32+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 59.4% | 71.2% | 0.462 | 56.2% | 84.3% | 94.8% | 0.693 |
+| en | 169 | 29.9% | 60.9% | 71.0% | 0.466 | 56.8% | 82.2% | 94.7% | 0.691 |
+| es | 98 | 29.6% | 56.6% | 71.4% | 0.455 | 55.1% | 87.8% | 94.9% | 0.697 |
+| synthetic | 255 | 30.8% | 61.0% | 72.2% | 0.475 | 55.7% | 83.5% | 94.5% | 0.689 |
+| manual | 12 | 8.3% | 25.0% | 50.0% | 0.179 | 66.7% | 100.0% | 100.0% | 0.792 |
+| cross-language | 65 | 8.5% | 22.3% | 36.9% | 0.184 | 18.5% | 56.9% | 87.7% | 0.361 |
+| same-language | 202 | 36.6% | 71.3% | 82.2% | 0.552 | 68.3% | 93.1% | 97.0% | 0.800 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:26:53+00:00 — benchmark method-comparison: merge-1200-embedding
+
+store: `data/benchmark_stores/merge-1200.json` — 4,488 chunks, bge-m3 (1024d), built 2026-10-01T15:14:47+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1200, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.4% | 62.8% | 73.5% | 0.479 | 62.9% | 91.8% | 93.6% | 0.751 |
+| en | 169 | 32.8% | 64.2% | 73.4% | 0.484 | 68.0% | 92.9% | 93.5% | 0.782 |
+| es | 98 | 28.9% | 60.4% | 73.8% | 0.470 | 54.1% | 89.8% | 93.9% | 0.698 |
+| synthetic | 255 | 31.3% | 62.6% | 73.1% | 0.479 | 62.4% | 91.4% | 93.3% | 0.747 |
+| manual | 12 | 33.3% | 66.7% | 83.3% | 0.476 | 75.0% | 100.0% | 100.0% | 0.833 |
+| cross-language | 65 | 23.6% | 53.3% | 70.0% | 0.412 | 55.4% | 92.3% | 95.4% | 0.701 |
+| same-language | 202 | 33.9% | 65.8% | 74.7% | 0.500 | 65.3% | 91.6% | 93.1% | 0.767 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5359, m014 0.5081, m015 0.4582)
+
+
+## 2026-10-01T15:26:57+00:00 — benchmark method-comparison: merge-1200-bm25
+
+store: `data/benchmark_stores/merge-1200.json` — 4,488 chunks, bge-m3 (1024d), built 2026-10-01T15:14:47+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1200, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.0% | 52.4% | 59.3% | 0.416 | 52.4% | 74.9% | 79.0% | 0.624 |
+| en | 169 | 32.2% | 53.3% | 59.5% | 0.431 | 54.4% | 71.6% | 75.7% | 0.623 |
+| es | 98 | 26.0% | 51.0% | 59.0% | 0.390 | 49.0% | 80.6% | 84.7% | 0.626 |
+| synthetic | 255 | 30.6% | 53.7% | 60.5% | 0.426 | 51.4% | 74.1% | 78.4% | 0.616 |
+| manual | 12 | 16.7% | 25.0% | 33.3% | 0.215 | 75.0% | 91.7% | 91.7% | 0.806 |
+| cross-language | 65 | 3.1% | 10.8% | 15.4% | 0.069 | 9.2% | 26.2% | 30.8% | 0.161 |
+| same-language | 202 | 38.6% | 65.8% | 73.4% | 0.528 | 66.3% | 90.6% | 94.6% | 0.773 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'bm25' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:26:59+00:00 — benchmark method-comparison: merge-1200-rrf
+
+store: `data/benchmark_stores/merge-1200.json` — 4,488 chunks, bge-m3 (1024d), built 2026-10-01T15:14:47+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1200, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 32.0% | 59.9% | 72.1% | 0.475 | 58.8% | 86.9% | 95.5% | 0.718 |
+| en | 169 | 35.2% | 61.5% | 71.9% | 0.494 | 61.5% | 84.6% | 95.9% | 0.725 |
+| es | 98 | 26.5% | 57.1% | 72.4% | 0.441 | 54.1% | 90.8% | 94.9% | 0.706 |
+| synthetic | 255 | 33.1% | 60.8% | 71.6% | 0.483 | 58.4% | 86.3% | 95.3% | 0.714 |
+| manual | 12 | 8.3% | 41.7% | 83.3% | 0.291 | 66.7% | 100.0% | 100.0% | 0.806 |
+| cross-language | 65 | 10.8% | 21.5% | 35.6% | 0.195 | 23.1% | 63.1% | 87.7% | 0.410 |
+| same-language | 202 | 38.9% | 72.3% | 83.8% | 0.565 | 70.3% | 94.6% | 98.0% | 0.817 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:03+00:00 — benchmark method-comparison: noheader-embedding
+
+store: `data/benchmark_stores/merge-1800-noheader.json` — 2,850 chunks, bge-m3 (1024d), built 2026-10-01T15:16:03+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.1% | 64.8% | 74.3% | 0.488 | 61.8% | 91.0% | 92.9% | 0.739 |
+| en | 169 | 31.7% | 66.9% | 75.7% | 0.489 | 65.7% | 91.1% | 92.9% | 0.756 |
+| es | 98 | 30.1% | 61.2% | 71.9% | 0.487 | 55.1% | 90.8% | 92.9% | 0.708 |
+| synthetic | 255 | 31.6% | 64.9% | 74.3% | 0.492 | 61.2% | 91.0% | 92.5% | 0.734 |
+| manual | 12 | 20.8% | 62.5% | 75.0% | 0.403 | 75.0% | 91.7% | 100.0% | 0.828 |
+| cross-language | 65 | 23.1% | 57.7% | 70.8% | 0.417 | 55.4% | 92.3% | 96.9% | 0.693 |
+| same-language | 202 | 33.7% | 67.1% | 75.5% | 0.511 | 63.9% | 90.6% | 91.6% | 0.753 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4983, m014 0.5066, m015 0.4675)
+
+
+## 2026-10-01T15:27:06+00:00 — benchmark method-comparison: noheader-bm25
+
+store: `data/benchmark_stores/merge-1800-noheader.json` — 2,850 chunks, bge-m3 (1024d), built 2026-10-01T15:16:03+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.5% | 54.7% | 60.1% | 0.445 | 53.6% | 74.9% | 78.3% | 0.631 |
+| en | 169 | 28.4% | 54.4% | 60.4% | 0.428 | 52.1% | 72.8% | 76.3% | 0.616 |
+| es | 98 | 34.2% | 55.1% | 59.7% | 0.474 | 56.1% | 78.6% | 81.6% | 0.658 |
+| synthetic | 255 | 31.2% | 56.1% | 61.8% | 0.456 | 52.9% | 74.5% | 77.6% | 0.626 |
+| manual | 12 | 16.7% | 25.0% | 25.0% | 0.205 | 66.7% | 83.3% | 91.7% | 0.747 |
+| cross-language | 65 | 3.1% | 9.2% | 10.8% | 0.064 | 10.8% | 21.5% | 21.5% | 0.146 |
+| same-language | 202 | 39.4% | 69.3% | 76.0% | 0.568 | 67.3% | 92.1% | 96.5% | 0.788 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'bm25' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:07+00:00 — benchmark method-comparison: noheader-rrf
+
+store: `data/benchmark_stores/merge-1800-noheader.json` — 2,850 chunks, bge-m3 (1024d), built 2026-10-01T15:16:03+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 34.5% | 61.2% | 70.0% | 0.494 | 59.2% | 82.8% | 93.6% | 0.702 |
+| en | 169 | 34.0% | 63.3% | 69.8% | 0.491 | 60.4% | 81.1% | 94.1% | 0.704 |
+| es | 98 | 35.2% | 57.7% | 70.4% | 0.499 | 57.1% | 85.7% | 92.9% | 0.700 |
+| synthetic | 255 | 35.7% | 62.5% | 70.8% | 0.506 | 58.8% | 82.0% | 93.3% | 0.698 |
+| manual | 12 | 8.3% | 33.3% | 54.2% | 0.246 | 66.7% | 100.0% | 100.0% | 0.799 |
+| cross-language | 65 | 10.8% | 21.5% | 25.4% | 0.181 | 18.5% | 43.1% | 83.1% | 0.335 |
+| same-language | 202 | 42.1% | 74.0% | 84.4% | 0.595 | 72.3% | 95.5% | 97.0% | 0.821 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:10+00:00 — benchmark method-comparison: qwen3-06b-embedding
+
+store: `data/benchmark_stores/qwen3-06b.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-01T15:17:16+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 62.2% | 74.2% | 0.483 | 59.9% | 88.8% | 93.6% | 0.722 |
+| en | 169 | 29.6% | 61.2% | 73.1% | 0.469 | 59.8% | 87.0% | 92.9% | 0.716 |
+| es | 98 | 30.1% | 63.8% | 76.0% | 0.506 | 60.2% | 91.8% | 94.9% | 0.733 |
+| synthetic | 255 | 30.6% | 62.4% | 74.5% | 0.489 | 59.6% | 88.2% | 93.3% | 0.718 |
+| manual | 12 | 12.5% | 58.3% | 66.7% | 0.343 | 66.7% | 100.0% | 100.0% | 0.819 |
+| cross-language | 65 | 32.3% | 63.8% | 73.1% | 0.502 | 58.5% | 92.3% | 96.9% | 0.720 |
+| same-language | 202 | 29.0% | 61.6% | 74.5% | 0.477 | 60.4% | 87.6% | 92.6% | 0.723 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4671, m014 0.4360, m015 0.3119)
+
+
+## 2026-10-01T15:27:14+00:00 — benchmark method-comparison: qwen3-06b-bm25
+
+store: `data/benchmark_stores/qwen3-06b.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-01T15:17:16+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 |
+| en | 169 | 30.2% | 54.7% | 61.2% | 0.437 | 53.8% | 71.6% | 75.7% | 0.623 |
+| es | 98 | 34.2% | 56.1% | 63.8% | 0.476 | 56.1% | 81.6% | 85.7% | 0.671 |
+| synthetic | 255 | 32.4% | 56.7% | 63.1% | 0.461 | 53.7% | 74.9% | 78.8% | 0.634 |
+| manual | 12 | 16.7% | 25.0% | 41.7% | 0.231 | 75.0% | 83.3% | 91.7% | 0.781 |
+| cross-language | 65 | 4.6% | 12.3% | 14.6% | 0.085 | 10.8% | 26.2% | 29.2% | 0.173 |
+| same-language | 202 | 40.3% | 69.1% | 77.5% | 0.569 | 68.8% | 91.1% | 95.5% | 0.791 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'bm25' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:15+00:00 — benchmark method-comparison: qwen3-06b-rrf
+
+store: `data/benchmark_stores/qwen3-06b.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-01T15:17:16+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.7% | 58.8% | 72.3% | 0.479 | 58.4% | 86.9% | 95.5% | 0.707 |
+| en | 169 | 28.4% | 58.3% | 69.8% | 0.455 | 57.4% | 82.2% | 93.5% | 0.686 |
+| es | 98 | 34.7% | 59.7% | 76.5% | 0.519 | 60.2% | 94.9% | 99.0% | 0.744 |
+| synthetic | 255 | 31.4% | 60.0% | 72.7% | 0.487 | 57.3% | 86.3% | 95.3% | 0.698 |
+| manual | 12 | 16.7% | 33.3% | 62.5% | 0.294 | 83.3% | 100.0% | 100.0% | 0.896 |
+| cross-language | 65 | 10.8% | 24.6% | 36.2% | 0.211 | 23.1% | 63.1% | 90.8% | 0.394 |
+| same-language | 202 | 37.1% | 69.8% | 83.9% | 0.565 | 69.8% | 94.6% | 97.0% | 0.808 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:19+00:00 — benchmark method-comparison: nomic-v2-moe-embedding
+
+store: `data/benchmark_stores/nomic-v2-moe.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-01T15:18:43+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 |
+| en | 169 | 35.2% | 67.8% | 79.3% | 0.523 | 66.3% | 88.2% | 94.1% | 0.755 |
+| es | 98 | 29.1% | 62.2% | 76.5% | 0.483 | 58.2% | 88.8% | 96.9% | 0.728 |
+| synthetic | 255 | 33.9% | 65.9% | 78.4% | 0.515 | 62.7% | 88.2% | 95.3% | 0.741 |
+| manual | 12 | 12.5% | 62.5% | 75.0% | 0.354 | 75.0% | 91.7% | 91.7% | 0.833 |
+| cross-language | 65 | 30.0% | 62.3% | 76.9% | 0.475 | 60.0% | 89.2% | 96.9% | 0.714 |
+| same-language | 202 | 33.9% | 66.8% | 78.7% | 0.519 | 64.4% | 88.1% | 94.6% | 0.755 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5017, m014 0.4497, m015 0.4142)
+
+
+## 2026-10-01T15:27:22+00:00 — benchmark method-comparison: nomic-v2-moe-bm25
+
+store: `data/benchmark_stores/nomic-v2-moe.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-01T15:18:43+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 |
+| en | 169 | 30.2% | 54.7% | 61.2% | 0.437 | 53.8% | 71.6% | 75.7% | 0.623 |
+| es | 98 | 34.2% | 56.1% | 63.8% | 0.476 | 56.1% | 81.6% | 85.7% | 0.671 |
+| synthetic | 255 | 32.4% | 56.7% | 63.1% | 0.461 | 53.7% | 74.9% | 78.8% | 0.634 |
+| manual | 12 | 16.7% | 25.0% | 41.7% | 0.231 | 75.0% | 83.3% | 91.7% | 0.781 |
+| cross-language | 65 | 4.6% | 12.3% | 14.6% | 0.085 | 10.8% | 26.2% | 29.2% | 0.173 |
+| same-language | 202 | 40.3% | 69.1% | 77.5% | 0.569 | 68.8% | 91.1% | 95.5% | 0.791 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'bm25' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:23+00:00 — benchmark method-comparison: nomic-v2-moe-rrf
+
+store: `data/benchmark_stores/nomic-v2-moe.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-01T15:18:43+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 34.1% | 61.0% | 69.3% | 0.497 | 58.1% | 85.0% | 95.1% | 0.706 |
+| en | 169 | 32.5% | 62.7% | 70.1% | 0.485 | 58.0% | 81.1% | 93.5% | 0.692 |
+| es | 98 | 36.7% | 58.2% | 67.9% | 0.518 | 58.2% | 91.8% | 98.0% | 0.730 |
+| synthetic | 255 | 35.3% | 62.0% | 70.0% | 0.509 | 56.9% | 84.7% | 95.3% | 0.698 |
+| manual | 12 | 8.3% | 41.7% | 54.2% | 0.241 | 83.3% | 91.7% | 91.7% | 0.861 |
+| cross-language | 65 | 10.8% | 23.8% | 35.4% | 0.204 | 23.1% | 55.4% | 86.2% | 0.385 |
+| same-language | 202 | 41.6% | 73.0% | 80.2% | 0.592 | 69.3% | 94.6% | 98.0% | 0.809 |
+
+Unanswerable: 3 rows — false-retrieval not measured (the ranking method's top-1 score is not cosine-calibrated)
+note: false-retrieval is cosine-specific — retrieval 'rrf' scores on a different scale, so comparison cells read —
+
+
+## 2026-10-01T15:27:26+00:00 — benchmark method-comparison — comparison (18 experiments)
+
+| experiment | model | chunk cfg | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 | 0/3 | reuse / 4.5s |
+| baseline-bm25 | bge-m3 | 1800/0.15/on | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 | — | reuse / 1.0s |
+| baseline-rrf | bge-m3 | 1800/0.15/on | 267 | 31.5% | 60.9% | 71.5% | 0.487 | 58.1% | 85.4% | 95.1% | 0.705 | — | reuse / 3.4s |
+| merge-2400-embedding | bge-m3 | 2400/0.15/on | 267 | 29.6% | 63.5% | 71.2% | 0.465 | 59.6% | 89.1% | 93.3% | 0.722 | 0/3 | reuse / 2.3s |
+| merge-2400-bm25 | bge-m3 | 2400/0.15/on | 267 | 26.8% | 56.6% | 64.8% | 0.416 | 49.8% | 76.0% | 79.8% | 0.612 | — | reuse / 0.8s |
+| merge-2400-rrf | bge-m3 | 2400/0.15/on | 267 | 29.8% | 59.4% | 71.2% | 0.462 | 56.2% | 84.3% | 94.8% | 0.693 | — | reuse / 2.9s |
+| merge-1200-embedding | bge-m3 | 1200/0.15/on | 267 | 31.4% | 62.8% | 73.5% | 0.479 | 62.9% | 91.8% | 93.6% | 0.751 | 0/3 | reuse / 3.6s |
+| merge-1200-bm25 | bge-m3 | 1200/0.15/on | 267 | 30.0% | 52.4% | 59.3% | 0.416 | 52.4% | 74.9% | 79.0% | 0.624 | — | reuse / 1.3s |
+| merge-1200-rrf | bge-m3 | 1200/0.15/on | 267 | 32.0% | 59.9% | 72.1% | 0.475 | 58.8% | 86.9% | 95.5% | 0.718 | — | reuse / 4.4s |
+| noheader-embedding | bge-m3 | 1800/0.15/off | 267 | 31.1% | 64.8% | 74.3% | 0.488 | 61.8% | 91.0% | 92.9% | 0.739 | 0/3 | reuse / 2.6s |
+| noheader-bm25 | bge-m3 | 1800/0.15/off | 267 | 30.5% | 54.7% | 60.1% | 0.445 | 53.6% | 74.9% | 78.3% | 0.631 | — | reuse / 0.9s |
+| noheader-rrf | bge-m3 | 1800/0.15/off | 267 | 34.5% | 61.2% | 70.0% | 0.494 | 59.2% | 82.8% | 93.6% | 0.702 | — | reuse / 3.1s |
+| qwen3-06b-embedding | qwen3-embedding:0.6b | 1800/0.15/on | 267 | 29.8% | 62.2% | 74.2% | 0.483 | 59.9% | 88.8% | 93.6% | 0.722 | 0/3 | reuse / 3.7s |
+| qwen3-06b-bm25 | qwen3-embedding:0.6b | 1800/0.15/on | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 | — | reuse / 1.0s |
+| qwen3-06b-rrf | qwen3-embedding:0.6b | 1800/0.15/on | 267 | 30.7% | 58.8% | 72.3% | 0.479 | 58.4% | 86.9% | 95.5% | 0.707 | — | reuse / 3.7s |
+| nomic-v2-moe-embedding | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 0/3 | reuse / 3.3s |
+| nomic-v2-moe-bm25 | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 31.6% | 55.2% | 62.2% | 0.451 | 54.7% | 75.3% | 79.4% | 0.640 | — | reuse / 0.9s |
+| nomic-v2-moe-rrf | nomic-embed-text-v2-moe | 1800/0.15/on | 267 | 34.1% | 61.0% | 69.3% | 0.497 | 58.1% | 85.0% | 95.1% | 0.706 | — | reuse / 3.0s |
+
