@@ -598,3 +598,146 @@ Open chunker knobs (NOT implemented — awaiting explicit OK, evidence gathered)
 Corpus locality caveat: everything here is 77 IACHR-style reports from one instance with self-echo-biased questions (255 synthetic). Scores are relative (A vs B), never absolute; absolute recall will read lower on the full collection and, after Step 4's scale-up, chunking conclusions must be re-checked first (chunk geometry interacts with corpus mix). An external legal-RAG dataset (user-supplied, preferred over generic MIRACL) can still be added as a second opinion on the MODEL ranking only — never on chunking — and only if two models tie here (they do not: nomic leads on the shared corpus, bge leads on manual chunk R@1; the doc-level tie + CL edge broke it for nomic).
 
 Step 4 inherits: chunker merge / 1800 / 0.15 / header on; model nomic-embed-text-v2-moe (EMBEDDING_DIMENSIONS → 768, .env); retrieval embedding-only; false-retrieval threshold 0.55 unchanged.
+## 2026-10-02T12:33:59+00:00 — benchmark sweep2_models — resolved plan
+
+plan    : sweep2_models — 3 experiment(s) over 3 store cell(s)
+captures: data/raw/bdd5a7c445847b35 — 77 capture(s)
+golden  : data/eval/golden.jsonl — 270 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/0ac7665e253e3e842a94cf8985283a95.json
+  qwen3-06b              merge 1800/0.15/on     × qwen3-embedding:0.6b         → data/benchmark_stores/c5a3f43dfdc0418eb400325f3a2ace51.json
+  nomic-v2-moe           merge 1800/0.15/on     × nomic-embed-text-v2-moe      → data/benchmark_stores/3b54e62444bbbe62672c466a4226a4e6.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+  2. qwen3-06b-embedding          → qwen3-06b              retrieval embedding
+  3. nomic-v2-moe-embedding       → nomic-v2-moe           retrieval embedding
+
+
+## 2026-10-02T12:33:59+00:00 — benchmark sweep2_models: baseline-embedding
+
+store: `data/benchmark_stores/0ac7665e253e3e842a94cf8985283a95.json` — 2,850 chunks, bge-m3 (1024d), built 2026-10-02T12:34:01+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 |
+| en | 169 | 32.5% | 70.4% | 76.3% | 0.506 | 68.0% | 90.5% | 93.5% | 0.777 |
+| es | 98 | 25.5% | 58.2% | 74.5% | 0.462 | 53.1% | 87.8% | 90.8% | 0.691 |
+| synthetic | 255 | 30.0% | 65.9% | 75.7% | 0.492 | 62.0% | 89.4% | 92.5% | 0.742 |
+| manual | 12 | 29.2% | 66.7% | 75.0% | 0.445 | 75.0% | 91.7% | 91.7% | 0.826 |
+| cross-language | 65 | 23.1% | 62.3% | 71.5% | 0.436 | 58.5% | 93.8% | 98.5% | 0.729 |
+| same-language | 202 | 32.2% | 67.1% | 77.0% | 0.508 | 63.9% | 88.1% | 90.6% | 0.751 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5081, m014 0.5040, m015 0.4606)
+retrieval: embedding
+
+
+## 2026-10-02T12:34:35+00:00 — benchmark sweep2_models: qwen3-06b-embedding
+
+store: `data/benchmark_stores/c5a3f43dfdc0418eb400325f3a2ace51.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-02T12:34:36+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 62.5% | 74.2% | 0.481 | 59.9% | 88.8% | 93.6% | 0.722 |
+| en | 169 | 29.6% | 61.2% | 73.1% | 0.468 | 59.8% | 87.0% | 92.9% | 0.716 |
+| es | 98 | 30.1% | 64.8% | 76.0% | 0.503 | 60.2% | 91.8% | 94.9% | 0.734 |
+| synthetic | 255 | 30.6% | 62.7% | 74.5% | 0.487 | 59.6% | 88.2% | 93.3% | 0.718 |
+| manual | 12 | 12.5% | 58.3% | 66.7% | 0.343 | 66.7% | 100.0% | 100.0% | 0.819 |
+| cross-language | 65 | 32.3% | 63.8% | 73.1% | 0.496 | 58.5% | 92.3% | 96.9% | 0.720 |
+| same-language | 202 | 29.0% | 62.1% | 74.5% | 0.476 | 60.4% | 87.6% | 92.6% | 0.723 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4671, m014 0.4364, m015 0.3122)
+retrieval: embedding
+
+
+## 2026-10-02T12:35:50+00:00 — benchmark sweep2_models: nomic-v2-moe-embedding
+
+store: `data/benchmark_stores/3b54e62444bbbe62672c466a4226a4e6.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-02T12:35:53+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 |
+| en | 169 | 35.2% | 67.8% | 79.3% | 0.523 | 66.3% | 88.2% | 94.1% | 0.755 |
+| es | 98 | 29.1% | 62.2% | 76.5% | 0.483 | 58.2% | 88.8% | 96.9% | 0.728 |
+| synthetic | 255 | 33.9% | 65.9% | 78.4% | 0.515 | 62.7% | 88.2% | 95.3% | 0.741 |
+| manual | 12 | 12.5% | 62.5% | 75.0% | 0.354 | 75.0% | 91.7% | 91.7% | 0.833 |
+| cross-language | 65 | 30.0% | 62.3% | 76.9% | 0.475 | 60.0% | 89.2% | 96.9% | 0.714 |
+| same-language | 202 | 33.9% | 66.8% | 78.7% | 0.519 | 64.4% | 88.1% | 94.6% | 0.755 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5017, m014 0.4497, m015 0.4142)
+retrieval: embedding
+
+
+## 2026-10-02T12:36:17+00:00 — benchmark sweep2_models — comparison (3 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 | 0/3 | 31s / 2.8s |
+| qwen3-06b-embedding | qwen3-embedding:0.6b | 1800/0.15/on | embedding | 267 | 29.8% | 62.5% | 74.2% | 0.481 | 59.9% | 88.8% | 93.6% | 0.722 | 0/3 | 71s / 2.9s |
+| nomic-v2-moe-embedding | nomic-embed-text-v2-moe | 1800/0.15/on | embedding | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 0/3 | 22s / 2.2s |
+
+
+## 2026-10-02T12:36:49+00:00 — benchmark sweep2_models — resolved plan
+
+plan    : sweep2_models — 1 experiment(s) over 1 store cell(s)
+captures: data/raw/bdd5a7c445847b35 — 77 capture(s)
+golden  : data/eval/golden.jsonl — 270 row(s)
+stores  :
+  qwen3-06b              merge 1800/0.15/on     × qwen3-embedding:0.6b         → data/benchmark_stores/c5a3f43dfdc0418eb400325f3a2ace51.json
+experiments:
+  1. qwen3-06b-embedding          → qwen3-06b              retrieval embedding
+
+
+## 2026-10-02T12:36:49+00:00 — benchmark sweep2_models: qwen3-06b-embedding
+
+store: `data/benchmark_stores/c5a3f43dfdc0418eb400325f3a2ace51.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-02T12:36:49+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 62.2% | 74.2% | 0.482 | 59.9% | 89.1% | 94.0% | 0.722 |
+| en | 169 | 29.6% | 61.2% | 73.1% | 0.469 | 59.8% | 87.6% | 92.9% | 0.716 |
+| es | 98 | 30.1% | 63.8% | 76.0% | 0.505 | 60.2% | 91.8% | 95.9% | 0.733 |
+| synthetic | 255 | 30.6% | 62.4% | 74.5% | 0.489 | 59.6% | 88.6% | 93.7% | 0.718 |
+| manual | 12 | 12.5% | 58.3% | 66.7% | 0.344 | 66.7% | 100.0% | 100.0% | 0.819 |
+| cross-language | 65 | 32.3% | 63.8% | 73.1% | 0.500 | 58.5% | 92.3% | 96.9% | 0.721 |
+| same-language | 202 | 29.0% | 61.6% | 74.5% | 0.477 | 60.4% | 88.1% | 93.1% | 0.723 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4671, m014 0.4364, m015 0.3119)
+retrieval: embedding
+
+
+## 2026-10-02T12:38:03+00:00 — benchmark sweep2_models — comparison (1 experiment)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| qwen3-06b-embedding | qwen3-embedding:0.6b | 1800/0.15/on | embedding | 267 | 29.8% | 62.2% | 74.2% | 0.482 | 59.9% | 89.1% | 94.0% | 0.722 | 0/3 | 70s / 2.9s |
+
+
+## 2026-10-02T12:38:03+00:00 — Step 3.5 migration parity: sweep 2 re-run through the rewritten config layer
+
+Acceptance re-run for the benchmark redesign (TOML sweep specs → method packages + `use_cases/run_sweep.py`,
+user-approved): `uwazi-rag benchmark --spec benchmarks/sweep2_models.py`. Grid = 3 store cells (MergeChunker
+at the Step 2 geometry, one per model) × EmbeddingRetrieval; stores rebuilt under content-derived fingerprints
+(`data/benchmark_stores/<sha256[:32]>.json`; the committed `data/naive_store.json` was not reused — the bge-m3
+cell rebuilt it from the same corpus). The shared grading path is untouched
+(`prepare_run` byte-verify + `rank_rows` + `score_rows`); per-experiment blocks above carry the resolved plan.
+
+- bge-m3: EXACT — every scope cell and all unanswerable top-1s equal the recorded 2026-10-01 block, across a
+  store built 2026-09-30 vs rebuilt 2026-10-02. The rewritten layer reproduces bit-stable pipelines exactly.
+- nomic-embed-text-v2-moe: EXACT (all scopes + top-1s 0.5017/0.4497/0.4142).
+- qwen3-embedding:0.6b: near-tie drift only — top-1 scores move ±0.0004 (e.g. m014 0.4360/0.4364), flipping
+  1–2 rows near rank 5–10: chunk R@5 62.2%↔62.5%, chunk MRR 0.481–0.483, doc R@5/R@10 ±0.4pp; R@1, R@10-level
+  all-scope structure and doc MRR stable. Two fresh builds through the NEW runner differ from each other the
+  same way, so this is Ollama's qwen3 embeds not being bit-identical across store builds (bge-m3/nomic are) —
+  not a migration artifact; the old runner's builds carried the same property.
+
+Recorded sweep numbers remain final (append-only; nothing above rewritten). Recorded VERDICTS unchanged:
+nomic-embed-text-v2-moe leads with ~3pp margins vs ~4e-4 rebuild noise; bge-m3 standby; embedding-only for
+Step 4; FALSE_RETRIEVAL_THRESHOLD 0.55.
