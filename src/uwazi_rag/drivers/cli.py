@@ -14,17 +14,7 @@ from uwazi_rag import configuration
 from uwazi_rag.adapters.naive_vector_store import NaiveStoreMismatchError, NaiveVectorStore
 from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
 from uwazi_rag.adapters.ollama_llm import OllamaLlm
-from uwazi_rag.use_cases.benchmark import (
-    BenchmarkSpecError,
-    ExperimentResult,
-    StoreSpec,
-    describe_plan,
-    format_chunk_cfg,
-    parse_benchmark_toml,
-    render_comparison,
-    select_experiments,
-    store_matches_spec,
-)
+from uwazi_rag.ports.embedding_port import EmbeddingPort
 from uwazi_rag.use_cases.build_golden import (
     GOLDEN_FILE,
     PASSAGES_FILE,
@@ -51,6 +41,7 @@ from uwazi_rag.use_cases.fetch_document import (
 )
 from uwazi_rag.use_cases.index_captures import IndexStats, index_captures
 from uwazi_rag.use_cases.passage_groups import GROUPS_PER_DOCUMENT, build_passage_groups, format_group_view
+from uwazi_rag.use_cases.run_sweep import SweepSpecError, load_sweep_spec, run_sweep
 from uwazi_rag.use_cases.semantic_search import format_search_results, semantic_search
 
 
@@ -172,12 +163,12 @@ def _build_parser() -> argparse.ArgumentParser:
 
     benchmark = subparsers.add_parser(
         "benchmark",
-        help="run a sweep spec: build each [stores] block once, grade its [[experiments]], append a comparison (Step 3.5)",
+        help="run a sweep script: build-or-reuse its stores, grade its experiments, append a comparison (Step 3.5)",
     )
     benchmark.add_argument(
-        "--config",
+        "--spec",
         required=True,
-        help="benchmark TOML (e.g. benchmarks/sweep1-chunking.toml) — [stores.<slug>] + [[experiments]]",
+        help="sweep script (e.g. benchmarks/sweep2_models.py) — plain Python cells × methods; one script = one sweep",
     )
     benchmark.add_argument(
         "--only",
@@ -187,7 +178,7 @@ def _build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument(
         "--dry-run",
         action="store_true",
-        help="print the grid (stores + experiments) without building or grading anything",
+        help="print the resolved plan (stores + experiments) without building or grading anything",
     )
     benchmark.add_argument("--source", default=None, help="captures dir (default: data/raw/<instance_key> from .env)")
 
@@ -626,211 +617,36 @@ def _run_eval(args: argparse.Namespace) -> int:
     return 0
 
 
-def _benchmark_store_path(slug: str) -> Path:
-    """Where a benchmark spec's build-store lives (sweeps never touch the baseline store)."""
-    return configuration.BENCHMARK_STORES_DIR / f"{slug}.json"
+def _benchmark_embedder(model: str) -> EmbeddingPort:
+    """The sweep-side embedder factory: one Ollama adapter per cell's model."""
+    return OllamaEmbeddings(model=model, base_url=configuration.OLLAMA_BASE_URL)
 
 
 def _run_benchmark(args: argparse.Namespace) -> int:
-    """Step 3.5 (benchmark half): build the spec's stores once, grade each experiment.
+    """Step 3.5 (benchmark half): a thin wrapper — the sweep lives in :mod:`uwazi_rag.use_cases.run_sweep`.
 
-    Store phase honors the grid: a source-backed store is used read-only (and
-    validated against its spec); a build store is built when missing or stale
-    and skipped when a matching store file exists. Experiments run in spec
-    order through the shared grading path; a failed experiment is recorded and
-    the run continues. Everything lands in results.md: one labeled block per
-    experiment plus a comparison table for the whole run.
+    The script's ``experiments`` declare the grid; the helper builds-or-reuses
+    every cell's fingerprint-addressed store (pre-existing stores are never
+    touched), grades each experiment through the shared path, appends plan +
+    blocks + comparison to results.md, and continues past failed experiments.
     """
     try:
-        spec = parse_benchmark_toml(Path(args.config))
-        selected = select_experiments(spec.experiments, only=args.only)
-    except (BenchmarkSpecError, OSError) as error:
+        name, experiments = load_sweep_spec(Path(args.spec))
+    except (SweepSpecError, OSError) as error:
         print(f"error: benchmark spec failed — {error}", file=sys.stderr)
         return 1
-
-    store_paths = {
-        slug: (spec_store.source_path() if spec_store.is_source else _benchmark_store_path(slug))
-        for slug, spec_store in spec.stores.items()
-    }
-    if args.dry_run:
-        for line in describe_plan(spec, selected, {slug: str(path) for slug, path in store_paths.items()}):
-            print(line)
-        return 0
-
-    if args.source:
-        raw_dir = Path(args.source)
-    else:
-        try:
-            raw_dir = configuration.RAW_DIR / configuration.instance_key(configuration.uwazi_url())
-        except RuntimeError as error:
-            print(f"error: benchmark needs the captures dir — {error}", file=sys.stderr)
-            return 1
-
-    results_path = configuration.EVAL_DIR / RESULTS_FILE
-    golden_path = configuration.EVAL_DIR / GOLDEN_FILE
-    store_costs: dict[str, float | None] = {}  # slug → build seconds (None = reused/up to date)
-    store_errors: dict[str, str] = {}
-
-    results: list[ExperimentResult] = []
-    for experiment in selected:
-        spec_store = spec.stores[experiment.store]
-        path = store_paths[experiment.store]
-        label = f"benchmark {spec.name}: {experiment.name}"
-        started_at = datetime.now(timezone.utc)
-
-        # Store phase (lazy, once per slug): validate reuse specs, build-or-skip build specs.
-        if experiment.store not in store_costs and experiment.store not in store_errors:
-            try:
-                store_costs[experiment.store] = _make_benchmark_store_ready(
-                    spec_store=spec_store, path=path, raw_dir=raw_dir
-                )
-            except (NaiveStoreMismatchError, EvalInputsError, RuntimeError, ValueError, OSError) as error:
-                store_errors[experiment.store] = str(error).replace("\n", " ")[:240]
-
-        if experiment.store in store_errors:
-            message = store_errors[experiment.store]
-            results.append(ExperimentResult(name=experiment.name, ok=False, error=message))
-            print(f"failure : {experiment.name} — {message}", file=sys.stderr)
-            append_results(results_path, f"## {started_at.isoformat(timespec='seconds')} — {label}\n\nFAILED: {message}\n")
-            continue
-
-        clock = time.monotonic()
-        try:
-            prepared = prepare_run(store_path=path, raw_dir=raw_dir, golden_path=golden_path)
-            for note in prepared.graded.ungradable:
-                print(f"warning: {note}", file=sys.stderr)
-            if prepared.check.extra_in_store:
-                print(
-                    f"note: {len(prepared.check.extra_in_store)} store chunks belong to captures outside {raw_dir} "
-                    "(indexed earlier from a wider corpus) — they stay in the ranking",
-                    file=sys.stderr,
-                )
-            embedder = (
-                OllamaEmbeddings(model=prepared.store.embedding_model, base_url=configuration.OLLAMA_BASE_URL)
-                if experiment.retrieval in ("embedding", "rrf")
-                else None
-            )
-            hits_by_row = rank_rows(prepared, retrieval=experiment.retrieval, embedder=embedder)
-            card = score_rows(
-                prepared.graded,
-                hits_by_row,
-                false_retrieval_threshold=(
-                    configuration.FALSE_RETRIEVAL_THRESHOLD if experiment.retrieval == "embedding" else None
-                ),
-            )
-        except (NaiveStoreMismatchError, EvalInputsError, RuntimeError, ValueError, OSError) as error:
-            message = str(error).replace("\n", " ")[:240]
-            elapsed = time.monotonic() - clock
-            results.append(ExperimentResult(name=experiment.name, ok=False, run_seconds=elapsed, error=message))
-            print(f"failure : {experiment.name} — {message}", file=sys.stderr)
-            append_results(
-                results_path,
-                f"## {started_at.isoformat(timespec='seconds')} — {label}\n\nFAILED after {elapsed:.0f}s: {message}\n",
-            )
-            continue
-
-        elapsed = time.monotonic() - clock
-        run = build_run_facts(
-            prepared,
-            label=label,
-            started_at_utc=started_at.isoformat(timespec="seconds"),
-            elapsed_seconds=elapsed,
-            false_retrieval_threshold=configuration.FALSE_RETRIEVAL_THRESHOLD,
-        )
-        block = render(run, card, heading=True)
-        if experiment.retrieval != "embedding":
-            block += (
-                f"note: false-retrieval is cosine-specific — retrieval '{experiment.retrieval}' "
-                "scores on a different scale, so comparison cells read —\n"
-            )
-        append_results(results_path, block)
-        print(render(run, card, heading=False), end="")
-        scope_all = card.scopes[0]
-        results.append(
-            ExperimentResult(
-                name=experiment.name,
-                ok=True,
-                model=run.store_model,
-                cfg=format_chunk_cfg(
-                    max_chars=run.config.target_max_chars,
-                    overlap=run.config.overlap_ratio,
-                    header=run.config.prepend_header,
-                ),
-                n=card.answerable_rows,
-                chunk_recall=scope_all.chunk.recall,
-                chunk_mrr=scope_all.chunk.mrr,
-                doc_recall=scope_all.doc.recall,
-                doc_mrr=scope_all.doc.mrr,
-                false_retrieval=(
-                    f"{len(card.unanswerable.false_retrievals)}/{card.unanswerable.rows}"
-                    if experiment.retrieval == "embedding"
-                    else "—"
-                ),
-                build_seconds=store_costs.get(experiment.store),
-                run_seconds=elapsed,
-            )
-        )
-
-    heading = (
-        f"## {datetime.now(timezone.utc).isoformat(timespec='seconds')} — benchmark {spec.name} — comparison "
-        f"({len(results)} experiment{'s' if len(results) != 1 else ''})"
-    )
-    block = heading + "\n\n" + "\n".join(render_comparison(results)) + "\n"
-    append_results(results_path, block)
-    for line in block.splitlines():
-        print(line)
-    graded = sum(1 for result in results if result.ok)
-    print(f"done    : {graded}/{len(results)} experiments graded — results appended to {results_path}")
-    return 0 if graded == len(results) else 1
-
-
-def _make_benchmark_store_ready(*, spec_store: StoreSpec, path: Path, raw_dir: Path) -> float | None:
-    """Make ``path`` ready for grading per its spec; return build seconds (``None`` = reused).
-
-    Source-backed stores are loaded and validated read-only (their file is
-    never written — the committed baseline lives here). Build stores are
-    skipped when a valid matching file exists and rebuilt otherwise (missing,
-    corrupt, or stale-vs-spec). Failures raise; the caller records them and
-    the run continues with the other experiments.
-    """
-    if spec_store.is_source:
-        loaded = NaiveVectorStore.load(path)
-        if not store_matches_spec(loaded, spec_store):
-            raise EvalInputsError(
-                f"source store {path} does not match its spec "
-                f"(model {spec_store.model!r}, {spec_store.describe()}) — refusing to grade under it"
-            )
-        print(f"store   : {spec_store.slug} — reuse (read-only) {path}")
-        return None
     try:
-        loaded = NaiveVectorStore.load(path)
-        valid = store_matches_spec(loaded, spec_store)
-    except (NaiveStoreMismatchError, ValueError, OSError):
-        valid = False
-    if valid:
-        print(f"store   : {spec_store.slug} — up to date ({path} matches the spec; build skipped)")
-        return None
-    print(
-        f"store   : {spec_store.slug} — {path} is missing or stale → building "
-        f"({spec_store.describe()}, model {spec_store.model})"
-    )
-    clock = time.monotonic()
-    try:
-        stats, _ = _build_naive_store(
-            store_path=path,
-            raw_dir=raw_dir,
-            model=spec_store.model,
-            declared_dimensions=None,
-            probe=True,
-            max_chars=spec_store.max_chars,
-            overlap=spec_store.overlap,
-            header=spec_store.header,
+        return run_sweep(
+            name=name,
+            experiments=experiments,
+            embedder_factory=_benchmark_embedder,
+            source=Path(args.source) if args.source else None,
+            only=args.only,
+            dry_run=args.dry_run,
         )
-    except (RuntimeError, ValueError, OSError) as error:
-        raise EvalInputsError(f"building {path} failed — {error}") from error
-    seconds = time.monotonic() - clock
-    print(f"store   : {spec_store.slug} — built {stats.chunks_indexed:,} chunks in {seconds:.0f}s")
-    return seconds
+    except (SweepSpecError, RuntimeError, ValueError, OSError) as error:
+        print(f"error: benchmark failed — {error}", file=sys.stderr)
+        return 1
 
 
 def _stub(name: str) -> int:
