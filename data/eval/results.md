@@ -741,3 +741,139 @@ cell rebuilt it from the same corpus). The shared grading path is untouched
 Recorded sweep numbers remain final (append-only; nothing above rewritten). Recorded VERDICTS unchanged:
 nomic-embed-text-v2-moe leads with ~3pp margins vs ~4e-4 rebuild noise; bge-m3 standby; embedding-only for
 Step 4; FALSE_RETRIEVAL_THRESHOLD 0.55.
+
+## 2026-10-02T15:56:07+00:00 — benchmark sweep2_models — resolved plan
+
+plan    : sweep2_models — 5 experiment(s) over 5 store cell(s)
+captures: data/raw/bdd5a7c445847b35 — 77 capture(s)
+golden  : data/eval/golden.jsonl — 270 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/0ac7665e253e3e842a94cf8985283a95.json
+  qwen3-06b              merge 1800/0.15/on     × qwen3-embedding:0.6b         → data/benchmark_stores/c5a3f43dfdc0418eb400325f3a2ace51.json
+  nomic-v2-moe           merge 1800/0.15/on     × nomic-embed-text-v2-moe      → data/benchmark_stores/3b54e62444bbbe62672c466a4226a4e6.json
+  qwen3-8b               merge 1800/0.15/on     × qwen3-embedding:8b           → data/benchmark_stores/ae9f2e8585ffd72012a4f800fa0fc08f.json
+  embeddinggemma         merge 1800/0.15/on     × embeddinggemma               → data/benchmark_stores/e5f634b561e4684981ebbc88c4c5b173.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+  2. qwen3-06b-embedding          → qwen3-06b              retrieval embedding
+  3. nomic-v2-moe-embedding       → nomic-v2-moe           retrieval embedding
+  4. qwen3-8b-embedding           → qwen3-8b               retrieval embedding
+  5. embeddinggemma-embedding     → embeddinggemma         retrieval embedding
+
+
+## 2026-10-02T15:56:07+00:00 — benchmark sweep2_models: baseline-embedding
+
+store: `data/benchmark_stores/0ac7665e253e3e842a94cf8985283a95.json` — 2,850 chunks, bge-m3 (1024d), built 2026-10-02T12:34:01+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 |
+| en | 169 | 32.5% | 70.4% | 76.3% | 0.506 | 68.0% | 90.5% | 93.5% | 0.777 |
+| es | 98 | 25.5% | 58.2% | 74.5% | 0.462 | 53.1% | 87.8% | 90.8% | 0.691 |
+| synthetic | 255 | 30.0% | 65.9% | 75.7% | 0.492 | 62.0% | 89.4% | 92.5% | 0.742 |
+| manual | 12 | 29.2% | 66.7% | 75.0% | 0.445 | 75.0% | 91.7% | 91.7% | 0.826 |
+| cross-language | 65 | 23.1% | 62.3% | 71.5% | 0.436 | 58.5% | 93.8% | 98.5% | 0.729 |
+| same-language | 202 | 32.2% | 67.1% | 77.0% | 0.508 | 63.9% | 88.1% | 90.6% | 0.751 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5081, m014 0.5040, m015 0.4606)
+retrieval: embedding
+
+
+## 2026-10-02T15:56:12+00:00 — benchmark sweep2_models: qwen3-06b-embedding
+
+store: `data/benchmark_stores/c5a3f43dfdc0418eb400325f3a2ace51.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-02T12:36:49+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 62.2% | 74.2% | 0.482 | 59.9% | 89.1% | 94.0% | 0.722 |
+| en | 169 | 29.6% | 61.2% | 73.1% | 0.469 | 59.8% | 87.6% | 92.9% | 0.716 |
+| es | 98 | 30.1% | 63.8% | 76.0% | 0.505 | 60.2% | 91.8% | 95.9% | 0.733 |
+| synthetic | 255 | 30.6% | 62.4% | 74.5% | 0.489 | 59.6% | 88.6% | 93.7% | 0.718 |
+| manual | 12 | 12.5% | 58.3% | 66.7% | 0.344 | 66.7% | 100.0% | 100.0% | 0.819 |
+| cross-language | 65 | 32.3% | 63.8% | 73.1% | 0.500 | 58.5% | 92.3% | 96.9% | 0.721 |
+| same-language | 202 | 29.0% | 61.6% | 74.5% | 0.477 | 60.4% | 88.1% | 93.1% | 0.723 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4671, m014 0.4364, m015 0.3119)
+retrieval: embedding
+
+
+## 2026-10-02T15:56:15+00:00 — benchmark sweep2_models: nomic-v2-moe-embedding
+
+store: `data/benchmark_stores/3b54e62444bbbe62672c466a4226a4e6.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-02T12:35:53+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 |
+| en | 169 | 35.2% | 67.8% | 79.3% | 0.523 | 66.3% | 88.2% | 94.1% | 0.755 |
+| es | 98 | 29.1% | 62.2% | 76.5% | 0.483 | 58.2% | 88.8% | 96.9% | 0.728 |
+| synthetic | 255 | 33.9% | 65.9% | 78.4% | 0.515 | 62.7% | 88.2% | 95.3% | 0.741 |
+| manual | 12 | 12.5% | 62.5% | 75.0% | 0.354 | 75.0% | 91.7% | 91.7% | 0.833 |
+| cross-language | 65 | 30.0% | 62.3% | 76.9% | 0.475 | 60.0% | 89.2% | 96.9% | 0.714 |
+| same-language | 202 | 33.9% | 66.8% | 78.7% | 0.519 | 64.4% | 88.1% | 94.6% | 0.755 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5017, m014 0.4497, m015 0.4142)
+retrieval: embedding
+
+
+## 2026-10-02T15:56:19+00:00 — benchmark sweep2_models: qwen3-8b-embedding
+
+store: `data/benchmark_stores/ae9f2e8585ffd72012a4f800fa0fc08f.json` — 2,850 chunks, qwen3-embedding:8b (4096d), built 2026-10-02T15:56:38+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.7% | 66.5% | 82.0% | 0.509 | 65.9% | 94.4% | 97.4% | 0.781 |
+| en | 169 | 31.7% | 68.6% | 80.5% | 0.509 | 70.4% | 93.5% | 96.4% | 0.800 |
+| es | 98 | 29.1% | 62.8% | 84.7% | 0.511 | 58.2% | 95.9% | 99.0% | 0.749 |
+| synthetic | 255 | 31.2% | 67.3% | 82.4% | 0.515 | 65.9% | 94.1% | 97.3% | 0.780 |
+| manual | 12 | 20.8% | 50.0% | 75.0% | 0.396 | 66.7% | 100.0% | 100.0% | 0.808 |
+| cross-language | 65 | 24.6% | 66.9% | 78.5% | 0.463 | 56.9% | 96.9% | 98.5% | 0.732 |
+| same-language | 202 | 32.7% | 66.3% | 83.2% | 0.524 | 68.8% | 93.6% | 97.0% | 0.797 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 1/3 (33.3%) (top-1: m013 0.5866, m014 0.5389, m015 0.4367)
+retrieval: embedding
+
+
+## 2026-10-02T16:00:59+00:00 — benchmark sweep2_models: embeddinggemma-embedding
+
+store: `data/benchmark_stores/e5f634b561e4684981ebbc88c4c5b173.json` — 2,850 chunks, embeddinggemma (768d), built 2026-10-02T16:01:06+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR |
+|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 35.0% | 69.1% | 80.3% | 0.541 | 65.5% | 93.3% | 97.0% | 0.774 |
+| en | 169 | 35.5% | 69.8% | 77.8% | 0.541 | 68.0% | 90.5% | 95.9% | 0.782 |
+| es | 98 | 34.2% | 67.9% | 84.7% | 0.542 | 61.2% | 98.0% | 99.0% | 0.761 |
+| synthetic | 255 | 35.3% | 69.8% | 80.2% | 0.544 | 64.7% | 92.9% | 96.9% | 0.767 |
+| manual | 12 | 29.2% | 54.2% | 83.3% | 0.477 | 83.3% | 100.0% | 100.0% | 0.917 |
+| cross-language | 65 | 23.8% | 63.8% | 80.0% | 0.450 | 53.8% | 92.3% | 98.5% | 0.699 |
+| same-language | 202 | 38.6% | 70.8% | 80.4% | 0.570 | 69.3% | 93.6% | 96.5% | 0.798 |
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4635, m014 0.4292, m015 0.3883)
+retrieval: embedding
+
+
+p1 p2 p3
+
+p1-p2 , p3
+
+
+## 2026-10-02T16:01:34+00:00 — benchmark sweep2_models — comparison (5 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 | 0/3 | reuse / 4.2s |
+| qwen3-06b-embedding | qwen3-embedding:0.6b | 1800/0.15/on | embedding | 267 | 29.8% | 62.2% | 74.2% | 0.482 | 59.9% | 89.1% | 94.0% | 0.722 | 0/3 | reuse / 3.3s |
+| nomic-v2-moe-embedding | nomic-embed-text-v2-moe | 1800/0.15/on | embedding | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 0/3 | reuse / 3.0s |
+| qwen3-8b-embedding | qwen3-embedding:8b | 1800/0.15/on | embedding | 267 | 30.7% | 66.5% | 82.0% | 0.509 | 65.9% | 94.4% | 97.4% | 0.781 | 1/3 | 247s / 12.5s |
+| embeddinggemma-embedding | embeddinggemma | 1800/0.15/on | embedding | 267 | 35.0% | 69.1% | 80.3% | 0.541 | 65.5% | 93.3% | 97.0% | 0.774 | 0/3 | 25s / 3.1s |
+
+1 / rank of the first golden chunk

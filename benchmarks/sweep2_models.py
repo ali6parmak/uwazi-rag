@@ -19,6 +19,8 @@ experiments = define_sweep(
         StoreCell(label="baseline", chunk_method=MergeChunker(), model="bge-m3"),
         StoreCell(label="qwen3-06b", chunk_method=MergeChunker(), model="qwen3-embedding:0.6b"),
         StoreCell(label="nomic-v2-moe", chunk_method=MergeChunker(), model="nomic-embed-text-v2-moe"),
+        StoreCell(label="qwen3-8b", chunk_method=MergeChunker(), model="qwen3-embedding:8b"),
+        StoreCell(label="embeddinggemma", chunk_method=MergeChunker(), model="embeddinggemma"),
     ],
     [EmbeddingRetrieval()],
 )
