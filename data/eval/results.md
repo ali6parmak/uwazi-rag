@@ -877,3 +877,177 @@ p1-p2 , p3
 | embeddinggemma-embedding | embeddinggemma | 1800/0.15/on | embedding | 267 | 35.0% | 69.1% | 80.3% | 0.541 | 65.5% | 93.3% | 97.0% | 0.774 | 0/3 | 25s / 3.1s |
 
 1 / rank of the first golden chunk
+
+## 2026-10-05T11:48:35+00:00 — benchmark sweep2_models — resolved plan
+
+plan    : sweep2_models — 5 experiment(s) over 5 store cell(s)
+captures: data/raw/bdd5a7c445847b35 — 77 capture(s)
+golden  : data/eval/golden.jsonl — 270 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-4d284af0.json
+  qwen3-06b              merge 1800/0.15/on     × qwen3-embedding:0.6b         → data/benchmark_stores/merge-1800-0.15-on__qwen3-embedding-0.6b-4d284af0.json
+  nomic-v2-moe           merge 1800/0.15/on     × nomic-embed-text-v2-moe      → data/benchmark_stores/merge-1800-0.15-on__nomic-embed-text-v2-moe-4d284af0.json
+  qwen3-8b               merge 1800/0.15/on     × qwen3-embedding:8b           → data/benchmark_stores/merge-1800-0.15-on__qwen3-embedding-8b-4d284af0.json
+  embeddinggemma         merge 1800/0.15/on     × embeddinggemma               → data/benchmark_stores/merge-1800-0.15-on__embeddinggemma-4d284af0.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+  2. qwen3-06b-embedding          → qwen3-06b              retrieval embedding
+  3. nomic-v2-moe-embedding       → nomic-v2-moe           retrieval embedding
+  4. qwen3-8b-embedding           → qwen3-8b               retrieval embedding
+  5. embeddinggemma-embedding     → embeddinggemma         retrieval embedding
+
+
+## 2026-10-05T11:48:35+00:00 — benchmark sweep2_models: baseline-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-4d284af0.json` — 2,850 chunks, bge-m3 (1024d), built 2026-10-05T11:48:37+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 | 30.8% | 67.9% | 77.4% | 36.1% | 33.0% | 14.9% | 8.7% | 32.0% |
+| en | 169 | 32.5% | 70.4% | 76.3% | 0.506 | 68.0% | 90.5% | 93.5% | 0.777 | 33.0% | 71.8% | 77.5% | 38.5% | 34.9% | 15.6% | 8.5% | 34.3% |
+| es | 98 | 25.5% | 58.2% | 74.5% | 0.462 | 53.1% | 87.8% | 90.8% | 0.691 | 26.9% | 61.3% | 77.4% | 31.8% | 29.6% | 13.7% | 8.9% | 28.1% |
+| synthetic | 255 | 30.0% | 65.9% | 75.7% | 0.492 | 62.0% | 89.4% | 92.5% | 0.742 | 30.9% | 68.0% | 77.6% | 36.4% | 32.9% | 14.9% | 8.7% | 32.2% |
+| manual | 12 | 29.2% | 66.7% | 75.0% | 0.445 | 75.0% | 91.7% | 91.7% | 0.826 | 29.2% | 66.7% | 75.0% | 29.2% | 33.3% | 15.0% | 8.3% | 29.2% |
+| cross-language | 65 | 23.1% | 62.3% | 71.5% | 0.436 | 58.5% | 93.8% | 98.5% | 0.729 | 24.7% | 65.6% | 74.1% | 27.9% | 26.2% | 14.2% | 8.3% | 24.6% |
+| same-language | 202 | 32.2% | 67.1% | 77.0% | 0.508 | 63.9% | 88.1% | 90.6% | 0.751 | 32.7% | 68.7% | 78.5% | 38.7% | 35.1% | 15.1% | 8.8% | 34.4% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5081, m014 0.5040, m015 0.4606)
+retrieval: embedding
+
+
+## 2026-10-05T11:49:09+00:00 — benchmark sweep2_models: qwen3-06b-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__qwen3-embedding-0.6b-4d284af0.json` — 2,850 chunks, qwen3-embedding:0.6b (1024d), built 2026-10-05T11:49:10+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 29.8% | 62.5% | 74.2% | 0.482 | 60.3% | 88.8% | 93.6% | 0.725 | 30.9% | 64.3% | 76.0% | 35.2% | 33.3% | 14.3% | 8.5% | 31.6% |
+| en | 169 | 29.6% | 61.2% | 73.1% | 0.470 | 60.4% | 87.0% | 92.9% | 0.720 | 30.5% | 62.5% | 74.2% | 36.3% | 32.0% | 13.6% | 8.1% | 30.8% |
+| es | 98 | 30.1% | 64.8% | 76.0% | 0.504 | 60.2% | 91.8% | 94.9% | 0.734 | 31.6% | 67.3% | 78.9% | 33.4% | 35.7% | 15.5% | 9.1% | 33.2% |
+| synthetic | 255 | 30.6% | 62.7% | 74.5% | 0.489 | 60.0% | 88.2% | 93.3% | 0.720 | 31.8% | 64.6% | 76.4% | 35.9% | 34.1% | 14.4% | 8.5% | 32.5% |
+| manual | 12 | 12.5% | 58.3% | 66.7% | 0.351 | 66.7% | 100.0% | 100.0% | 0.819 | 12.5% | 58.3% | 66.7% | 20.8% | 16.7% | 13.3% | 7.5% | 12.5% |
+| cross-language | 65 | 32.3% | 63.8% | 73.1% | 0.499 | 58.5% | 92.3% | 96.9% | 0.721 | 34.5% | 66.4% | 75.6% | 39.2% | 36.9% | 14.8% | 8.3% | 35.4% |
+| same-language | 202 | 29.0% | 62.1% | 74.5% | 0.477 | 60.9% | 87.6% | 92.6% | 0.726 | 29.7% | 63.6% | 76.1% | 33.9% | 32.2% | 14.2% | 8.5% | 30.4% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4643, m014 0.4360, m015 0.3122)
+retrieval: embedding
+
+
+## 2026-10-05T11:50:23+00:00 — benchmark sweep2_models: nomic-v2-moe-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__nomic-embed-text-v2-moe-4d284af0.json` — 2,850 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-05T11:50:25+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 33.7% | 67.4% | 79.6% | 38.9% | 36.3% | 15.0% | 9.0% | 34.6% |
+| en | 169 | 35.2% | 67.8% | 79.3% | 0.523 | 66.3% | 88.2% | 94.1% | 0.755 | 36.0% | 69.1% | 80.3% | 41.1% | 37.9% | 14.9% | 8.9% | 37.0% |
+| es | 98 | 29.1% | 62.2% | 76.5% | 0.483 | 58.2% | 88.8% | 96.9% | 0.728 | 29.8% | 64.6% | 78.6% | 34.9% | 33.7% | 15.1% | 9.3% | 30.6% |
+| synthetic | 255 | 33.9% | 65.9% | 78.4% | 0.515 | 62.7% | 88.2% | 95.3% | 0.741 | 34.7% | 67.7% | 79.9% | 40.1% | 37.3% | 15.1% | 9.1% | 35.7% |
+| manual | 12 | 12.5% | 62.5% | 75.0% | 0.354 | 75.0% | 91.7% | 91.7% | 0.833 | 12.5% | 62.5% | 75.0% | 12.5% | 16.7% | 13.3% | 8.3% | 12.5% |
+| cross-language | 65 | 30.0% | 62.3% | 76.9% | 0.475 | 60.0% | 89.2% | 96.9% | 0.714 | 30.8% | 65.4% | 79.2% | 31.8% | 33.8% | 14.8% | 8.9% | 31.5% |
+| same-language | 202 | 33.9% | 66.8% | 78.7% | 0.519 | 64.4% | 88.1% | 94.6% | 0.755 | 34.7% | 68.1% | 79.8% | 41.1% | 37.1% | 15.0% | 9.1% | 35.6% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5017, m014 0.4497, m015 0.4142)
+retrieval: embedding
+
+
+## 2026-10-05T11:50:49+00:00 — benchmark sweep2_models: qwen3-8b-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__qwen3-embedding-8b-4d284af0.json` — 2,850 chunks, qwen3-embedding:8b (4096d), built 2026-10-05T11:50:58+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.6% | 66.7% | 81.6% | 0.514 | 66.3% | 94.0% | 97.4% | 0.783 | 32.8% | 68.2% | 82.7% | 38.8% | 35.2% | 15.1% | 9.3% | 33.0% |
+| en | 169 | 33.4% | 69.2% | 80.5% | 0.519 | 71.0% | 92.9% | 96.4% | 0.804 | 34.2% | 70.3% | 81.1% | 40.8% | 36.1% | 15.3% | 9.0% | 34.3% |
+| es | 98 | 28.6% | 62.2% | 83.7% | 0.506 | 58.2% | 95.9% | 99.0% | 0.748 | 30.3% | 64.7% | 85.4% | 35.4% | 33.7% | 14.7% | 9.9% | 30.6% |
+| synthetic | 255 | 32.2% | 67.5% | 82.0% | 0.520 | 66.3% | 93.7% | 97.3% | 0.782 | 33.3% | 69.1% | 83.0% | 39.7% | 35.7% | 15.2% | 9.4% | 33.5% |
+| manual | 12 | 20.8% | 50.0% | 75.0% | 0.396 | 66.7% | 100.0% | 100.0% | 0.808 | 20.8% | 50.0% | 75.0% | 20.8% | 25.0% | 11.7% | 8.3% | 20.8% |
+| cross-language | 65 | 26.2% | 66.9% | 78.5% | 0.471 | 56.9% | 96.9% | 98.5% | 0.731 | 27.8% | 69.5% | 80.3% | 33.5% | 29.2% | 15.7% | 9.1% | 27.7% |
+| same-language | 202 | 33.4% | 66.6% | 82.7% | 0.528 | 69.3% | 93.1% | 97.0% | 0.800 | 34.4% | 67.8% | 83.4% | 40.6% | 37.1% | 14.9% | 9.4% | 34.7% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 1/3 (33.3%) (top-1: m013 0.5858, m014 0.5389, m015 0.4367)
+retrieval: embedding
+
+
+## 2026-10-05T11:55:43+00:00 — benchmark sweep2_models: embeddinggemma-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__embeddinggemma-4d284af0.json` — 2,850 chunks, embeddinggemma (768d), built 2026-10-05T11:55:44+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 35.0% | 69.1% | 80.3% | 0.541 | 65.5% | 93.3% | 97.0% | 0.774 | 36.1% | 70.7% | 81.9% | 40.7% | 39.0% | 15.4% | 9.1% | 36.7% |
+| en | 169 | 35.5% | 69.8% | 77.8% | 0.541 | 68.0% | 90.5% | 95.9% | 0.782 | 36.5% | 71.1% | 78.8% | 42.5% | 39.1% | 15.3% | 8.6% | 36.7% |
+| es | 98 | 34.2% | 67.9% | 84.7% | 0.542 | 61.2% | 98.0% | 99.0% | 0.761 | 35.4% | 70.0% | 87.3% | 37.7% | 38.8% | 15.7% | 9.9% | 36.7% |
+| synthetic | 255 | 35.3% | 69.8% | 80.2% | 0.544 | 64.7% | 92.9% | 96.9% | 0.767 | 36.4% | 71.4% | 81.8% | 41.3% | 39.2% | 15.6% | 9.1% | 37.1% |
+| manual | 12 | 29.2% | 54.2% | 83.3% | 0.477 | 83.3% | 100.0% | 100.0% | 0.917 | 29.2% | 54.2% | 83.3% | 29.2% | 33.3% | 11.7% | 9.2% | 29.2% |
+| cross-language | 65 | 23.8% | 63.8% | 80.0% | 0.450 | 53.8% | 92.3% | 98.5% | 0.699 | 25.3% | 65.9% | 82.8% | 31.3% | 27.7% | 14.5% | 9.1% | 26.9% |
+| same-language | 202 | 38.6% | 70.8% | 80.4% | 0.570 | 69.3% | 93.6% | 96.5% | 0.798 | 39.6% | 72.2% | 81.6% | 43.8% | 42.6% | 15.7% | 9.1% | 39.9% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.4635, m014 0.4292, m015 0.3883)
+retrieval: embedding
+
+
+## 2026-10-05T11:56:15+00:00 — benchmark sweep2_models — comparison (5 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 267 | 30.0% | 65.9% | 75.7% | 0.490 | 62.5% | 89.5% | 92.5% | 0.746 | 30.8% | 67.9% | 77.4% | 36.1% | 33.0% | 14.9% | 8.7% | 32.0% | 0/3 | 29s / 2.9s |
+| qwen3-06b-embedding | qwen3-embedding:0.6b | 1800/0.15/on | embedding | 267 | 29.8% | 62.5% | 74.2% | 0.482 | 60.3% | 88.8% | 93.6% | 0.725 | 30.9% | 64.3% | 76.0% | 35.2% | 33.3% | 14.3% | 8.5% | 31.6% | 0/3 | 70s / 3.0s |
+| nomic-v2-moe-embedding | nomic-embed-text-v2-moe | 1800/0.15/on | embedding | 267 | 33.0% | 65.7% | 78.3% | 0.508 | 63.3% | 88.4% | 95.1% | 0.745 | 33.7% | 67.4% | 79.6% | 38.9% | 36.3% | 15.0% | 9.0% | 34.6% | 0/3 | 22s / 2.0s |
+| qwen3-8b-embedding | qwen3-embedding:8b | 1800/0.15/on | embedding | 267 | 31.6% | 66.7% | 81.6% | 0.514 | 66.3% | 94.0% | 97.4% | 0.783 | 32.8% | 68.2% | 82.7% | 38.8% | 35.2% | 15.1% | 9.3% | 33.0% | 1/3 | 273s / 10.1s |
+| embeddinggemma-embedding | embeddinggemma | 1800/0.15/on | embedding | 267 | 35.0% | 69.1% | 80.3% | 0.541 | 65.5% | 93.3% | 97.0% | 0.774 | 36.1% | 70.7% | 81.9% | 40.7% | 39.0% | 15.4% | 9.1% | 36.7% | 0/3 | 28s / 2.2s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
+## 2026-10-05T11:56:15+00:00 — Step 3.6 scorecard-honesty parity: fresh sweep re-run through the new runner under readable store names
+
+Acceptance re-run for the Step 3.6 upgrade (user-approved: cov@k / cov@3000 / P@k / RP added above; readable store names
+`<method-slug(params)>__<model-slug>-<corpus-digest8>.json` replace the raw 32-hex fingerprint paths). All five stores
+rebuilt under the new names (`merge-1800-0.15-on__<model>-4d284af0.json`; corpus digest unchanged). The graded path is
+untouched (`prepare_run` byte-verify + `rank_rows` + `score_rows`); the upgrade only ADDED columns, so the OLD metric
+columns in the comparison above must match the recorded 2026-10-02T16:01:34 comparison values.
+
+OLD-column parity:
+
+- bge-m3: EXACT — every old cell in every scope plus all unanswerable top-1s (0.5081/0.5040/0.4606) equal the recorded block.
+- nomic-embed-text-v2-moe: EXACT (all scopes + top-1s 0.5017/0.4497/0.4142). embeddinggemma: EXACT (all scopes + top-1s
+  0.4635/0.4292/0.3883). The store-naming change is layer-thin: bit-stable models reproduce bit-stable numbers.
+- qwen3-embedding:0.6b: inside the already-recorded rebuild-drift family (qwen embeds are not bit-stable across builds):
+  chunk R@1 29.8%, chunk R@10 74.2%, chunk MRR 0.482 all exact; chunk R@5 62.2%→62.5%; doc cells ±0.4pp (doc R@1
+  59.9→60.3, doc R@5 89.1→88.8, doc R@10 94.0→93.6, doc MRR 0.722→0.725); top-1s move ≤ ±0.003, false-retrieval 0/3 kept.
+- qwen3-embedding:8b: same fresh-build flip family, a little wider at the very top (single fresh build, one recorded
+  predecessor): chunk R@1 30.7%→31.6% (a few rows flipping across the rank-1/2 boundary of 267), chunk R@5 66.5→66.7,
+  chunk R@10 82.0→81.6, chunk MRR 0.509→0.514, doc cells ±0.4pp (doc R@10 exact 97.4%); top-1s 0.5858/0.5389/0.4367 and
+  false-retrieval still 1/3 (m013 0.5858 ≥ 0.55 — the noted threshold item stands UNCHANGED, separate step).
+- Verdict order unchanged in both currencies: embeddinggemma leads chunk-level, qwen3-8b leads doc-level, nomic-v2-moe
+  keeps its margins; decisions untouched (nomic standby verdict per recorded blocks, embedding-only, threshold 0.55).
+
+Recorded numbers remain final (append-only; nothing above rewritten). The new currency columns (cov@k, cov@3000, P@k, RP)
+first appear recorded in this run's blocks; their interpretation is the next analysis step, not part of this parity note.
+
