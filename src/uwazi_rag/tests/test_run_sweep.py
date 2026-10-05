@@ -4,7 +4,8 @@ Real files everywhere (AGENTS.md testing policy): tmp captures + real chunker
 + real ``NaiveVectorStore`` stores + the deterministic ``HashingEmbedding``
 factory (its ``.model`` is ``"hashing"`` and the cells all name that model, so
 the store-model guard passes honestly). No mocks, no Ollama, no Uwazi — the
-assertion set covers build-or-skip caching via fingerprints, plan/results.md
+assertion set covers build-or-skip caching via readable content-derived store
+names (slugs + corpus digest8), plan/results.md
 appends with visible settings, failure recording, selection, and number parity
 between a sweep experiment and the shared grading path.
 """
@@ -36,7 +37,7 @@ from uwazi_rag.use_cases.run_sweep import (
     load_sweep_spec,
     run_sweep,
     select_sweep_experiments,
-    store_fingerprint,
+    store_file_name,
 )
 
 DIMENSIONS = 32
@@ -334,9 +335,9 @@ def test_stale_and_corrupt_stores_are_rebuilt(
     stores_dir = tmp_path / "benchmark_stores"
     digest = corpus_digest(raw_dir)
     cell_a = experiments[0].cell
-    a_path = stores_dir / f"{store_fingerprint(cell_a, digest)}.json"
+    a_path = stores_dir / store_file_name(cell_a, digest)
 
-    # a corrupt file at the fingerprint path (a torn write): rebuilt, not fatal
+    # a corrupt file at the slug-named path (a torn write): rebuilt, not fatal
     stores_dir.mkdir(parents=True, exist_ok=True)
     a_path.write_text('{"schema": "nope"}', encoding="utf-8")
     assert _run(grid, results_path) == 0
@@ -359,26 +360,29 @@ def test_stale_and_corrupt_stores_are_rebuilt(
     assert a_rows and not a_rows[0].split(" | ")[-1].startswith("reuse /")
 
 
-def test_fingerprints_carry_method_model_and_corpus(
+def test_store_names_carry_method_model_and_corpus(
     grid: tuple[Path, Path, Path, Path, list[SweepExperiment]],
 ) -> None:
+    """The readable scheme: ``<method-slug(params)>__<model-slug>-<corpus-digest8>.json`` — settled Step 3.6."""
     tmp_path, raw_dir, _golden, _results, experiments = grid
     digest = corpus_digest(raw_dir)
     cell = experiments[0].cell
 
-    assert store_fingerprint(cell, digest) == store_fingerprint(cell, digest)  # deterministic
-    assert store_fingerprint(cell, digest) != store_fingerprint(
-        StoreCell(label="x", chunk_method=cell.chunk_method, model="other"), digest
-    )
-    assert store_fingerprint(cell, digest) != store_fingerprint(
-        StoreCell(label="x", chunk_method=MergeChunker(max_chars=600), model="hashing"), digest
-    )
-    assert store_fingerprint(cell, digest) != store_fingerprint(cell, "0" * 64)  # corpus side
+    name = store_file_name(cell, digest)
+    assert name == f"merge-1800-0.15-on__hashing-{digest[:8]}.json"  # method settings + model + corpus digest8
+    # deterministic — and label-free: two cells with the same (method, model) share one file
+    assert store_file_name(cell, digest) == name
+    assert store_file_name(StoreCell(label="x", chunk_method=cell.chunk_method, model=cell.model), digest) == name
+    # model, settings and corpus each move the name
+    assert store_file_name(StoreCell(label="x", chunk_method=cell.chunk_method, model="other"), digest) != name
+    other = store_file_name(StoreCell(label="x", chunk_method=MergeChunker(max_chars=600), model="hashing"), digest)
+    assert other.startswith("merge-600-0.15-on__hashing-") and other != name
+    assert store_file_name(cell, "0" * 64).endswith("__hashing-00000000.json")  # corpus side
 
-    # and the sweep's store file lands exactly at the fingerprint-derived path
+    # and the sweep's store file lands exactly at the slug-derived path
     results_path = tmp_path / "results-fp.md"
     assert _run(grid, results_path, only=experiments[0].name) == 0
-    assert (tmp_path / "benchmark_stores" / f"{store_fingerprint(cell, digest)}.json").exists()
+    assert (tmp_path / "benchmark_stores" / name).exists()
 
     # corpus digest is sensitive to content, not just names
     (raw_dir / "extra_en.json").write_text(
@@ -467,17 +471,24 @@ def test_sweep_experiment_numbers_equal_the_shared_grading_path(
     tmp_path, raw_dir, golden_path, results_path, experiments = grid
     assert _run(grid, results_path, only="a-default-embedding") == 0
 
-    fingerprint = store_fingerprint(
-        next(experiment.cell for experiment in experiments if experiment.cell.label == "a-default"), corpus_digest(raw_dir)
+    store_name = store_file_name(
+        next(experiment.cell for experiment in experiments if experiment.cell.label == "a-default"),
+        corpus_digest(raw_dir),
     )
     prepared = prepare_run(
-        store_path=tmp_path / "benchmark_stores" / f"{fingerprint}.json",
+        store_path=tmp_path / "benchmark_stores" / store_name,
         raw_dir=raw_dir,
         golden_path=golden_path,
     )
     embedder = HashingEmbedding(dimensions=DIMENSIONS)
     hits = rank_rows(prepared, retrieval="embedding", embedder=embedder)
-    card = score_rows(prepared.graded, hits, false_retrieval_threshold=configuration.FALSE_RETRIEVAL_THRESHOLD)
+    char_lengths = {chunk.chunk_id: len(chunk.text) for chunk in prepared.store.chunks()}
+    card = score_rows(
+        prepared.graded,
+        hits,
+        false_retrieval_threshold=configuration.FALSE_RETRIEVAL_THRESHOLD,
+        chunk_char_lengths=char_lengths,
+    )
     scope_all = card.scopes[0]
 
     text = results_path.read_text(encoding="utf-8")
@@ -496,7 +507,15 @@ def test_sweep_experiment_numbers_equal_the_shared_grading_path(
     expected += [f"{100 * scope_all.doc.recall[k]:.1f}%" for k in (1, 5, 10)]
     expected += [f"{scope_all.doc.mrr:.3f}"]
     assert cells[: len(expected)] == expected
+    # the Step 3.6 lens columns sit between doc MRR and false-retr: cov@k, cov@3000, P@k, RP
+    expected_lens = [f"{100 * scope_all.paragraph.coverage[k]:.1f}%" for k in (1, 5, 10)]
+    budget = scope_all.paragraph.budget_coverage
+    assert budget is not None  # char lengths were passed, so the budget lens was measured
+    expected_lens.append(f"{100 * budget:.1f}%")
+    expected_lens += [f"{100 * scope_all.chunk.precision[k]:.1f}%" for k in (1, 5, 10)]
+    expected_lens.append(f"{100 * scope_all.chunk.r_precision:.1f}%")
+    assert cells[len(expected) : len(expected) + len(expected_lens)] == expected_lens
     # the unanswerable row was measured on the same cosine scale the sweep used
-    recorded_false = cells[len(expected)]
-    assert re.fullmatch(r"\d+/1", recorded_false)
+    recorded_false = cells[len(expected) + len(expected_lens)]
+    assert re.fullmatch(r"\d+/\d+", recorded_false)
     assert recorded_false == f"{len(card.unanswerable.false_retrievals)}/{card.unanswerable.rows}"

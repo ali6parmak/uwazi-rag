@@ -20,8 +20,9 @@ data/raw/
 # Step 3 naive index — disposable, rebuildable from data/raw captures.
 data/naive_store.json
 data/*.tmp
-# Step 3.5 benchmark stores — one JSON per content-derived fingerprint (chunker
-# method + settings + model + corpus digest; same deal as the naive index:
+# Step 3.5 benchmark stores — one JSON per readable content-derived name
+# (<chunk-method-slug>__<model-slug>-<corpus-digest8>.json — e.g.
+# merge-1800-0.15-on__bge-m3-0ac7665e.json; same deal as the naive index:
 # disposable, rebuildable, never committed). Sweep caching is invisible —
 # use_cases/run_sweep.py owns the paths; pre-existing stores such as the
 # baseline data/naive_store.json are always read-only.

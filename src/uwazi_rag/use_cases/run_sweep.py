@@ -5,11 +5,12 @@ data-as-code) declare plain Python lists — store cells (a chunk method instanc
 + an embedding model, labeled) cross-producted with retrieval method instances —
 and this helper does everything else:
 
-- store caching, invisible: a store's file is named by a content-derived
-  fingerprint of (chunk method instance, embedding model, corpus digest) under
-  ``data/benchmark_stores/``; a valid existing store is skipped, stale/missing
-  ones are rebuilt. Pre-existing stores (the committed ``data/naive_store.json``)
-  can never be addressed by a fingerprint, so they are always read-only.
+- store caching, invisible: a store's file is named by a human-readable,
+  content-derived slug — ``<method-slug(params)>__<model-slug>-<corpus-digest8>.json``
+  (e.g. ``merge-1800-0.15-on__bge-m3-0ac7665e.json``) under ``data/benchmark_stores/``;
+  a valid existing store is skipped, stale/missing ones are rebuilt. Pre-existing
+  stores (the committed ``data/naive_store.json``) can never be addressed by a
+  slug, so they are always read-only.
 - results.md appends: resolved-plan lines at run start (every setting visible),
   one labeled block per experiment (facts from the graded objects), and a
   comparison table per run whose cells carry the settings
@@ -29,7 +30,6 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
-import json
 import re
 import sys
 import time
@@ -37,6 +37,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from uwazi_rag import configuration
 from uwazi_rag.adapters.naive_vector_store import NaiveVectorStore
@@ -44,13 +45,11 @@ from uwazi_rag.configuration import ROOT_PATH
 from uwazi_rag.ports.embedding_port import EmbeddingPort
 from uwazi_rag.use_cases.build_golden import GOLDEN_FILE, read_jsonl
 from uwazi_rag.use_cases.chunking_methods import ChunkMethod
-from uwazi_rag.use_cases.eval_retrieval import RECALL_KS, RESULTS_FILE, _percent, render, score_rows
+from uwazi_rag.use_cases.eval_retrieval import COVERAGE_CHAR_BUDGET, RECALL_KS, RESULTS_FILE, _percent, render, score_rows
 from uwazi_rag.use_cases.eval_run import append_results, build_run_facts, prepare_run
 from uwazi_rag.use_cases.index_captures import index_captures
 from uwazi_rag.use_cases.retrieval_methods import RetrievalMethod
 
-# Bumped only when the fingerprint's meaning changes (invalidates all stores at once).
-FINGERPRINT_SCHEMA = "benchmark_store_fp_v1"
 # One throwaway embed per store build: its vector length is the store's dimensions.
 STORE_BUILD_PROBE = "uwazi-rag benchmark store build probe"
 
@@ -118,7 +117,7 @@ def select_sweep_experiments(experiments: Sequence[SweepExperiment], *, only: st
 
 
 def corpus_digest(raw_dir: Path) -> str:
-    """sha256 over the captures' names + contents (sorted) — the corpus side of store fingerprints."""
+    """sha256 over the captures' names + contents (sorted) — the corpus side of store file names."""
     files = sorted(raw_dir.glob("*.json"))
     if not files:
         raise FileNotFoundError(f"no captures under {raw_dir} — run `uwazi-rag fetch` (or the seed script) first")
@@ -130,27 +129,47 @@ def corpus_digest(raw_dir: Path) -> str:
     return digest.hexdigest()
 
 
-def store_fingerprint(cell: StoreCell, corpus: str) -> str:
-    """A content-derived address of one store: chunk method + settings + model + corpus.
+def store_file_name(cell: StoreCell, corpus: str) -> str:
+    """The readable store filename: ``<method-slug(params)>__<model-slug>-<corpus-digest8>.json``.
 
-    The fingerprint is the caching unit — same inputs mean the same finished
-    store, so no slugs and no user-facing paths. Changing a chunker's CODE
-    without its settings yields the same fingerprint: the grading path's
-    byte-verify guard then refuses the stale store loudly (and
-    ``FINGERPRINT_SCHEMA`` bumps invalidate all stores at once).
+    Slugs are deterministic labels, not identities — the same inputs always
+    render the same file (two sweeps configuring the same cell share one store,
+    whatever their labels), and the corpus digest's first 8 hex chars are the
+    one content input a slug cannot say in words. Validity stays content-based:
+    ``_ensure_store`` checks the store's recorded model + chunk_config and the
+    grading path byte-verifies the texts, so a stale or lying file is never
+    trusted no matter what it is called.
     """
-    payload = json.dumps(
-        {
-            "schema": FINGERPRINT_SCHEMA,
-            "chunk_method": cell.chunk_method.name,
-            "chunk_params": cell.chunk_method.params(),
-            "embedding_model": cell.model,
-            "corpus": corpus,
-        },
-        sort_keys=True,
-        ensure_ascii=False,
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:32]
+    return f"{method_slug(cell.chunk_method)}__{_slug_text(cell.model)}-{corpus[:8]}.json"
+
+
+def _slug_text(value: str) -> str:
+    """Filesystem-safe slug text: one dash per run of anything outside letters/digits/._-."""
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", value).strip("-")
+    return cleaned or "x"
+
+
+def _slug_setting(value: Any) -> str:
+    """One ``params()`` value as slug text: bool → on/off, floats compact, strings sanitized."""
+    if isinstance(value, bool):
+        return "on" if value else "off"
+    if isinstance(value, float):
+        return f"{value:g}"
+    if isinstance(value, int):
+        return str(value)
+    return _slug_text(str(value))
+
+
+def method_slug(method: ChunkMethod) -> str:
+    """``<name>-<setting>-<setting>-…`` from ``params()`` insertion order (e.g. ``merge-1800-0.15-on``).
+
+    Deterministic across processes and sweeps: same instance, same slug, so the
+    store cache is shared, not duplicated. Slugs are labels — two different
+    cells that colliding slugs would name identically are still kept honest by
+    the content-based validity checks (never by the name).
+    """
+    settings = "-".join(_slug_setting(value) for value in method.params().values())
+    return _slug_text(f"{method.name}-{settings}") if settings else _slug_text(method.name)
 
 
 @dataclass(frozen=True)
@@ -167,6 +186,10 @@ class ExperimentResult:
     chunk_mrr: float = 0.0
     doc_recall: Mapping[int, float] | None = None
     doc_mrr: float = 0.0
+    coverage: Mapping[int, float] | None = None
+    budget_coverage: float | None = None
+    chunk_precision: Mapping[int, float] | None = None
+    r_precision: float = 0.0
     false_retrieval: str = "—"
     build_seconds: float | None = None
     run_seconds: float | None = None
@@ -181,22 +204,31 @@ def format_chunk_cfg(*, max_chars: int, overlap: float, header: bool) -> str:
 def render_comparison(results: Sequence[ExperimentResult]) -> list[str]:
     """The run's comparison table: one row per experiment, shared metric columns.
 
-    Cells carry the settings: ``model``/``chunk cfg`` come from the graded
-    objects (the store was verified, so these are facts), ``retrieval`` from
-    the method instance's own ``describe()``.
+    Columns follow the currency ladder: chunk level (granule lens: R@k, MRR,
+    P@k, RP), document level (the granularity-neutral decider: R@k, MRR), then
+    the paragraph lens (cov@k, cov@budget — packaging-immune, never the
+    cross-chunker decider). Cells carry the settings: ``model``/``chunk cfg``
+    come from the graded objects (the store was verified, so these are facts),
+    ``retrieval`` from the method instance's own ``describe()``. The caveat
+    lines under the table carry the self-anchored-gold honesty note.
     """
     ks = list(RECALL_KS)
+    lens_columns = 2 * (len(ks) + 1)  # cov@k + cov@budget + P@k + RP
     lines = [
         "| experiment | model | chunk cfg | retrieval | n | "
         + " | ".join(f"chunk R@{k}" for k in ks)
         + " | chunk MRR | "
         + " | ".join(f"doc R@{k}" for k in ks)
-        + " | doc MRR | false-retr | build/score time |",
-        "|" + "---|" * (7 + 2 * len(ks) + 2),
+        + " | doc MRR | "
+        + " | ".join(f"cov@{k}" for k in ks)
+        + f" | cov@{COVERAGE_CHAR_BUDGET} | "
+        + " | ".join(f"P@{k}" for k in ks)
+        + " | RP | false-retr | build/score time |",
+        "|" + "---|" * (7 + 2 * len(ks) + 2 + lens_columns),
     ]
-    dashes = len(ks) * ["—"] + ["—", *["—"] * len(ks), "—"]
     for result in results:
         if not result.ok:
+            dashes = ["—"] * (2 * len(ks) + 2 + lens_columns)
             lines.append(f"| {result.name} | — | — | — | — | " + " | ".join(dashes) + " | — | — |")
             lines.append(f"> failed: {result.name} — {result.error}" if result.error else f"> failed: {result.name}")
             continue
@@ -208,13 +240,29 @@ def render_comparison(results: Sequence[ExperimentResult]) -> list[str]:
         false_cell = result.false_retrieval if result.false_retrieval else "—"
         chunk_cells = [_percent(result.chunk_recall[k]) if result.chunk_recall else "—" for k in ks]
         doc_cells = [_percent(result.doc_recall[k]) if result.doc_recall else "—" for k in ks]
+        cov_cells = [_percent(result.coverage[k]) if result.coverage else "—" for k in ks]
+        budget_cell = _percent(result.budget_coverage) if result.budget_coverage is not None else "—"
+        precision_cells = [_percent(result.chunk_precision[k]) if result.chunk_precision else "—" for k in ks]
         lines.append(
             f"| {result.name} | {result.model} | {result.cfg} | {result.retrieval} | {result.n} | "
             + " | ".join(chunk_cells)
             + f" | {result.chunk_mrr:.3f} | "
             + " | ".join(doc_cells)
-            + f" | {result.doc_mrr:.3f} | {false_cell} | {time_cell} |"
+            + f" | {result.doc_mrr:.3f} | "
+            + " | ".join(cov_cells)
+            + f" | {budget_cell} | "
+            + " | ".join(precision_cells)
+            + f" | {_percent(result.r_precision)} | {false_cell} | {time_cell} |"
         )
+    lines.append("")
+    lines.append(
+        f"cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); "
+        f"cov@{COVERAGE_CHAR_BUDGET} = same within the first {COVERAGE_CHAR_BUDGET:,} retrieved chars (whole packed chunks)"
+    )
+    lines.append(
+        "P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage "
+        "they quote); compare configs, never absolutes"
+    )
     return lines
 
 
@@ -236,7 +284,7 @@ def render_resolved_plan(
     capture_count: int,
     golden_rows: int,
 ) -> list[str]:
-    """The resolved plan: settings visible, fingerprint paths, experiment order."""
+    """The resolved plan: settings visible, readable store paths, experiment order."""
     labels = list(dict.fromkeys(experiment.cell.label for experiment in experiments))
     lines = [
         f"plan    : {name} — {len(experiments)} experiment(s) over {len(labels)} store cell(s)",
@@ -264,10 +312,10 @@ def _ensure_store(
     raw_dir: Path,
     embedder_factory: Callable[[str], EmbeddingPort],
 ) -> float | None:
-    """Make the fingerprint-addressed store ready; return build seconds (``None`` = up to date).
+    """Make the slug-named store ready; return build seconds (``None`` = up to date).
 
     Valid store files are skipped; missing, corrupt, or config-stale ones are
-    rebuilt in place — the path belongs to the fingerprint, so a rebuild can
+    rebuilt in place — the path belongs to the content slug, so a rebuild can
     never touch a pre-existing store (``data/naive_store.json`` et al.).
     Failures raise; the caller records them and the run continues.
     """
@@ -335,7 +383,7 @@ def run_sweep(
     golden_rows = len(read_jsonl(golden_path))
 
     store_paths = {
-        label: stores_dir / f"{store_fingerprint(cell, digest)}.json"
+        label: stores_dir / store_file_name(cell, digest)
         for label, cell in ((experiment.cell.label, experiment.cell) for experiment in selected)
     }
     plan_lines = render_resolved_plan(
@@ -400,12 +448,15 @@ def run_sweep(
                 )
             embedder = embedder_factory(prepared.store.embedding_model)
             hits_by_row = experiment.retrieval.rank(prepared, embedder=embedder)
+            # the budget lens reads the store's chunk texts (byte-verified = the graded truth)
+            char_lengths = {chunk.chunk_id: len(chunk.text) for chunk in prepared.store.chunks()}
             card = score_rows(
                 prepared.graded,
                 hits_by_row,
                 false_retrieval_threshold=(
                     configuration.FALSE_RETRIEVAL_THRESHOLD if experiment.retrieval.cosine_calibrated else None
                 ),
+                chunk_char_lengths=char_lengths,
             )
         except (RuntimeError, ValueError, OSError) as error:
             message = str(error).replace("\n", " ")[:240]
@@ -453,6 +504,10 @@ def run_sweep(
                 chunk_mrr=scope_all.chunk.mrr,
                 doc_recall=scope_all.doc.recall,
                 doc_mrr=scope_all.doc.mrr,
+                coverage=scope_all.paragraph.coverage,
+                budget_coverage=scope_all.paragraph.budget_coverage,
+                chunk_precision=scope_all.chunk.precision,
+                r_precision=scope_all.chunk.r_precision,
                 false_retrieval=(
                     f"{len(card.unanswerable.false_retrievals)}/{card.unanswerable.rows}"
                     if experiment.retrieval.cosine_calibrated

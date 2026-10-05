@@ -44,7 +44,7 @@ class ChunkMethod(ABC):
         return chunks
 
     def params(self) -> dict[str, Any]:
-        """This instance's settings — JSON-safe primitives, part of store fingerprints."""
+        """This instance's settings — JSON-safe primitives, rendered into the store file-name slug."""
         return {}
 
     @abstractmethod
