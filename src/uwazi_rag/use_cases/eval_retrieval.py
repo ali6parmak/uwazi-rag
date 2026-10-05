@@ -21,6 +21,19 @@ Metrics conventions:
   ``|gold ∩ ranked[:k]| / |gold|``
 - MRR is measured within the ranked list the caller provides (CLI retrieves
   ``RETRIEVAL_DEPTH`` deep; a gold not found anywhere in it scores 0)
+- coverage@k is paragraph currency: the fraction of the row's anchor paragraphs
+  covered by the top-k ranking, where a paragraph counts as covered iff ANY
+  chunk containing it is retrieved. The denominator is the row's own anchor
+  set — fixed across chunkers — so the lens is packaging-immune; it is a lens
+  (``cov``), never the decider across chunkers (that is the document level)
+- coverage@char-budget is the same lens at a fixed amount of retrieved text:
+  whole chunks pack from rank 1 while the running char total (store chunk
+  lengths) stays within ``COVERAGE_CHAR_BUDGET`` — kills the "top-k means
+  different text amounts" leak between chunk sizes
+- precision@k and R-precision are chunk currency: ``|gold ∩ top-k| / k`` and
+  precision at ``k = |gold|`` (BeIR standard). Gold is self-anchored — the
+  questions were drafted from the passage they quote — so measured precision
+  is systematically pessimistic: comparisons-only, like all numbers here
 - unanswerable rows are excluded from every scope and reported as a
   *false-retrieval rate*: the fraction whose top-1 score reaches
   ``false_retrieval_threshold`` (cosine, config not code)
@@ -37,6 +50,10 @@ from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, TARGET_MAX_CHARS
 from uwazi_rag.use_cases.index_captures import capture_to_chunks
 
 RECALL_KS = (1, 5, 10)
+# Coverage's char-budget lens (~the answer-side context size): whole chunks
+# pack from rank 1 until the running char total would exceed this — a fixed
+# amount of retrieved text, so chunkers of different packing sizes race fair.
+COVERAGE_CHAR_BUDGET = 3000
 # MRR needs a real rank even when gold sits deep; the naive cosine scan is
 # cheap (one numpy matmul per question over the whole store), so rank deep.
 RETRIEVAL_DEPTH = 100
@@ -168,7 +185,14 @@ def paragraph_chunk_map(chunks: Sequence[Chunk]) -> dict[int, list[str]]:
 
 @dataclass(frozen=True)
 class RowGold:
-    """What one golden row demands from the ranking (chunk level + document level)."""
+    """What one golden row demands from the ranking (all three currencies).
+
+    Chunk currency lives in ``gold_chunk_ids``. Paragraph currency needs the
+    anchors themselves plus, per anchor, every chunk holding it — one paragraph
+    cut by the splitter spans several chunks, and coverage credits ANY of them
+    (credit = text actually seen). An unmapped anchor keeps its slot: it can
+    never be covered, which is exactly the honesty the lens exists for.
+    """
 
     row_id: str
     origin: str
@@ -177,6 +201,8 @@ class RowGold:
     expected_title: str = ""
     doc_key: DocKey = NO_DOC_KEY
     gold_chunk_ids: frozenset[str] = frozenset()
+    anchor_paragraphs: tuple[int, ...] = ()
+    paragraph_chunks: tuple[tuple[int, frozenset[str]], ...] = ()
     unmapped_paragraph_ids: tuple[int, ...] = ()
     unanswerable: bool = False
 
@@ -213,7 +239,9 @@ def row_golds(
     Rows with ``expected: null`` become ``unanswerable`` entries; rows whose
     capture/file identity cannot be found are counted ungradable (with a
     description) instead of crashing the run — a stale row against a fresh
-    corpus must downgrade loudly, not silently.
+    corpus must downgrade loudly, not silently. Every gold also carries the
+    anchor paragraphs and their per-paragraph chunk grouping — the bookkeeping
+    the paragraph-currency coverage lens needs.
     """
     graded = GradedSet()
     doc_maps: dict[DocKey, dict[int, list[str]]] = {}
@@ -260,6 +288,8 @@ def row_golds(
                 expected_title=str(expected.get("title", "")),
                 doc_key=doc_key,
                 gold_chunk_ids=frozenset(gold),
+                anchor_paragraphs=tuple(paragraph_ids),
+                paragraph_chunks=tuple((pid, frozenset(doc_map.get(pid, ()))) for pid in paragraph_ids),
                 unmapped_paragraph_ids=unmapped,
             )
         )
@@ -316,6 +346,62 @@ def doc_gold_rank(hits: Sequence[Hit], doc_key: DocKey) -> int:
     return 0
 
 
+def coverage_at_k(hits: Sequence[Hit], gold: RowGold, k: int) -> float:
+    """Paragraph currency: ``|anchor paragraphs covered in top-k| / |anchor paragraphs|``.
+
+    A paragraph counts as covered iff ANY chunk containing it is in the top-k —
+    the denominator is the row's own anchor set, fixed across chunkers, so the
+    lens can't be manipulated by packing. Unmapped anchors (dropped paragraphs)
+    can never be covered: the metric reports that honestly instead of skipping
+    them. Rows without recorded anchors cover nothing (0.0), never a guess.
+    """
+    if not gold.anchor_paragraphs:
+        return 0.0
+    top = {hit.chunk_id for hit in hits[:k]}
+    covered = sum(1 for _, chunk_ids in gold.paragraph_chunks if chunk_ids & top)
+    return covered / len(gold.anchor_paragraphs)
+
+
+def coverage_at_char_budget(hits: Sequence[Hit], gold: RowGold, char_lengths: Mapping[str, int], budget: int) -> float:
+    """Paragraph currency at a fixed amount of retrieved text — coverage@k without the k leak.
+
+    Walks the ranking packing whole chunks from rank 1 while the running char
+    total stays within ``budget``; the chunk that would overflow and everything
+    after it is not visible. An anchor paragraph counts iff one of its chunks
+    got packed. Same fixed anchor denominator as :func:`coverage_at_k`.
+    """
+    if not gold.anchor_paragraphs:
+        return 0.0
+    packed: set[str] = set()
+    used = 0
+    for hit in hits:
+        try:
+            length = char_lengths[hit.chunk_id]
+        except KeyError as error:
+            raise ValueError(
+                f"chunk {hit.chunk_id!r} has no recorded char length — the length map must cover the store"
+            ) from error
+        if used + length > budget:
+            break  # text beyond the budget window is never shown
+        used += length
+        packed.add(hit.chunk_id)
+    covered = sum(1 for _, chunk_ids in gold.paragraph_chunks if chunk_ids & packed)
+    return covered / len(gold.anchor_paragraphs)
+
+
+def precision_at_k(hits: Sequence[Hit], gold: frozenset[str], k: int) -> float:
+    """Chunk currency: ``|gold ∩ ranked[:k]| / k`` — big granules are held honest (self-anchored gold)."""
+    top = {hit.chunk_id for hit in hits[:k]}
+    return len(top & gold) / k
+
+
+def r_precision(hits: Sequence[Hit], gold: frozenset[str]) -> float:
+    """Precision at ``k = |gold|`` (BeIR standard) — handles variable gold sizes fairly."""
+    if not gold:
+        return 0.0
+    return precision_at_k(hits, gold, len(gold))
+
+
 # --------------------------------------------------------------------------
 # Scoring + aggregation
 # --------------------------------------------------------------------------
@@ -323,13 +409,17 @@ def doc_gold_rank(hits: Sequence[Hit], doc_key: DocKey) -> int:
 
 @dataclass(frozen=True)
 class RowScore:
-    """One answerable row's metrics."""
+    """One answerable row's metrics: chunk/doc recall+MRR, the coverage lens, chunk precision."""
 
     gold: RowGold
     chunk_recall: dict[int, float]
     chunk_mrr: float
     doc_recall: dict[int, float]
     doc_mrr: float
+    paragraph_coverage: dict[int, float] = field(default_factory=dict)
+    budget_coverage: float | None = None
+    chunk_precision: dict[int, float] = field(default_factory=dict)
+    r_precision: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -339,6 +429,21 @@ class LevelScore:
     rows: int = 0
     recall: dict[int, float] = field(default_factory=dict)
     mrr: float = 0.0
+    precision: dict[int, float] = field(default_factory=dict)
+    r_precision: float = 0.0
+
+
+@dataclass(frozen=True)
+class ParagraphScore:
+    """Paragraph-currency means: coverage@k and coverage@char-budget.
+
+    ``budget_coverage`` is ``None`` when the caller gave no chunk char lengths —
+    the budget lens needs them, and an unmeasured lens is reported (—), not
+    guessed.
+    """
+
+    coverage: dict[int, float] = field(default_factory=dict)
+    budget_coverage: float | None = None
 
 
 def _mean(values: Sequence[float]) -> float:
@@ -347,11 +452,15 @@ def _mean(values: Sequence[float]) -> float:
 
 @dataclass(frozen=True)
 class ScopeScore:
-    """One scope's chunk- and document-level means (``n`` = rows graded)."""
+    """One scope's means per currency: chunk (granule lens), document (the decider), paragraph (the lens).
+
+    ``n`` = rows graded (identical across the three levels).
+    """
 
     label: str
     chunk: LevelScore
     doc: LevelScore
+    paragraph: ParagraphScore = field(default_factory=ParagraphScore)
 
     @property
     def n(self) -> int:
@@ -387,6 +496,7 @@ class Scorecard:
     unanswerable: UnanswerableScore
     ungradable: tuple[str, ...] = ()
     anomalies: tuple[str, ...] = ()
+    char_budget: int = COVERAGE_CHAR_BUDGET
 
 
 def score_rows(
@@ -395,25 +505,35 @@ def score_rows(
     *,
     recall_ks: Sequence[int] = RECALL_KS,
     false_retrieval_threshold: float | None,
+    chunk_char_lengths: Mapping[str, int] | None = None,
+    char_budget: int = COVERAGE_CHAR_BUDGET,
 ) -> Scorecard:
     """Compute the scorecard from per-row ranked hits (pure; caller did retrieval).
 
-    ``graded`` comes from :func:`row_golds`, ``hits_by_row`` maps row id →
-    ranked ``Hit``s (``RETRIEVAL_DEPTH`` deep). Rows without hits score 0.
+    ``graded`` comes from :func:`row_golds` (carrying the anchor bookkeeping
+    coverage needs), ``hits_by_row`` maps row id → ranked ``Hit``s
+    (``RETRIEVAL_DEPTH`` deep). Rows without hits score 0. The coverage@k lens
+    works off the golds alone; the coverage@char-budget lens additionally needs
+    ``chunk_char_lengths`` (store chunk texts) — ``None`` skips only that lens.
     ``false_retrieval_threshold=None`` (non-cosine methods) skips the
     unanswerable side-metric instead of comparing alien score scales.
     """
     if false_retrieval_threshold is not None and not 0.0 <= false_retrieval_threshold <= 1.0:
         raise ValueError(f"false_retrieval_threshold must be in [0, 1] (or None), got {false_retrieval_threshold}")
+    if char_budget < 1:
+        raise ValueError(f"char_budget must be >= 1, got {char_budget}")
     ks = tuple(sorted(dict.fromkeys(recall_ks)))
 
-    row_scores = [_score_one(gold, hits_by_row.get(gold.row_id, ()), ks) for gold in graded.golds]
+    row_scores = [
+        _score_one(gold, hits_by_row.get(gold.row_id, ()), ks, chunk_char_lengths, char_budget) for gold in graded.golds
+    ]
 
     scopes = [
         ScopeScore(
             label=label,
-            chunk=_level(subset, "chunk_recall", "chunk_mrr", ks),
+            chunk=_level(subset, "chunk_recall", "chunk_mrr", ks, precision_attr="chunk_precision"),
             doc=_level(subset, "doc_recall", "doc_mrr", ks),
+            paragraph=_paragraph_level(subset, ks),
         )
         for label, subset in _scope_subsets(row_scores)
     ]
@@ -442,7 +562,13 @@ def score_rows(
     )
 
 
-def _score_one(gold: RowGold, hits: Sequence[Hit], ks: Sequence[int]) -> RowScore:
+def _score_one(
+    gold: RowGold,
+    hits: Sequence[Hit],
+    ks: Sequence[int],
+    char_lengths: Mapping[str, int] | None,
+    char_budget: int,
+) -> RowScore:
     chunk_rank = first_gold_rank(hits, gold.gold_chunk_ids)
     doc_rank = doc_gold_rank(hits, gold.doc_key)
     return RowScore(
@@ -451,6 +577,12 @@ def _score_one(gold: RowGold, hits: Sequence[Hit], ks: Sequence[int]) -> RowScor
         chunk_mrr=1.0 / chunk_rank if chunk_rank else 0.0,
         doc_recall={k: (1.0 if 0 < doc_rank <= k else 0.0) for k in ks},
         doc_mrr=1.0 / doc_rank if doc_rank else 0.0,
+        paragraph_coverage={k: coverage_at_k(hits, gold, k) for k in ks},
+        budget_coverage=(
+            coverage_at_char_budget(hits, gold, char_lengths, char_budget) if char_lengths is not None else None
+        ),
+        chunk_precision={k: precision_at_k(hits, gold.gold_chunk_ids, k) for k in ks},
+        r_precision=r_precision(hits, gold.gold_chunk_ids),
     )
 
 
@@ -467,11 +599,26 @@ def _scope_subsets(scores: list[RowScore]) -> list[tuple[str, list[RowScore]]]:
     return subsets
 
 
-def _level(scores: list[RowScore], recall_attr: str, mrr_attr: str, ks: Sequence[int]) -> LevelScore:
+def _level(
+    scores: list[RowScore], recall_attr: str, mrr_attr: str, ks: Sequence[int], *, precision_attr: str | None = None
+) -> LevelScore:
+    """One level's means. Precision is chunk currency — graded only when ``precision_attr`` names it."""
     return LevelScore(
         rows=len(scores),
         recall={k: _mean([getattr(score, recall_attr)[k] for score in scores]) for k in ks},
         mrr=_mean([getattr(score, mrr_attr) for score in scores]),
+        precision={k: _mean([getattr(score, precision_attr)[k] for score in scores]) for k in ks} if precision_attr else {},
+        r_precision=_mean([score.r_precision for score in scores]) if precision_attr else 0.0,
+    )
+
+
+def _paragraph_level(scores: list[RowScore], ks: Sequence[int]) -> ParagraphScore:
+    """The paragraph lens' means; the budget lens only when every row was measured."""
+    budgets = [score.budget_coverage for score in scores if score.budget_coverage is not None]
+    measured_all = len(budgets) == len(scores) and bool(scores)
+    return ParagraphScore(
+        coverage={k: _mean([score.paragraph_coverage[k] for score in scores]) for k in ks},
+        budget_coverage=_mean(budgets) if measured_all else None,
     )
 
 
@@ -505,15 +652,19 @@ def _percent(value: float) -> str:
     return f"{100 * value:.1f}%"
 
 
-def _table_lines(scopes: Sequence[ScopeScore], ks: Sequence[int]) -> list[str]:
-    """The scoped markdown table: chunk-level columns then doc-level columns."""
+def _table_lines(scopes: Sequence[ScopeScore], ks: Sequence[int], char_budget: int) -> list[str]:
+    """The scoped markdown table: chunk-level columns, doc-level columns, then the paragraph lens."""
     lines = [
         "| scope | n | "
         + " | ".join(f"chunk R@{k}" for k in ks)
         + " | chunk MRR | "
         + " | ".join(f"doc R@{k}" for k in ks)
-        + " | doc MRR |",
-        "|" + "---|" * (4 + 2 * len(ks)),
+        + " | doc MRR | "
+        + " | ".join(f"cov@{k}" for k in ks)
+        + f" | cov@{char_budget} | "
+        + " | ".join(f"P@{k}" for k in ks)
+        + " | RP |",
+        "|" + "---|" * (4 + 2 * len(ks) + 2 * (len(ks) + 1)),
     ]
     for scope in scopes:
         prefix = "" if scope.n else "—"  # empty scope: every cell reads —
@@ -523,7 +674,17 @@ def _table_lines(scopes: Sequence[ScopeScore], ks: Sequence[int]) -> list[str]:
         doc_cells = [f"{_percent(scope.doc.recall[k])}" if scope.n else prefix for k in ks] + [
             f"{scope.doc.mrr:.3f}" if scope.n else prefix
         ]
-        lines.append(f"| {scope.label} | {scope.n} | " + " | ".join(chunk_cells + doc_cells) + " |")
+        paragraph_cells = [_percent(scope.paragraph.coverage[k]) if scope.n else prefix for k in ks] + [
+            (_percent(scope.paragraph.budget_coverage) if scope.n and scope.paragraph.budget_coverage is not None else "—")
+        ]
+        precision_cells = [_percent(scope.chunk.precision[k]) if scope.n else prefix for k in ks] + [
+            _percent(scope.chunk.r_precision) if scope.n else prefix
+        ]
+        lines.append(
+            f"| {scope.label} | {scope.n} | "
+            + " | ".join(chunk_cells + doc_cells + paragraph_cells + precision_cells)
+            + " |"
+        )
     return lines
 
 
@@ -549,7 +710,16 @@ def render(run: RunFacts, card: Scorecard, *, heading: bool) -> str:
     )
     ks = sorted(card.scopes[0].chunk.recall) if card.scopes else list(RECALL_KS)
     lines.append("")
-    lines.extend(_table_lines(card.scopes, ks))
+    lines.extend(_table_lines(card.scopes, ks, card.char_budget))
+    lines.append("")
+    lines.append(
+        f"coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); "
+        f"cov@{card.char_budget} — same within the first {card.char_budget:,} retrieved chars (whole packed chunks)"
+    )
+    lines.append(
+        "precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so "
+        "P@k/RP read systematically pessimistic; compare configs, never absolutes"
+    )
     lines.append("")
     unans = card.unanswerable
     if unans.threshold is None:

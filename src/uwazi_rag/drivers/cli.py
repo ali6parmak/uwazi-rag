@@ -601,7 +601,11 @@ def _run_eval(args: argparse.Namespace) -> int:
         return 1
 
     threshold = configuration.FALSE_RETRIEVAL_THRESHOLD
-    card = score_rows(prepared.graded, hits_by_row, false_retrieval_threshold=threshold)
+    # the coverage@char-budget lens reads the store's chunk texts (byte-verified above)
+    chunk_char_lengths = {chunk.chunk_id: len(chunk.text) for chunk in prepared.store.chunks()}
+    card = score_rows(
+        prepared.graded, hits_by_row, false_retrieval_threshold=threshold, chunk_char_lengths=chunk_char_lengths
+    )
     run = build_run_facts(
         prepared,
         label=args.label,
