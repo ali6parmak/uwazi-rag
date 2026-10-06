@@ -409,19 +409,61 @@ keeps every comparison re-runnable as data arrives.
 
 **Done when (met):** coverage/precision/RP implemented + tested (suite 165), readable
 store names live, parity block recorded in results.md, plan updated; then STOP for user
-review. Next work resumes once the new labeled dataset is selected.
+review. Next work: Step 4a — the instrument adapters (datasets are sourced and homed).
 
 ---
 
-## Step 4 — Index a whole collection
+## Step 4 — Dataset instruments: adapters + sweeps (Uwazi mass-index deferred)
 
-> **Status (2026-10-05): on hold — re-scoped around an external labeled RAG dataset;
-> see Step 3.6.** The build below stays the eventual Uwazi-side shape; the labeled-
-> evaluation half is redefined when the dataset is chosen.
+> **Status (2026-10-06): re-scoped.** The labeled-evaluation half IS this step's active
+> work — both instrument corpora are sourced, checksum-verified and homed under
+> `data/datasets/*/upstream/`, with provenance + adapter contracts in each home's
+> `about.md`. The Uwazi mass-index half (4b, bottom) is DEFERRED until the service
+> outgrows the 77-capture harness; its plumbing is dataset-independent and carries over
+> unchanged when needed.
 
-**Goal:** from one document to a template's worth of content, resiliently.
+**4a. Build (active):**
+- `src/uwazi_rag/adapters/datasets/` — one adapter module per upstream dataset, over a
+  pure mapping core (offline-testable end to end, per the testing policy):
+  - offset-preserving paragraph synthesis from raw corpus text. Reads are Python
+    text-mode `utf-8` — **never** `utf-8-sig` — because `legalbenchrag`'s gold spans
+    are text-mode offsets (148 MAUD files carry a BOM at index 0);
+  - gold char-spans → `paragraph_ids` anchors by interval intersection (half-open
+    `[start, end)`); the dataset's built-in self-check is the adapter's acceptance
+    test (`text[start:end] == snippet["answer"]` — holds for all 10,928
+    `legalbenchrag` snippets, so correctness is verifiable, not assumed);
+  - golden rows in the house format + per-dataset `manual.jsonl` for hand-authored
+    unanswerables (every upstream question here is answerable — the false-retrieval
+    lens has nothing to bite on until we add those rows), merged at build;
+  - determinism asserted: same upstream revision + same code → byte-identical
+    captures and golden; tiny committed fixture slices (`tests/fixtures/datasets/`)
+    keep adapter tests offline.
+- Dataset identities (settled): per-source ids `legalbenchrag-cuad` / `-contractnli` /
+  `-privacyqa` / `-maud` (each its own synthetic `instance_key = sha1("dataset:" + id)[:16]`,
+  captures under `data/raw/<instance_key>/`) and `vic-chargebook` as one dataset. The
+  `legalbenchrag` upstream package is shared (never duplicated); upstream material is
+  never committed (re-fetchable, checksum-pinned); **MAUD is gated** on its unverified
+  license — adapter coverage for the three licensed sources first.
+- Command: `uwazi-rag dataset <name>` — download → verify checksums → build captures +
+  golden → summary; idempotent; network-dependent (never inside pytest).
+- Sweeps: one `benchmarks/sweep_<dataset>.py` per dataset through the unchanged
+  `benchmark --spec` runner; `results.md` blocks carry `Dataset: <name>`; comparisons
+  within a dataset only — datasets are separate instruments, never merged into one
+  ranking. Each home's `about.md` says which currencies its labels support:
+  `legalbenchrag` → the FULL ladder (raw docs — our chunk-method layer applies, parked
+  chunker questions become gradeable); `vic-chargebook` → pre-chunked fixed passages
+  (pass-through chunk method; hit-rate semantics, documented as designed-in) + gold
+  answers for later answer-side scoring. The `footnotes` field decision gets recorded
+  in its about.md when the adapter lands.
 
-**Build:**
+**Done when (4a):** adapters offline-tested with the span self-checks passing; datasets
+built from verified upstreams; a first per-dataset sweep recorded in results.md with the
+new currency columns; then STOP for review.
+
+**4b. Build (deferred — the original step, kept verbatim):**
+
+**Goal (4b):** from one document to a template's worth of content, resiliently.
+
 - `use_cases/index_collection.py`:
   1. **Inventory:** page through `/api/search` filtered by template (the client handles the
      ES 10,000-result window paging). Published entities only.
@@ -436,14 +478,15 @@ review. Next work resumes once the new labeled dataset is selected.
   duplicates. Progress logging (entity count, failures).
 - Command: `uwazi-rag index --template <id>` (and `--all`).
 
-**Learn:** the *pipeline* shape: inventory → extract → chunk → embed → store. Idempotency
+**4b. Learn (deferred):** the *pipeline* shape: inventory → extract → chunk → embed → store. Idempotency
 (run it twice, nothing breaks) and resilience (one bad entity logs an error, the run
 continues). This is also where rate-friendliness matters — the sibling client already has
 retry/backoff; if you parallelize fetches, copy the adaptive-throttling executor from
 `uwazi_admin_agent` (drops workers on 429s, adds them back when clean).
 
-**Done when:** indexing a template completes on your instance; a search across the
-collection returns sensible hits from multiple entities.
+**Done when (4b — deferred until the service scales):** indexing a template completes
+on your instance; a search across the collection returns sensible hits from multiple
+entities.
 
 ---
 
