@@ -391,6 +391,15 @@ the reader actually saw (paragraphs) — without changing any previously recorde
 - **Chunker exploration is parked behind the same dependency:** `RawChunker`,
   registry/self-describing stores in `NOT IN SCOPE` notes, and candidate `drop_footnotes`/
   `section` methods start once better labels exist to judge them on.
+- **Candidates sourced and homed (2026-10-06):** two upstream corpora are verified
+  (checksums) and parked under `data/datasets/*/upstream/` with committed provenance in
+  each home's `about.md` — `legalbenchrag` (Pipitone & Houir Alami 2024: raw contracts,
+  expert char-span labels; planned per-source ids `legalbenchrag-cuad`/`-contractnli`/
+  `-maud`/`-privacyqa`; MAUD gated on its unverified license) and `vic-chargebook`
+  (Isaacus's Legal RAG Bench: 4,876 fixed passages + 100 expert Q/A rows; pre-chunked
+  corpus → currencies collapse to hit rates there, by design). Adapters and sweep specs
+  are NOT built — integration starts on explicit go. Both are English-only; the
+  Spanish hunt continues.
 
 **Learn:** a metric's honesty lives in its denominator — fixed denominators (the row's own
 anchors; the char budget; the demand size `|gold|`) make races fair, because then only

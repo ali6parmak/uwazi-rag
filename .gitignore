@@ -27,6 +27,10 @@ data/*.tmp
 # use_cases/run_sweep.py owns the paths; pre-existing stores such as the
 # baseline data/naive_store.json are always read-only.
 data/benchmark_stores/
+# Datasets (Step 3.6+): upstream third-party corpora are parked under their homes and
+# remain re-fetchable + checksum-pinned (see each home's committed about.md) — they are
+# disposable material, never committed; adapters rebuild captures/golden from them.
+data/datasets/*/upstream/
 # Step 3.5 — the sampled passage groups behind golden.jsonl are derived/disposable
 # (re-generable with `uwazi-rag build-golden`); golden.jsonl, manual.jsonl and
 # about.md are the committed half.
