@@ -1,0 +1,5 @@
+{"id": "m001", "question": "Does the document indicate that the agreement terminates upon an IPO or other public offering by a party?", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m002", "question": "Does the document mention any collective bargaining obligations covering the Receiving Party's employees?", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m003", "question": "Does the document state that consultants are entitled to overtime pay for evening or weekend work?", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m004", "question": "Does the document indicate that the parties will register the agreement with any tax authority?", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m005", "question": "Does the document state that either party may offset payments against accrued pension entitlements?", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}

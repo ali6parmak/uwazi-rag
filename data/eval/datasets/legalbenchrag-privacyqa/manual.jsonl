@@ -1,0 +1,5 @@
+{"id": "m001", "question": "what retention schedule applies to hipaa-regulated medical records on this service", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m002", "question": "which biometric identifiers does the platform collect from children", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m003", "question": "what rights do parents have over student records under ferpa", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m004", "question": "who is the designated data protection officer for these services", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
+{"id": "m005", "question": "does this policy describe the safeguards the glba requires for customers' financial information", "origin": "manual", "query_language": "en", "source_group_id": null, "expected": null}
