@@ -79,6 +79,8 @@ uv run uwazi-rag ask "question"     # RAG answer with citations
 uv run uwazi-rag eval               # golden-set scorecard (needs real services)
 uv run uwazi-rag serve              # HTTP API on $SERVICE_PORT (default 5060)
 uv run uwazi-rag sync               # incremental update from updatelogs/editDate
+uv run uwazi-rag dataset <name>     # build a benchmark dataset: pins → captures + golden (Step 4a)
+uv run uwazi-rag benchmark --spec benchmarks/sweep_<dataset>.py  # dataset sweeps (same runner as Step 3.5)
 ```
 
 Ollama must be running for anything that embeds or answers (`ollama serve`).

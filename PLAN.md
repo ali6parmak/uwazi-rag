@@ -423,6 +423,41 @@ review. Next work: Step 4a — the instrument adapters (datasets are sourced and
 > unchanged when needed.
 
 **4a. Build (active):**
+
+**Built (RECORDED — data/eval/results.md, first dataset sweeps 2026-10-06):**
+
+- `adapters/datasets/` — mapping core (`synthesize_paragraphs` offset-preserving line
+  partition; `content_anchor_ids` span→anchors by interval intersection filtered to the
+  CHUNKER-KEEPABLE paragraphs — the `chunking.keepable` one-rule-two-consumers contract),
+  checksum-pin machinery (committed `data/datasets/*/checksums.txt`; any drift aborts the
+  build before writing), the legalbenchrag source adapter (privacyqa/contractnli/cuad only —
+  MAUD still gated; NFD/NFC filename resolution) and the vic-chargebook adapter (one capture
+  per passage; gold anchor = paragraph 0; footnotes sidecar decision recorded in its
+  about.md: preserved verbatim, never chunked).
+- `PassThroughChunker` for fixed corpora — one keepable capture paragraph → one chunk
+  (byte-equal to the shared chunker on single-paragraph captures, so grading's byte-verify
+  holds); `uwazi-rag dataset <name>` (verify pins → captures + golden + manual merge →
+  summary; idempotent; bit-stable across rebuilds); `run_sweep(dataset=…)`: sweep specs name
+  their instrument, the runner repoints captures + golden at the dataset and labels every
+  plan/experiment/comparison block (`— dataset <name> — comparison`), comparisons stay
+  WITHIN a dataset. Manual unanswerables per dataset (grep-verified absent topics; origin
+  manual, expected null) — 199/982/4046/104 rows total per dataset.
+- Built + verified: privacyqa (194 up + 5 manual; 453 span checks), contractnli (977+5;
+  1389), cuad (4042+4; 6247; 1 NFD-referenced file resolved via NFC), vic-chargebook (100+4;
+  100/100 labels resolve). Suite 212, ruff/mypy clean.
+- First recorded sweeps (bge-m3, dataset-labeled blocks): privacyqa full geometry ladder —
+  merge-2400 leads every chunk/paragraph lens (R@1 36.2%, R@10 95.5%, MRR 0.752); doc-level
+  saturated (7 docs). contractnli — baseline leads R@k (R@1 35.7%), merge-1200 leads
+  MRR/precision, noheader COLLAPSES chunk retrieval (14.7% R@1 — the NDA-name header is the
+  doc identity). vic-chargebook (pass-through, 4,876 passages) — R@1 16% / R@10 42%, and
+  doc=chunk=passage columns identical by construction. cuad baseline — doc R@1 98.7% but
+  chunk R@1 7.7% / R@10 54.8%: the long-document pressure test the harness lacked, now
+  measured. False-retrieval bites everywhere (m-top1 ≥ 0.55: 1/5, 3–4/5, 3/4, 4/4 per
+  dataset) — the hand-authored rows earn their keep; threshold stays the one global 0.55,
+  per-model threshold work stays parked.
+- STILL OPEN in 4a: the multi-model race per dataset (bge-m3 only so far — qwen pair,
+  nomic-v2-moe, embeddinggemma) and the cuad merge-2400 cell; cuad's store is ~16k chunks so
+  a 5-model sweep is 45+ min (qwen3-8b alone ~25 min). MAUD adapter blocked on license.
 - `src/uwazi_rag/adapters/datasets/` — one adapter module per upstream dataset, over a
   pure mapping core (offline-testable end to end, per the testing policy):
   - offset-preserving paragraph synthesis from raw corpus text. Reads are Python
