@@ -10,5 +10,6 @@ evidence, never a knob flip.
 
 from uwazi_rag.use_cases.chunking_methods.base import ChunkMethod
 from uwazi_rag.use_cases.chunking_methods.merge import MergeChunker
+from uwazi_rag.use_cases.chunking_methods.passthrough import PassThroughChunker
 
-__all__ = ["ChunkMethod", "MergeChunker"]
+__all__ = ["ChunkMethod", "MergeChunker", "PassThroughChunker"]
