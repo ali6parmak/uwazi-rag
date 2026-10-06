@@ -11,11 +11,14 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import pytest
+
 from uwazi_rag.adapters.datasets.core import (
     MANUAL_ORIGIN,
     UPSTREAM_ORIGIN,
     anchor_paragraph_ids,
     capture_paragraphs,
+    content_anchor_ids,
     make_dataset_capture,
     make_expected_block,
     make_golden_row,
@@ -90,6 +93,18 @@ def test_anchor_rejects_impossible_and_unmapped_spans() -> None:
         raise AssertionError("expected ValueError")
     except ValueError as error:
         assert "past its end" in str(error)
+
+
+def test_content_anchors_exclude_whitespace_slots_across_blank_lines() -> None:
+    text = "alpha\n\nbeta"  # lines: "alpha\n" (0..6), "\n" (6..7), "beta" (7..11)
+    spans = synthesize_paragraphs(text)
+
+    # the raw intersection INCLUDES the whitespace slot; the golden anchor set must not
+    assert anchor_paragraph_ids(spans, (0, 11)) == [0, 1, 2]
+    assert content_anchor_ids(text, spans, (0, 11)) == [0, 2]
+    with pytest.raises(ValueError, match="hollow"):  # a pure-whitespace span anchors nothing usable
+        content_anchor_ids(text, spans, (6, 7))
+    assert content_anchor_ids(text, spans, (11, 11)) == []  # empty span: no error, no anchors
 
 
 def test_capture_paragraphs_and_expected_block_shape() -> None:

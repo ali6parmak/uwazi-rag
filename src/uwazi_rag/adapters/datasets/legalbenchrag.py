@@ -36,8 +36,8 @@ from typing import Any
 from uwazi_rag.adapters.datasets.base import DatasetBuildResult
 from uwazi_rag.adapters.datasets.core import (
     UPSTREAM_ORIGIN,
-    anchor_paragraph_ids,
     capture_paragraphs,
+    content_anchor_ids,
     make_dataset_capture,
     make_expected_block,
     make_golden_row,
@@ -137,7 +137,7 @@ class LegalBenchRagSource:
                     )
                 checks += 1
                 answers.append(str(snippet["answer"]))
-                anchor_set.update(anchor_paragraph_ids(spans, span))
+                anchor_set.update(content_anchor_ids(text, spans, span))
             shared_id = _shared_id(file_path)
             rows_per_doc.setdefault(file_path, []).append(
                 make_golden_row(

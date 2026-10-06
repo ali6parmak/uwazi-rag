@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-from uwazi_rag.adapters.datasets.core import anchor_paragraph_ids
+from uwazi_rag.adapters.datasets.core import content_anchor_ids
 from uwazi_rag.adapters.datasets.legalbenchrag import SOURCES, LegalBenchRagSource
 from uwazi_rag.configuration import FIXTURES_DIR, dataset_instance_key
 from uwazi_rag.use_cases.index_captures import capture_to_chunks
@@ -110,13 +110,19 @@ def test_anchors_match_span_intersection_recomputed_from_the_slice() -> None:
     result = _adapter().build(FIXTURE_HOME / "upstream")
     tests = json.loads((FIXTURE_HOME / "upstream" / "benchmarks" / "privacy_qa.json").read_text(encoding="utf-8"))["tests"]
 
+    docs: dict[str, str] = {}
     for test in tests:
         file_path = _nfc(test["snippets"][0]["file_path"])
-        span = _line_spans((FIXTURE_HOME / "upstream" / "corpus" / file_path).read_text(encoding="utf-8"))
+        docs[file_path] = (FIXTURE_HOME / "upstream" / "corpus" / file_path).read_text(encoding="utf-8")
+
+    for test in tests:
+        file_path = _nfc(test["snippets"][0]["file_path"])
+        span = _line_spans(docs[file_path])
         expected_anchors: list[int] = []
         for snippet in test["snippets"]:
             expected_anchors = sorted(
-                set(expected_anchors) | set(anchor_paragraph_ids(span, (int(snippet["span"][0]), int(snippet["span"][1]))))
+                set(expected_anchors)
+                | set(content_anchor_ids(docs[file_path], span, (int(snippet["span"][0]), int(snippet["span"][1]))))
             )
         row = next(row for row in result.golden_rows if row["question"] == test["query"])
         assert row["expected"]["paragraph_ids"] == expected_anchors

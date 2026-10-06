@@ -29,6 +29,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from uwazi_rag.configuration import dataset_instance_key
+from uwazi_rag.use_cases.chunking import keepable
 
 # Paragraph spans into the raw text, half-open [start, end) — the unit every
 # anchor computation and every capture's ``paragraphs`` list is built from.
@@ -82,6 +83,26 @@ def anchor_paragraph_ids(paragraph_spans: Sequence[ParagraphSpan], span: Paragra
 def span_text(text: str, span: ParagraphSpan) -> str:
     """The upstream snippet's own self-check, as a function: ``text[start:end]``."""
     return text[span[0] : span[1]]
+
+
+def content_anchor_ids(text: str, paragraph_spans: Sequence[ParagraphSpan], span: ParagraphSpan) -> list[int]:
+    """Intersecting paragraph ids the CHUNKER would keep — the golden anchors (pure).
+
+    ``chunking.keepable``'s contract is one rule, two consumers: golden anchors
+    must be the exact paragraphs the chunker uses, else coverage denominators
+    count slots nothing can ever cover. A span straddling a blank line
+    intersects a whitespace-only slot — that slot is dropped here, while the
+    content-bearing neighbors on both sides carry the anchor. Raises when a
+    non-empty span anchors no content at all (label bug or uncovered text).
+    """
+    ids = [
+        pid
+        for pid in anchor_paragraph_ids(paragraph_spans, span)
+        if keepable({"text": text[paragraph_spans[pid][0] : paragraph_spans[pid][1]]})
+    ]
+    if span[0] < span[1] and not ids:
+        raise ValueError(f"span [{span[0]}, {span[1]}) anchors no content-bearing paragraph — refusing a hollow gold set")
+    return ids
 
 
 def capture_paragraphs(text: str, spans: Sequence[ParagraphSpan]) -> list[dict[str, Any]]:
