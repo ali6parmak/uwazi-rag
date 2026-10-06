@@ -283,8 +283,14 @@ def render_resolved_plan(
     store_paths: Mapping[str, Path],
     capture_count: int,
     golden_rows: int,
+    dataset: str | None = None,
 ) -> list[str]:
-    """The resolved plan: settings visible, readable store paths, experiment order."""
+    """The resolved plan: settings visible, readable store paths, experiment order.
+
+    Dataset sweeps (Step 4a) name their instrument up front — the plan block
+    and the comparison heading both carry it, so results.md comparisons can
+    never silently mix instruments.
+    """
     labels = list(dict.fromkeys(experiment.cell.label for experiment in experiments))
     lines = [
         f"plan    : {name} — {len(experiments)} experiment(s) over {len(labels)} store cell(s)",
@@ -292,6 +298,8 @@ def render_resolved_plan(
         f"golden  : {_display_path(golden_path)} — {golden_rows} row(s)",
         "stores  :",
     ]
+    if dataset:
+        lines.insert(1, f"dataset : {dataset}")
     for label in labels:
         cell = next(experiment.cell for experiment in experiments if experiment.cell.label == label)
         lines.append(
@@ -366,20 +374,38 @@ def run_sweep(
     stores_dir: Path | None = None,
     results_path: Path | None = None,
     golden_path: Path | None = None,
+    dataset: str | None = None,
 ) -> int:
     """Run one recorded sweep: build-or-reuse each cell's store, grade, append, return the exit code.
 
     The CLI is a thin wrapper over this; the seams (``stores_dir``/``results_path``/
     ``golden_path``/``source``/``embedder_factory``) exist so offline unit tests
     can drive the whole thing on real files with the deterministic embedder.
+
+    ``dataset`` (Step 4a) grades an INSTRUMENT instead of the Uwazi golden:
+    captures default to ``data/raw/<dataset-instance-key>/``, the golden to
+    ``data/eval/datasets/<id>/golden.jsonl``, and every appended block is
+    labeled with the dataset so comparisons can never mix instruments.
     """
     selected = select_sweep_experiments(experiments, only=only)
-    raw_dir = Path(source) if source else configuration.RAW_DIR / configuration.instance_key(configuration.uwazi_url())
+    raw_dir = (
+        Path(source)
+        if source
+        else (
+            configuration.RAW_DIR / configuration.dataset_instance_key(dataset)
+            if dataset
+            else configuration.RAW_DIR / configuration.instance_key(configuration.uwazi_url())
+        )
+    )
     digest = corpus_digest(raw_dir)
     capture_count = len(sorted(raw_dir.glob("*.json")))
     stores_dir = stores_dir if stores_dir is not None else configuration.BENCHMARK_STORES_DIR
     results_path = results_path if results_path is not None else configuration.EVAL_DIR / RESULTS_FILE
-    golden_path = golden_path if golden_path is not None else configuration.EVAL_DIR / GOLDEN_FILE
+    golden_path = (
+        golden_path
+        if golden_path is not None
+        else (configuration.EVAL_DATASETS_DIR / dataset / GOLDEN_FILE if dataset else configuration.EVAL_DIR / GOLDEN_FILE)
+    )
     golden_rows = len(read_jsonl(golden_path))
 
     store_paths = {
@@ -394,6 +420,7 @@ def run_sweep(
         store_paths=store_paths,
         capture_count=capture_count,
         golden_rows=golden_rows,
+        dataset=dataset,
     )
     if dry_run:
         for line in plan_lines:
@@ -479,6 +506,8 @@ def run_sweep(
         )
         block = render(run, card, heading=True)
         block += f"retrieval: {experiment.retrieval.describe()}\n"
+        if dataset:
+            block += f"dataset: {dataset}\n"
         if not experiment.retrieval.cosine_calibrated:
             block += (
                 "note: false-retrieval is cosine-specific — this method scores on a different scale, "
@@ -518,9 +547,10 @@ def run_sweep(
             )
         )
 
+    instrument = f" — dataset {dataset}" if dataset else ""
     heading = (
-        f"## {datetime.now(timezone.utc).isoformat(timespec='seconds')} — benchmark {name} — comparison "
-        f"({len(results)} experiment{'s' if len(results) != 1 else ''})"
+        f"## {datetime.now(timezone.utc).isoformat(timespec='seconds')} — benchmark {name}{instrument} "
+        f"— comparison ({len(results)} experiment{'s' if len(results) != 1 else ''})"
     )
     block = heading + "\n\n" + "\n".join(render_comparison(results)) + "\n"
     append_results(results_path, block)
@@ -531,15 +561,17 @@ def run_sweep(
     return 0 if graded == len(results) else 1
 
 
-def load_sweep_spec(path: Path) -> tuple[str, list[SweepExperiment]]:
+def load_sweep_spec(path: Path) -> tuple[str, list[SweepExperiment], str | None]:
     """Load one sweep script; its module-level ``experiments`` list is the run's grid.
 
     Scripts are data-as-code (one script = one recorded sweep); the run's name
-    is the file stem. Failures name the script and are stderr-ready.
+    is the file stem. A script may also name its instrument (``dataset = "…"``
+    — Step 4a dataset sweeps); anything else than a non-empty string there is
+    a spec error. Failures name the script and are stderr-ready.
     """
     if not path.is_file():
         raise SweepSpecError(f"no sweep script at {path} — the specs live in benchmarks/ as plain Python")
-    spec = importlib.util.spec_from_file_location(f"uwazi_rag_sweep_{re.sub(r'\\W', '_', path.stem)}", path)
+    spec = importlib.util.spec_from_file_location(f"uwazi_rag_sweep_{re.sub(r'\W', '_', path.stem)}", path)
     if spec is None or spec.loader is None:
         raise SweepSpecError(f"{path}: cannot be loaded as a Python module")
     module = importlib.util.module_from_spec(spec)
@@ -555,4 +587,7 @@ def load_sweep_spec(path: Path) -> tuple[str, list[SweepExperiment]]:
         )
     if any(not isinstance(experiment, SweepExperiment) for experiment in experiments):
         raise SweepSpecError(f"{path}: experiments entries must come from define_sweep (SweepExperiment objects)")
-    return path.stem, experiments
+    dataset = getattr(module, "dataset", None)
+    if dataset is not None and (not isinstance(dataset, str) or not dataset.strip()):
+        raise SweepSpecError(f"{path}: optional module-level 'dataset' must be a non-empty dataset id")
+    return path.stem, experiments, dataset.strip() if isinstance(dataset, str) else None

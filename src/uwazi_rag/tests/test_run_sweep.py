@@ -445,9 +445,10 @@ experiments = define_sweep(
 def test_load_sweep_spec_loads_scripts_and_names_failures(tmp_path: Path) -> None:
     script = tmp_path / "unit_script.py"
     script.write_text(SCRIPT_IMPORTS, encoding="utf-8")
-    stem, experiments = load_sweep_spec(script)
+    stem, experiments, dataset = load_sweep_spec(script)
 
     assert stem == "unit_script"
+    assert dataset is None  # the Uwazi-golden sweeps carry no instrument
     assert [experiment.name for experiment in experiments] == ["a-embedding"]
 
     bare = tmp_path / "bare.py"

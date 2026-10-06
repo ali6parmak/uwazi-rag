@@ -11,10 +11,12 @@ from uwazi_api.client import UwaziClient
 from uwazi_api.domain.exceptions import SegmentationNotFoundError
 
 from uwazi_rag import configuration
+from uwazi_rag.adapters.datasets import known_dataset_ids
 from uwazi_rag.adapters.naive_vector_store import NaiveStoreMismatchError, NaiveVectorStore
 from uwazi_rag.adapters.ollama_embeddings import OllamaEmbeddings
 from uwazi_rag.adapters.ollama_llm import OllamaLlm
 from uwazi_rag.ports.embedding_port import EmbeddingPort
+from uwazi_rag.use_cases.build_dataset import build_dataset
 from uwazi_rag.use_cases.build_golden import (
     GOLDEN_FILE,
     PASSAGES_FILE,
@@ -184,6 +186,12 @@ def _build_parser() -> argparse.ArgumentParser:
 
     for name in ("serve", "sync"):
         subparsers.add_parser(name, help="stub — implemented in a later PLAN step")
+
+    dataset = subparsers.add_parser(
+        "dataset",
+        help="build one benchmark dataset instrument: verify upstream checksums → captures + golden (Step 4a)",
+    )
+    dataset.add_argument("name", help="dataset id, e.g. legalbenchrag-privacyqa (see data/datasets/*/about.md)")
 
     return parser
 
@@ -629,13 +637,14 @@ def _benchmark_embedder(model: str) -> EmbeddingPort:
 def _run_benchmark(args: argparse.Namespace) -> int:
     """Step 3.5 (benchmark half): a thin wrapper — the sweep lives in :mod:`uwazi_rag.use_cases.run_sweep`.
 
-    The script's ``experiments`` declare the grid; the helper builds-or-reuses
-    every cell's fingerprint-addressed store (pre-existing stores are never
-    touched), grades each experiment through the shared path, appends plan +
-    blocks + comparison to results.md, and continues past failed experiments.
+    The script's ``experiments`` declare the grid (and its optional ``dataset``
+    names a Step 4a instrument, which repoints captures + golden); the helper
+    builds-or-reuses every cell's slug-addressed store (pre-existing stores are
+    never touched), grades each experiment through the shared path, appends
+    plan + blocks + comparison to results.md, and continues past failures.
     """
     try:
-        name, experiments = load_sweep_spec(Path(args.spec))
+        name, experiments, dataset = load_sweep_spec(Path(args.spec))
     except (SweepSpecError, OSError) as error:
         print(f"error: benchmark spec failed — {error}", file=sys.stderr)
         return 1
@@ -647,10 +656,29 @@ def _run_benchmark(args: argparse.Namespace) -> int:
             source=Path(args.source) if args.source else None,
             only=args.only,
             dry_run=args.dry_run,
+            dataset=dataset,
         )
     except (SweepSpecError, RuntimeError, ValueError, OSError) as error:
         print(f"error: benchmark failed — {error}", file=sys.stderr)
         return 1
+
+
+def _run_dataset(args: argparse.Namespace) -> int:
+    """Step 4a: build one dataset instrument from its verified upstream."""
+    try:
+        stats = build_dataset(args.name)
+    except (ValueError, OSError) as error:
+        print(f"error: dataset build failed — {error}", file=sys.stderr)
+        print(f"known datasets: {', '.join(known_dataset_ids())}", file=sys.stderr)
+        return 1
+    print(f"dataset : {stats.dataset_id} — instance key {stats.instance_key}")
+    print(f"built   : {stats.captures_written} capture(s) → {stats.raw_dir}")
+    print(
+        f"golden  : {stats.upstream_rows + stats.manual_rows_merged} row(s) "
+        f"({stats.upstream_rows} upstream + {stats.manual_rows_merged} manual) → {stats.golden_path}"
+    )
+    print("next    : uwazi-rag benchmark --spec benchmarks/sweep_<dataset>.py --only <experiment>")
+    return 0
 
 
 def _stub(name: str) -> int:
@@ -679,6 +707,8 @@ def main() -> int:
         return _run_eval(args)
     if args.command == "benchmark":
         return _run_benchmark(args)
+    if args.command == "dataset":
+        return _run_dataset(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 
