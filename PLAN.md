@@ -334,7 +334,81 @@ Step 4 inherits those parameters.
 
 ---
 
+## Step 3.6 — Scorecard honesty: currencies, readable stores, and the labeled-data dependency
+
+**Goal:** before more experiments run, make the scorecard honest about *what each number
+counts* — what you ship (chunks), what you need (the decider at document level), and what
+the reader actually saw (paragraphs) — without changing any previously recorded number.
+
+**Built (RECORDED — data/eval/results.md, commits 8425b31…cb02968):**
+
+- New pure metrics on the golden rows (offline-tested worked examples in
+  `tests/test_eval_retrieval_currencies.py`):
+  - `cov@k` — paragraph currency: anchor paragraphs covered in top-k, a paragraph counts
+    iff ANY chunk holding it is retrieved; denominator = the row's own anchors, so it is
+    packaging-immune. A *lens* on one experiment; the cross-chunker decider stays the
+    document level. Split paragraphs need one piece; chunk recall needs them all.
+  - `cov@3000` (`COVERAGE_CHAR_BUDGET`) — same lens at a fixed retrieved-char budget:
+    whole chunks pack from rank 1 while the running char total stays ≤ the budget
+    (inclusive; prefix semantics — a later small chunk never rescues an overflow). Kills
+    the "top-k means different text amounts" leak between packing sizes.
+  - `P@k` (`|gold ∩ top-k| / k`) and `RP` (precision at `k = |gold|`; BeIR standard) —
+    chunk currency: recall asks how much of the gold was collected, P asks how much of
+    what was shipped was gold (the waste counter). `RP = 100%` iff the first `|gold|`
+    slots are entirely gold.
+- The honesty caveat is stamped on every block: the gold is self-anchored (questions were
+  drafted from the passage they quote), so P/RP read systematically *pessimistic* —
+  comparisons only, never absolute quality.
+- `RowGold` grew additively (anchor paragraph ids + per-paragraph chunk grouping;
+  unmapped anchors keep their slot and can never be covered); `eval_run.py` stayed
+  byte-identical — parity is the acceptance criterion and the fresh 5-model sweep met it
+  (bge-m3 / nomic-v2-moe / embeddinggemma EXACT vs the recorded comparison; the qwen
+  models drift within the already-recorded non-bit-stable family).
+- Readable store names replace raw fingerprint hashes:
+  `<method-slug(params)>__<model-slug>-<corpus-digest8>.json` (e.g.
+  `merge-1800-0.15-on__bge-m3-4d284af0.json`). Deterministic (same inputs → same file,
+  cross-sweep sharing kept); validity stays content-based (recorded model + chunk_config
+  + the byte-verify guard), never name-based.
+
+**Decisions recorded at this step (user):**
+
+- **No absolute model is "decided".** The benchmark layer is the decision instrument;
+  models are compared per experiment and the config stays a knob. Verdict blocks in
+  results.md remain valid as snapshots at recording time, not permanent picks.
+- **Skip per-model threshold re-derivation** (qwen3-8b m013 crossing 0.55): noted, and
+  not needed yet — FALSE_RETRIEVAL_THRESHOLD stays the one global config value.
+- **Step 4 is re-scoped, not dropped — it now waits for labels.** Indexing thousands of
+  Uwazi entities adds no gradable signal without relevance labels, and hand-labeling a
+  human-rights corpus is not realistic (one person, non-expert domain). A new, properly
+  labeled RAG dataset is being sourced; when it arrives, Step 4 is redefined around
+  integrating it. Two facts to plan that work around:
+  - The Uwazi-side plumbing (inventory paging, published-only, segmentation cache,
+    idempotent chunk→embed→store) is dataset-independent — it is proven at 77-capture
+    scale and carries over unchanged when the service goes live at scale.
+  - The integration seam is a golden-format adapter: external relevance labels (often
+    document- or paragraph-level qrels) must be mapped onto this grading path — the
+    harness, metric engines and store naming all survive as-is.
+- **Chunker exploration is parked behind the same dependency:** `RawChunker`,
+  registry/self-describing stores in `NOT IN SCOPE` notes, and candidate `drop_footnotes`/
+  `section` methods start once better labels exist to judge them on.
+
+**Learn:** a metric's honesty lives in its denominator — fixed denominators (the row's own
+anchors; the char budget; the demand size `|gold|`) make races fair, because then only
+retrieval quality moves the number. And a benchmark *system* beats a "chosen model": a
+picked default freezes one experiment's result into a constant, while a recorded sweep
+keeps every comparison re-runnable as data arrives.
+
+**Done when (met):** coverage/precision/RP implemented + tested (suite 165), readable
+store names live, parity block recorded in results.md, plan updated; then STOP for user
+review. Next work resumes once the new labeled dataset is selected.
+
+---
+
 ## Step 4 — Index a whole collection
+
+> **Status (2026-10-05): on hold — re-scoped around an external labeled RAG dataset;
+> see Step 3.6.** The build below stays the eventual Uwazi-side shape; the labeled-
+> evaluation half is redefined when the dataset is chosen.
 
 **Goal:** from one document to a template's worth of content, resiliently.
 
