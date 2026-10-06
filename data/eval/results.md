@@ -1051,3 +1051,657 @@ OLD-column parity:
 Recorded numbers remain final (append-only; nothing above rewritten). The new currency columns (cov@k, cov@3000, P@k, RP)
 first appear recorded in this run's blocks; their interpretation is the next analysis step, not part of this parity note.
 
+
+## 2026-10-06T12:08:05+00:00 — benchmark sweep_legalbenchrag_privacyqa — resolved plan
+
+plan    : sweep_legalbenchrag_privacyqa — 1 experiment(s) over 1 store cell(s)
+dataset : legalbenchrag-privacyqa
+captures: data/raw/8a3f38ffd23a75e2 — 7 capture(s)
+golden  : data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl — 199 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-260a60f1.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+
+
+## 2026-10-06T12:08:05+00:00 — benchmark sweep_legalbenchrag_privacyqa: baseline-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-260a60f1.json` — 106 chunks, bge-m3 (1024d), built 2026-10-06T12:08:07+00:00
+golden: `data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl` — 199 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% |
+| en | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 1/5 (20.0%) (top-1: m001 0.4383, m002 0.5036, m003 0.4775, m004 0.5023, m005 0.5518)
+retrieval: embedding
+dataset: legalbenchrag-privacyqa
+
+
+## 2026-10-06T12:08:10+00:00 — benchmark sweep_legalbenchrag_privacyqa — dataset legalbenchrag-privacyqa — comparison (1 experiment)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% | 1/5 | 2s / 1.1s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
+
+## 2026-10-06T12:08:16+00:00 — benchmark sweep_legalbenchrag_privacyqa — resolved plan
+
+plan    : sweep_legalbenchrag_privacyqa — 4 experiment(s) over 4 store cell(s)
+dataset : legalbenchrag-privacyqa
+captures: data/raw/8a3f38ffd23a75e2 — 7 capture(s)
+golden  : data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl — 199 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-260a60f1.json
+  merge-1200             merge 1200/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1200-0.15-on__bge-m3-260a60f1.json
+  merge-2400             merge 2400/0.15/on     × bge-m3                       → data/benchmark_stores/merge-2400-0.15-on__bge-m3-260a60f1.json
+  noheader               merge 1800/0.15/off    × bge-m3                       → data/benchmark_stores/merge-1800-0.15-off__bge-m3-260a60f1.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+  2. merge-1200-embedding         → merge-1200             retrieval embedding
+  3. merge-2400-embedding         → merge-2400             retrieval embedding
+  4. noheader-embedding           → noheader               retrieval embedding
+
+
+## 2026-10-06T12:08:16+00:00 — benchmark sweep_legalbenchrag_privacyqa: baseline-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-260a60f1.json` — 106 chunks, bge-m3 (1024d), built 2026-10-06T12:08:07+00:00
+golden: `data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl` — 199 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% |
+| en | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 1/5 (20.0%) (top-1: m001 0.4383, m002 0.5036, m003 0.4775, m004 0.5023, m005 0.5518)
+retrieval: embedding
+dataset: legalbenchrag-privacyqa
+
+
+## 2026-10-06T12:08:17+00:00 — benchmark sweep_legalbenchrag_privacyqa: merge-1200-embedding
+
+store: `data/benchmark_stores/merge-1200-0.15-on__bge-m3-260a60f1.json` — 163 chunks, bge-m3 (1024d), built 2026-10-06T12:08:17+00:00
+golden: `data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl` — 199 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1200, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 194 | 29.5% | 66.8% | 82.4% | 0.676 | 100.0% | 100.0% | 100.0% | 1.000 | 31.0% | 67.2% | 83.0% | 47.7% | 51.0% | 28.2% | 18.2% | 47.4% |
+| en | 194 | 29.5% | 66.8% | 82.4% | 0.676 | 100.0% | 100.0% | 100.0% | 1.000 | 31.0% | 67.2% | 83.0% | 47.7% | 51.0% | 28.2% | 18.2% | 47.4% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 194 | 29.5% | 66.8% | 82.4% | 0.676 | 100.0% | 100.0% | 100.0% | 1.000 | 31.0% | 67.2% | 83.0% | 47.7% | 51.0% | 28.2% | 18.2% | 47.4% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 0/5 (0.0%) (top-1: m001 0.4373, m002 0.4836, m003 0.4628, m004 0.5121, m005 0.5491)
+retrieval: embedding
+dataset: legalbenchrag-privacyqa
+
+
+## 2026-10-06T12:08:20+00:00 — benchmark sweep_legalbenchrag_privacyqa: merge-2400-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__bge-m3-260a60f1.json` — 79 chunks, bge-m3 (1024d), built 2026-10-06T12:08:20+00:00
+golden: `data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl` — 199 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 194 | 36.2% | 82.5% | 95.5% | 0.752 | 100.0% | 100.0% | 100.0% | 1.000 | 38.4% | 81.6% | 95.5% | 38.4% | 59.8% | 30.2% | 18.2% | 53.0% |
+| en | 194 | 36.2% | 82.5% | 95.5% | 0.752 | 100.0% | 100.0% | 100.0% | 1.000 | 38.4% | 81.6% | 95.5% | 38.4% | 59.8% | 30.2% | 18.2% | 53.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 194 | 36.2% | 82.5% | 95.5% | 0.752 | 100.0% | 100.0% | 100.0% | 1.000 | 38.4% | 81.6% | 95.5% | 38.4% | 59.8% | 30.2% | 18.2% | 53.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 1/5 (20.0%) (top-1: m001 0.4335, m002 0.5098, m003 0.4798, m004 0.5167, m005 0.5676)
+retrieval: embedding
+dataset: legalbenchrag-privacyqa
+
+
+## 2026-10-06T12:08:22+00:00 — benchmark sweep_legalbenchrag_privacyqa: noheader-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-off__bge-m3-260a60f1.json` — 106 chunks, bge-m3 (1024d), built 2026-10-06T12:08:22+00:00
+golden: `data/eval/datasets/legalbenchrag-privacyqa/golden.jsonl` — 199 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 194 | 29.9% | 68.4% | 82.8% | 0.649 | 92.3% | 99.5% | 100.0% | 0.952 | 31.2% | 70.4% | 84.8% | 32.2% | 48.5% | 25.2% | 16.0% | 42.5% |
+| en | 194 | 29.9% | 68.4% | 82.8% | 0.649 | 92.3% | 99.5% | 100.0% | 0.952 | 31.2% | 70.4% | 84.8% | 32.2% | 48.5% | 25.2% | 16.0% | 42.5% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 194 | 29.9% | 68.4% | 82.8% | 0.649 | 92.3% | 99.5% | 100.0% | 0.952 | 31.2% | 70.4% | 84.8% | 32.2% | 48.5% | 25.2% | 16.0% | 42.5% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 0/5 (0.0%) (top-1: m001 0.4496, m002 0.4966, m003 0.4544, m004 0.5128, m005 0.5027)
+retrieval: embedding
+dataset: legalbenchrag-privacyqa
+
+
+## 2026-10-06T12:08:24+00:00 — benchmark sweep_legalbenchrag_privacyqa — dataset legalbenchrag-privacyqa — comparison (4 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 194 | 32.5% | 72.6% | 89.8% | 0.696 | 100.0% | 100.0% | 100.0% | 1.000 | 34.4% | 75.0% | 91.4% | 34.4% | 53.6% | 27.2% | 18.1% | 46.2% | 1/5 | reuse / 1.1s |
+| merge-1200-embedding | bge-m3 | 1200/0.15/on | embedding | 194 | 29.5% | 66.8% | 82.4% | 0.676 | 100.0% | 100.0% | 100.0% | 1.000 | 31.0% | 67.2% | 83.0% | 47.7% | 51.0% | 28.2% | 18.2% | 47.4% | 0/5 | 1s / 1.1s |
+| merge-2400-embedding | bge-m3 | 2400/0.15/on | embedding | 194 | 36.2% | 82.5% | 95.5% | 0.752 | 100.0% | 100.0% | 100.0% | 1.000 | 38.4% | 81.6% | 95.5% | 38.4% | 59.8% | 30.2% | 18.2% | 53.0% | 1/5 | 1s / 1.0s |
+| noheader-embedding | bge-m3 | 1800/0.15/off | embedding | 194 | 29.9% | 68.4% | 82.8% | 0.649 | 92.3% | 99.5% | 100.0% | 0.952 | 31.2% | 70.4% | 84.8% | 32.2% | 48.5% | 25.2% | 16.0% | 42.5% | 0/5 | 1s / 1.0s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
+
+## 2026-10-06T12:08:28+00:00 — benchmark sweep_legalbenchrag_contractnli — resolved plan
+
+plan    : sweep_legalbenchrag_contractnli — 3 experiment(s) over 3 store cell(s)
+dataset : legalbenchrag-contractnli
+captures: data/raw/d7f14657e7264534 — 95 capture(s)
+golden  : data/eval/datasets/legalbenchrag-contractnli/golden.jsonl — 982 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-826d4d38.json
+  merge-1200             merge 1200/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1200-0.15-on__bge-m3-826d4d38.json
+  noheader               merge 1800/0.15/off    × bge-m3                       → data/benchmark_stores/merge-1800-0.15-off__bge-m3-826d4d38.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+  2. merge-1200-embedding         → merge-1200             retrieval embedding
+  3. noheader-embedding           → noheader               retrieval embedding
+
+
+## 2026-10-06T12:08:28+00:00 — benchmark sweep_legalbenchrag_contractnli: baseline-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-826d4d38.json` — 703 chunks, bge-m3 (1024d), built 2026-10-06T12:08:28+00:00
+golden: `data/eval/datasets/legalbenchrag-contractnli/golden.jsonl` — 982 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 977 | 35.7% | 77.5% | 87.3% | 0.591 | 84.0% | 94.9% | 96.9% | 0.887 | 36.7% | 78.5% | 88.0% | 41.0% | 41.7% | 19.1% | 11.0% | 39.8% |
+| en | 977 | 35.7% | 77.5% | 87.3% | 0.591 | 84.0% | 94.9% | 96.9% | 0.887 | 36.7% | 78.5% | 88.0% | 41.0% | 41.7% | 19.1% | 11.0% | 39.8% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 977 | 35.7% | 77.5% | 87.3% | 0.591 | 84.0% | 94.9% | 96.9% | 0.887 | 36.7% | 78.5% | 88.0% | 41.0% | 41.7% | 19.1% | 11.0% | 39.8% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 3/5 (60.0%) (top-1: m001 0.6020, m002 0.5827, m003 0.5052, m004 0.5955, m005 0.5354)
+retrieval: embedding
+dataset: legalbenchrag-contractnli
+
+
+## 2026-10-06T12:08:42+00:00 — benchmark sweep_legalbenchrag_contractnli: merge-1200-embedding
+
+store: `data/benchmark_stores/merge-1200-0.15-on__bge-m3-826d4d38.json` — 1,091 chunks, bge-m3 (1024d), built 2026-10-06T12:08:42+00:00
+golden: `data/eval/datasets/legalbenchrag-contractnli/golden.jsonl` — 982 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1200, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 977 | 34.4% | 71.7% | 82.2% | 0.601 | 84.7% | 94.9% | 97.4% | 0.891 | 38.6% | 75.7% | 84.7% | 57.8% | 44.8% | 19.8% | 11.6% | 40.5% |
+| en | 977 | 34.4% | 71.7% | 82.2% | 0.601 | 84.7% | 94.9% | 97.4% | 0.891 | 38.6% | 75.7% | 84.7% | 57.8% | 44.8% | 19.8% | 11.6% | 40.5% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 977 | 34.4% | 71.7% | 82.2% | 0.601 | 84.7% | 94.9% | 97.4% | 0.891 | 38.6% | 75.7% | 84.7% | 57.8% | 44.8% | 19.8% | 11.6% | 40.5% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 3/5 (60.0%) (top-1: m001 0.5987, m002 0.5915, m003 0.5079, m004 0.5906, m005 0.5354)
+retrieval: embedding
+dataset: legalbenchrag-contractnli
+
+
+## 2026-10-06T12:08:59+00:00 — benchmark sweep_legalbenchrag_contractnli: noheader-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-off__bge-m3-826d4d38.json` — 703 chunks, bge-m3 (1024d), built 2026-10-06T12:08:59+00:00
+golden: `data/eval/datasets/legalbenchrag-contractnli/golden.jsonl` — 982 rows (0 synthetic / 5 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 977 | 14.7% | 28.5% | 34.2% | 0.251 | 54.8% | 67.2% | 73.8% | 0.612 | 14.7% | 28.6% | 34.3% | 16.9% | 17.5% | 6.9% | 4.1% | 16.1% |
+| en | 977 | 14.7% | 28.5% | 34.2% | 0.251 | 54.8% | 67.2% | 73.8% | 0.612 | 14.7% | 28.6% | 34.3% | 16.9% | 17.5% | 6.9% | 4.1% | 16.1% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 977 | 14.7% | 28.5% | 34.2% | 0.251 | 54.8% | 67.2% | 73.8% | 0.612 | 14.7% | 28.6% | 34.3% | 16.9% | 17.5% | 6.9% | 4.1% | 16.1% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 5 rows, threshold ≥ 0.550 → false-retrieval 4/5 (80.0%) (top-1: m001 0.6092, m002 0.6008, m003 0.4966, m004 0.6185, m005 0.5512)
+retrieval: embedding
+dataset: legalbenchrag-contractnli
+
+
+## 2026-10-06T12:09:14+00:00 — benchmark sweep_legalbenchrag_contractnli — dataset legalbenchrag-contractnli — comparison (3 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 977 | 35.7% | 77.5% | 87.3% | 0.591 | 84.0% | 94.9% | 96.9% | 0.887 | 36.7% | 78.5% | 88.0% | 41.0% | 41.7% | 19.1% | 11.0% | 39.8% | 3/5 | 7s / 6.9s |
+| merge-1200-embedding | bge-m3 | 1200/0.15/on | embedding | 977 | 34.4% | 71.7% | 82.2% | 0.601 | 84.7% | 94.9% | 97.4% | 0.891 | 38.6% | 75.7% | 84.7% | 57.8% | 44.8% | 19.8% | 11.6% | 40.5% | 3/5 | 9s / 7.5s |
+| noheader-embedding | bge-m3 | 1800/0.15/off | embedding | 977 | 14.7% | 28.5% | 34.2% | 0.251 | 54.8% | 67.2% | 73.8% | 0.612 | 14.7% | 28.6% | 34.3% | 16.9% | 17.5% | 6.9% | 4.1% | 16.1% | 4/5 | 8s / 7.0s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
+
+## 2026-10-06T12:09:18+00:00 — benchmark sweep_vic_chargebook — resolved plan
+
+plan    : sweep_vic_chargebook — 2 experiment(s) over 2 store cell(s)
+dataset : vic-chargebook
+captures: data/raw/c49c2465f4afa801 — 4876 capture(s)
+golden  : data/eval/datasets/vic-chargebook/golden.jsonl — 104 row(s)
+stores  :
+  baseline               passthrough 4096/on    × bge-m3                       → data/benchmark_stores/passthrough-4096-on__bge-m3-6adfbee8.json
+  noheader               passthrough 4096/off   × bge-m3                       → data/benchmark_stores/passthrough-4096-off__bge-m3-6adfbee8.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+  2. noheader-embedding           → noheader               retrieval embedding
+
+
+## 2026-10-06T12:09:18+00:00 — benchmark sweep_vic_chargebook: baseline-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__bge-m3-6adfbee8.json` — 4,876 chunks, bge-m3 (1024d), built 2026-10-06T12:09:18+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% |
+| en | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 3/4 (75.0%) (top-1: m001 0.5837, m002 0.5563, m003 0.5499, m004 0.5571)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-06T12:10:08+00:00 — benchmark sweep_vic_chargebook: noheader-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__bge-m3-6adfbee8.json` — 4,876 chunks, bge-m3 (1024d), built 2026-10-06T12:10:08+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% |
+| en | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 3/4 (75.0%) (top-1: m001 0.5696, m002 0.5526, m003 0.5351, m004 0.5504)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-06T12:10:56+00:00 — benchmark sweep_vic_chargebook — dataset vic-chargebook — comparison (2 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 4096/0/on | embedding | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% | 3/4 | 47s / 1.9s |
+| noheader-embedding | bge-m3 | 4096/0/off | embedding | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% | 3/4 | 46s / 1.8s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
+
+## 2026-10-06T12:11:02+00:00 — benchmark sweep_legalbenchrag_cuad — resolved plan
+
+plan    : sweep_legalbenchrag_cuad — 1 experiment(s) over 1 store cell(s)
+dataset : legalbenchrag-cuad
+captures: data/raw/c88547bc806ea086 — 462 capture(s)
+golden  : data/eval/datasets/legalbenchrag-cuad/golden.jsonl — 4046 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-47d5d5a2.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+
+
+## 2026-10-06T12:11:02+00:00 — benchmark sweep_legalbenchrag_cuad: baseline-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-47d5d5a2.json` — 18,024 chunks, bge-m3 (1024d), built 2026-10-06T12:11:02+00:00
+golden: `data/eval/datasets/legalbenchrag-cuad/golden.jsonl` — 4046 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.4% | 44.9% | 63.0% | 13.4% | 12.7% | 12.7% | 9.9% | 13.2% |
+| en | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.4% | 44.9% | 63.0% | 13.4% | 12.7% | 12.7% | 9.9% | 13.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.4% | 44.9% | 63.0% | 13.4% | 12.7% | 12.7% | 9.9% | 13.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6007, m002 0.5775, m003 0.6123, m004 0.5847)
+anomaly: CybergyHoldingsInc_20140520_10-Q_EX-10.27_8605784_EX-10.27_Affiliate Agreement:q007: paragraph(s) [625] not keepable under the current drop rule
+anomaly: EdietsComInc_20001030_10QSB_EX-10.4_2606646_EX-10.4_Co-Branding Agreement:q008: paragraph(s) [433] not keepable under the current drop rule
+anomaly: TomOnlineInc_20060501_20-F_EX-4.46_749700_EX-4.46_Co-Branding Agreement:q006: paragraph(s) [429, 431] not keepable under the current drop rule
+anomaly: FuelcellEnergyInc_20191106_8-K_EX-10.1_11868007_EX-10.1_Development Agreement:q009: paragraph(s) [183, 185, 187] not keepable under the current drop rule
+anomaly: FuelcellEnergyInc_20191106_8-K_EX-10.1_11868007_EX-10.1_Development Agreement:q015: paragraph(s) [529, 531] not keepable under the current drop rule
+anomaly: FuelcellEnergyInc_20191106_8-K_EX-10.1_11868007_EX-10.1_Development Agreement:q016: paragraph(s) [377, 379] not keepable under the current drop rule
+anomaly: FuseMedicalInc_20190321_10-K_EX-10.43_11575454_EX-10.43_Distributor Agreement:q007: paragraph(s) [387, 389] not keepable under the current drop rule
+anomaly: WaterNowInc_20191120_10-Q_EX-10.12_11900227_EX-10.12_Distributor Agreement:q007: paragraph(s) [1, 3, 4, 5, 6, 7] not keepable under the current drop rule
+anomaly: EcoScienceSolutionsInc_20171117_8-K_EX-10.1_10956472_EX-10.1_Endorsement Agreement:q009: paragraph(s) [11, 13, 15, 17] not keepable under the current drop rule
+anomaly: NakedBrandGroupInc_20150731_POS AM (on S-1)_EX-10.75_9196027_EX-10.75_Endorsement Agreement:q008: paragraph(s) [111] not keepable under the current drop rule
+anomaly: RgcResourcesInc_20151216_8-K_EX-10.3_9372751_EX-10.3_Franchise Agreement:q002: paragraph(s) [19] not keepable under the current drop rule
+anomaly: ArtaraTherapeuticsInc_20200110_8-K_EX-10.5_11943350_EX-10.5_License Agreement:q006: paragraph(s) [51, 53, 55, 57] not keepable under the current drop rule
+anomaly: AtnInternationalInc_20191108_10-Q_EX-10.1_11878541_EX-10.1_Maintenance Agreement:q009: paragraph(s) [787, 789, 791, 793, 795, 797, 811, 813, 815, 817, 821, 823, 825, 827, 829, 831, 853, 855, 857] not keepable under the current drop rule
+anomaly: AtnInternationalInc_20191108_10-Q_EX-10.1_11878541_EX-10.1_Maintenance Agreement:q011: paragraph(s) [243] not keepable under the current drop rule
+anomaly: UpjohnInc_20200121_10-12G_EX-2.6_11948692_EX-2.6_Manufacturing Agreement_ Supply Agreement:q015: paragraph(s) [701, 703, 704, 705, 706, 707, 709] not keepable under the current drop rule
+anomaly: ParatekPharmaceuticalsInc_20170505_10-KA_EX-10.29_10323872_EX-10.29_Outsourcing Agreement:q003: paragraph(s) [1173, 1175] not keepable under the current drop rule
+anomaly: ParatekPharmaceuticalsInc_20170505_10-KA_EX-10.29_10323872_EX-10.29_Outsourcing Agreement:q005: paragraph(s) [725] not keepable under the current drop rule
+anomaly: ExactSciencesCorp_20180822_8-K_EX-10.1_11331629_EX-10.1_Promotion Agreement:q009: paragraph(s) [253, 255, 256, 257, 258, 259] not keepable under the current drop rule
+anomaly: DovaPharmaceuticalsInc_20181108_10-Q_EX-10.2_11414857_EX-10.2_Promotion Agreement:q010: paragraph(s) [793, 795, 797] not keepable under the current drop rule
+anomaly: IpassInc_20181203_8-K_EX-99.1_11445874_EX-99.1_Reseller Agreement:q007: paragraph(s) [155, 157, 159, 161, 163, 165, 167, 169, 171, 173, 175, 177, 179, 181] not keepable under the current drop rule
+anomaly: WestPharmaceuticalServicesInc_20200116_8-K_EX-10.1_11947529_EX-10.1_Supply Agreement:q003: paragraph(s) [617] not keepable under the current drop rule
+anomaly: WestPharmaceuticalServicesInc_20200116_8-K_EX-10.1_11947529_EX-10.1_Supply Agreement:q005: paragraph(s) [11] not keepable under the current drop rule
+anomaly: WestPharmaceuticalServicesInc_20200116_8-K_EX-10.1_11947529_EX-10.1_Supply Agreement:q006: paragraph(s) [11] not keepable under the current drop rule
+anomaly: TcPipelinesLp_20160226_10-K_EX-99.12_9454048_EX-99.12_Transportation Agreement:q003: paragraph(s) [105, 107, 109] not keepable under the current drop rule
+anomaly: AudibleInc_20001113_10-Q_EX-10.32_2599586_EX-10.32_Co-Branding Agreement_ Marketing Agreement_ Investment Distribution Agreement:q005: paragraph(s) [277] not keepable under the current drop rule
+anomaly: AudibleInc_20001113_10-Q_EX-10.32_2599586_EX-10.32_Co-Branding Agreement_ Marketing Agreement_ Investment Distribution Agreement:q006: paragraph(s) [197] not keepable under the current drop rule
+anomaly: HealthcentralCom_19991108_S-1A_EX-10.27_6623292_EX-10.27_Co-Branding Agreement:q005: paragraph(s) [177, 179, 180, 181, 182, 183] not keepable under the current drop rule
+anomaly: HealthcentralCom_19991108_S-1A_EX-10.27_6623292_EX-10.27_Co-Branding Agreement:q009: paragraph(s) [429, 431, 433] not keepable under the current drop rule
+anomaly: HealthcentralCom_19991108_S-1A_EX-10.27_6623292_EX-10.27_Co-Branding Agreement:q011: paragraph(s) [319, 321] not keepable under the current drop rule
+anomaly: HealthcentralCom_19991108_S-1A_EX-10.27_6623292_EX-10.27_Co-Branding Agreement:q012: paragraph(s) [319, 321] not keepable under the current drop rule
+anomaly: InvendaCorp_20000828_S-1A_EX-10.2_2588206_EX-10.2_Co-Branding Agreement:q015: paragraph(s) [553, 555] not keepable under the current drop rule
+anomaly: InvendaCorp_20000828_S-1A_EX-10.2_2588206_EX-10.2_Co-Branding Agreement:q016: paragraph(s) [553, 555] not keepable under the current drop rule
+anomaly: RandWorldwideInc_20010402_8-KA_EX-10.2_2102464_EX-10.2_Co-Branding Agreement:q008: paragraph(s) [167] not keepable under the current drop rule
+anomaly: StampscomInc_20001114_10-Q_EX-10.47_2631630_EX-10.47_Co-Branding Agreement:q004: paragraph(s) [131, 133] not keepable under the current drop rule
+anomaly: StampscomInc_20001114_10-Q_EX-10.47_2631630_EX-10.47_Co-Branding Agreement:q005: paragraph(s) [229, 231, 232, 233, 234, 235, 237, 239, 241, 243, 247, 249, 251, 253, 255, 257] not keepable under the current drop rule
+anomaly: LinkPlusCorp_20050802_8-K_EX-10_3240252_EX-10_Affiliate Agreement:q007: paragraph(s) [123] not keepable under the current drop rule
+anomaly: AimmuneTherapeuticsInc_20200205_8-K_EX-10.3_11967170_EX-10.3_Development Agreement:q003: paragraph(s) [389, 391, 392, 393, 394, 395] not keepable under the current drop rule
+anomaly: CoherusBiosciencesInc_20200227_10-K_EX-10.29_12021376_EX-10.29_Development Agreement:q010: paragraph(s) [489, 491] not keepable under the current drop rule
+anomaly: HarpoonTherapeuticsInc_20200312_10-K_EX-10.18_12051356_EX-10.18_Development Agreement:q004: paragraph(s) [963, 965] not keepable under the current drop rule
+anomaly: HarpoonTherapeuticsInc_20200312_10-K_EX-10.18_12051356_EX-10.18_Development Agreement:q009: paragraph(s) [1077, 1079, 1081, 1083, 1085] not keepable under the current drop rule
+anomaly: HarpoonTherapeuticsInc_20200312_10-K_EX-10.18_12051356_EX-10.18_Development Agreement:q011: paragraph(s) [963, 965] not keepable under the current drop rule
+anomaly: NlsPharmaceuticsLtd_20200228_F-1_EX-10.14_12029046_EX-10.14_Development Agreement:q006: paragraph(s) [115, 117] not keepable under the current drop rule
+anomaly: PhasebioPharmaceuticalsInc_20200330_10-K_EX-10.21_12086810_EX-10.21_Development Agreement:q004: paragraph(s) [903, 905, 907, 909, 911] not keepable under the current drop rule
+anomaly: PhasebioPharmaceuticalsInc_20200330_10-K_EX-10.21_12086810_EX-10.21_Development Agreement:q009: paragraph(s) [1507, 1509, 1510, 1511, 1512, 1513] not keepable under the current drop rule
+anomaly: RevolutionMedicinesInc_20200117_S-1_EX-10.1_11948417_EX-10.1_Development Agreement:q008: paragraph(s) [975, 991, 993] not keepable under the current drop rule
+anomaly: RevolutionMedicinesInc_20200117_S-1_EX-10.1_11948417_EX-10.1_Development Agreement:q012: paragraph(s) [1265, 1267, 1269, 1271, 1272, 1273, 1274, 1275] not keepable under the current drop rule
+anomaly: GlobalTechnologiesGroupInc_20050928_10KSB_EX-10.9_4148808_EX-10.9_Content License Agreement:q005: paragraph(s) [195] not keepable under the current drop rule
+anomaly: PacificapEntertainmentHoldingsInc_20051115_8-KA_EX-1.01_4300894_EX-1.01_Content License Agreement:q004: paragraph(s) [17] not keepable under the current drop rule
+anomaly: PacificapEntertainmentHoldingsInc_20051115_8-KA_EX-1.01_4300894_EX-1.01_Content License Agreement:q008: paragraph(s) [17] not keepable under the current drop rule
+anomaly: ZogenixInc_20190509_10-Q_EX-10.2_11663313_EX-10.2_Distributor Agreement:q004: paragraph(s) [1241, 1243] not keepable under the current drop rule
+anomaly: ZogenixInc_20190509_10-Q_EX-10.2_11663313_EX-10.2_Distributor Agreement:q005: paragraph(s) [1241, 1243] not keepable under the current drop rule
+anomaly: ZogenixInc_20190509_10-Q_EX-10.2_11663313_EX-10.2_Distributor Agreement:q006: paragraph(s) [717, 719, 721, 723, 725] not keepable under the current drop rule
+anomaly: GluMobileInc_20070319_S-1A_EX-10.09_436630_EX-10.09_Content License Agreement1:q006: paragraph(s) [261, 263, 265, 267, 295] not keepable under the current drop rule
+anomaly: GluMobileInc_20070319_S-1A_EX-10.09_436630_EX-10.09_Content License Agreement1:q007: paragraph(s) [1139, 1141, 1143, 1145, 1147] not keepable under the current drop rule
+anomaly: GluMobileInc_20070319_S-1A_EX-10.09_436630_EX-10.09_Content License Agreement2:q002: paragraph(s) [51, 52, 53, 55, 57, 58, 59, 60, 61, 62, 63] not keepable under the current drop rule
+anomaly: GluMobileInc_20070319_S-1A_EX-10.09_436630_EX-10.09_Content License Agreement3:q001: paragraph(s) [19] not keepable under the current drop rule
+anomaly: PapaJohnsInternationalInc_20190617_8-K_EX-10.1_11707365_EX-10.1_Endorsement Agreement:q008: paragraph(s) [101, 103, 105, 107, 109] not keepable under the current drop rule
+anomaly: PapaJohnsInternationalInc_20190617_8-K_EX-10.1_11707365_EX-10.1_Endorsement Agreement:q009: paragraph(s) [101] not keepable under the current drop rule
+anomaly: PfHospitalityGroupInc_20150923_10-12G_EX-10.1_9266710_EX-10.1_Franchise Agreement1:q005: paragraph(s) [267, 269, 270, 271, 272, 273] not keepable under the current drop rule
+anomaly: CORALGOLDRESOURCES,LTD_05_28_2020-EX-4.1-CONSULTING AGREEMENT:q004: paragraph(s) [37] not keepable under the current drop rule
+anomaly: MRSFIELDSORIGINALCOOKIESINC_01_29_1998-EX-10-FRANCHISE AGREEMENT:q006: paragraph(s) [1229, 1230, 1231, 1232, 1233, 1265, 1267, 1269] not keepable under the current drop rule
+anomaly: MRSFIELDSORIGINALCOOKIESINC_01_29_1998-EX-10-FRANCHISE AGREEMENT:q016: paragraph(s) [243, 244, 245, 246, 247, 249] not keepable under the current drop rule
+anomaly: MRSFIELDSORIGINALCOOKIESINC_01_29_1998-EX-10-FRANCHISE AGREEMENT:q020: paragraph(s) [937, 939, 941, 943, 945, 947] not keepable under the current drop rule
+anomaly: WEBHELPCOMINC_03_22_2000-EX-10.8-HOSTING AGREEMENT:q010: paragraph(s) [25, 27] not keepable under the current drop rule
+anomaly: REGANHOLDINGCORP_03_31_2008-EX-10-LICENSE AND HOSTING AGREEMENT:q009: paragraph(s) [189, 191, 193, 195, 197, 199, 201] not keepable under the current drop rule
+anomaly: BUFFALOWILDWINGSINC_06_05_1998-EX-10.3-FRANCHISE AGREEMENT:q002: paragraph(s) [73, 75, 77, 79, 81, 83, 85] not keepable under the current drop rule
+anomaly: BUFFALOWILDWINGSINC_06_05_1998-EX-10.3-FRANCHISE AGREEMENT:q007: paragraph(s) [467] not keepable under the current drop rule
+anomaly: BUFFALOWILDWINGSINC_06_05_1998-EX-10.3-FRANCHISE AGREEMENT:q014: paragraph(s) [435, 437, 439, 441, 443, 445] not keepable under the current drop rule
+anomaly: BLACKSTONEGSOLONG-SHORTCREDITINCOMEFUND_05_11_2020-EX-99.(K)(1)-SERVICE AGREEMENT:q006: paragraph(s) [75, 76, 77, 78, 79] not keepable under the current drop rule
+anomaly: BICYCLETHERAPEUTICSPLC_03_10_2020-EX-10.11-SERVICE AGREEMENT:q004: paragraph(s) [91, 93, 95] not keepable under the current drop rule
+anomaly: THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT:q001: paragraph(s) [35] not keepable under the current drop rule
+anomaly: HALITRON,INC_03_01_2005-EX-10.15-SPONSORSHIP AND DEVELOPMENT AGREEMENT:q004: paragraph(s) [19, 21, 23, 25, 27] not keepable under the current drop rule
+anomaly: STAMPSCOMINC_06_24_1999-EX-10.18-SPONSORSHIP AGREEMENT:q003: paragraph(s) [165, 166, 167, 168, 169] not keepable under the current drop rule
+anomaly: STAMPSCOMINC_06_24_1999-EX-10.18-SPONSORSHIP AGREEMENT:q005: paragraph(s) [263, 264, 265, 266, 267] not keepable under the current drop rule
+anomaly: VIOLINMEMORYINC_12_12_2012-EX-10.14-SPONSORSHIP AGREEMENT:q006: paragraph(s) [475, 477, 479] not keepable under the current drop rule
+anomaly: XYBERNAUTCORP_07_12_2002-EX-4-SPONSORSHIP AGREEMENT:q002: paragraph(s) [243, 244, 245, 246, 247] not keepable under the current drop rule
+anomaly: DRKOOPCOMINC_04_21_1999-EX-10.28-SPONSORSHIP AGREEMENT:q003: paragraph(s) [201, 202, 203, 204, 205] not keepable under the current drop rule
+anomaly: GSVINC_05_15_1998-EX-10-SPONSORSHIP AGREEMENT:q006: paragraph(s) [227, 228, 229, 230, 231] not keepable under the current drop rule
+anomaly: LOGANSROADHOUSEINC_03_27_1998-EX-10.17-SPONSORSHIP AGREEMENT:q004: paragraph(s) [35, 36, 37, 38, 39] not keepable under the current drop rule
+anomaly: MERCATAINC_03_09_2000-EX-10.21-SPONSORSHIP AGREEMENT:q003: paragraph(s) [97, 98, 99, 100, 101] not keepable under the current drop rule
+anomaly: HYDRONTECHNOLOGIESINC_03_31_1997-EX-10.47-SPONSORSHIP AGREEMENT:q003: paragraph(s) [143] not keepable under the current drop rule
+anomaly: HYDRONTECHNOLOGIESINC_03_31_1997-EX-10.47-SPONSORSHIP AGREEMENT:q004: paragraph(s) [99, 100, 101, 102, 103] not keepable under the current drop rule
+anomaly: ASPIRITYHOLDINGSLLC_05_07_2012-EX-10.6-OUTSOURCING AGREEMENT:q004: paragraph(s) [165, 166, 167, 168, 169] not keepable under the current drop rule
+anomaly: ELANDIAINTERNATIONALINC_04_25_2007-EX-10.21-Outsourcing Agreement:q005: paragraph(s) [1111, 1113, 1115, 1117] not keepable under the current drop rule
+anomaly: ELANDIAINTERNATIONALINC_04_25_2007-EX-10.21-Outsourcing Agreement:q006: paragraph(s) [1229, 1231, 1233, 1235, 1239, 1241] not keepable under the current drop rule
+anomaly: ELANDIAINTERNATIONALINC_04_25_2007-EX-10.21-Outsourcing Agreement:q008: paragraph(s) [909, 911, 913, 915] not keepable under the current drop rule
+anomaly: TRICITYBANKSHARESCORP_05_15_1998-EX-10-OUTSOURCING AGREEMENT:q007: paragraph(s) [677, 679] not keepable under the current drop rule
+anomaly: TRICITYBANKSHARESCORP_05_15_1998-EX-10-OUTSOURCING AGREEMENT:q008: paragraph(s) [677, 679] not keepable under the current drop rule
+anomaly: TRICITYBANKSHARESCORP_05_15_1998-EX-10-OUTSOURCING AGREEMENT:q011: paragraph(s) [437, 439, 441, 443, 445, 447] not keepable under the current drop rule
+anomaly: TRICITYBANKSHARESCORP_05_15_1998-EX-10-OUTSOURCING AGREEMENT:q012: paragraph(s) [463, 465, 466, 467, 468, 469, 471, 473, 475] not keepable under the current drop rule
+anomaly: OFGBANCORP_03_28_2007-EX-10.23-OUTSOURCING AGREEMENT:q015: paragraph(s) [301, 303, 305, 307, 309] not keepable under the current drop rule
+anomaly: MANUFACTURERSSERVICESLTD_06_05_2000-EX-10.14-OUTSOURCING AGREEMENT:q010: paragraph(s) [423] not keepable under the current drop rule
+anomaly: NEXSTARFINANCEHOLDINGSINC_03_27_2002-EX-10.26-OUTSOURCING AGREEMENT:q006: paragraph(s) [51] not keepable under the current drop rule
+anomaly: NEXSTARFINANCEHOLDINGSINC_03_27_2002-EX-10.26-OUTSOURCING AGREEMENT:q007: paragraph(s) [53, 55] not keepable under the current drop rule
+anomaly: ASIANDRAGONGROUPINC_08_11_2005-EX-10.5-Reseller Agreement:q006: paragraph(s) [105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131] not keepable under the current drop rule
+anomaly: LOYALTYPOINTINC_11_16_2004-EX-10.2-RESELLER AGREEMENT:q004: paragraph(s) [33, 35] not keepable under the current drop rule
+anomaly: LOYALTYPOINTINC_11_16_2004-EX-10.2-RESELLER AGREEMENT:q009: paragraph(s) [371, 372, 373, 374, 375] not keepable under the current drop rule
+anomaly: AzulSa_20170303_F-1A_EX-10.3_9943903_EX-10.3_Maintenance Agreement1:q001: paragraph(s) [209, 210, 211] not keepable under the current drop rule
+anomaly: AzulSa_20170303_F-1A_EX-10.3_9943903_EX-10.3_Maintenance Agreement1:q005: paragraph(s) [921] not keepable under the current drop rule
+anomaly: AzulSa_20170303_F-1A_EX-10.3_9943903_EX-10.3_Maintenance Agreement1:q008: paragraph(s) [723, 725] not keepable under the current drop rule
+anomaly: CardlyticsInc_20180112_S-1_EX-10.16_11002987_EX-10.16_Maintenance Agreement1:q009: paragraph(s) [1191, 1193, 1195] not keepable under the current drop rule
+anomaly: BELLICUMPHARMACEUTICALS,INC_05_07_2019-EX-10.1-Supply Agreement:q008: paragraph(s) [853] not keepable under the current drop rule
+anomaly: BELLICUMPHARMACEUTICALS,INC_05_07_2019-EX-10.1-Supply Agreement:q009: paragraph(s) [853] not keepable under the current drop rule
+anomaly: ATMOSENERGYCORP_11_22_2002-EX-10.17-TRANSPORTATION SERVICE AGREEMENT:q002: paragraph(s) [51, 52, 53, 54, 55, 57] not keepable under the current drop rule
+anomaly: ATMOSENERGYCORP_11_22_2002-EX-10.17-TRANSPORTATION SERVICE AGREEMENT:q003: paragraph(s) [51, 52, 53, 54, 55, 57] not keepable under the current drop rule
+anomaly: ATMOSENERGYCORP_11_22_2002-EX-10.17-TRANSPORTATION SERVICE AGREEMENT:q005: paragraph(s) [167, 169, 171, 173, 175] not keepable under the current drop rule
+anomaly: DYNAMEXINC_06_06_1996-EX-10.4-TRANSPORTATION SERVICES AGREEMENT:q013: paragraph(s) [183, 185] not keepable under the current drop rule
+anomaly: MPLXLP_06_17_2015-EX-10.1-TRANSPORTATION SERVICES AGREEMENT:q008: paragraph(s) [159, 161] not keepable under the current drop rule
+anomaly: CHAPARRALRESOURCESINC_03_30_2000-EX-10.66-TRANSPORTATION CONTRACT:q002: paragraph(s) [213, 214, 215, 216, 217] not keepable under the current drop rule
+anomaly: BERKELEYLIGHTS,INC_06_26_2020-EX-10.12-COLLABORATION AGREEMENT:q006: paragraph(s) [915, 917, 919, 921] not keepable under the current drop rule
+anomaly: BERKELEYLIGHTS,INC_06_26_2020-EX-10.12-COLLABORATION AGREEMENT:q007: paragraph(s) [915, 917, 919, 921] not keepable under the current drop rule
+anomaly: MIDDLEBROOKPHARMACEUTICALS,INC_03_18_2010-EX-10.1-PROMOTION AGREEMENT:q006: paragraph(s) [91, 93, 95, 97, 99, 101] not keepable under the current drop rule
+anomaly: MIDDLEBROOKPHARMACEUTICALS,INC_03_18_2010-EX-10.1-PROMOTION AGREEMENT:q007: paragraph(s) [233, 234, 235, 236, 237, 238, 239] not keepable under the current drop rule
+anomaly: ASHWORTHINC_01_29_1999-EX-10.(D)-PROMOTION AGREEMENT AND NANTZ COMMUNICATIONS, INC.:q005: paragraph(s) [113, 114, 115, 116, 117] not keepable under the current drop rule
+anomaly: ASHWORTHINC_01_29_1999-EX-10.(D)-PROMOTION AGREEMENT AND NANTZ COMMUNICATIONS, INC.:q006: paragraph(s) [147, 148, 149, 150, 151] not keepable under the current drop rule
+anomaly: WHITESMOKE,INC_11_08_2011-EX-10.26-PROMOTION AND DISTRIBUTION AGREEMENT:q007: paragraph(s) [433, 435, 437, 439, 441, 446, 448] not keepable under the current drop rule
+anomaly: ACCELERATEDTECHNOLOGIESHOLDINGCORP_04_24_2003-EX-10.13-JOINT VENTURE AGREEMENT:q004: paragraph(s) [25, 27] not keepable under the current drop rule
+anomaly: XENCORINC_10_25_2013-EX-10.24-COLLABORATION AGREEMENT (3):q005: paragraph(s) [1227, 1228, 1229, 1230, 1231] not keepable under the current drop rule
+anomaly: IMMUNOMEDICSINC_08_07_2019-EX-10.1-PROMOTION AGREEMENT:q004: paragraph(s) [731, 732, 733, 734, 735] not keepable under the current drop rule
+anomaly: IMMUNOMEDICSINC_08_07_2019-EX-10.1-PROMOTION AGREEMENT:q007: paragraph(s) [979, 980, 981, 982, 983] not keepable under the current drop rule
+anomaly: IMMUNOMEDICSINC_08_07_2019-EX-10.1-PROMOTION AGREEMENT:q008: paragraph(s) [485, 487, 488, 489, 490, 491] not keepable under the current drop rule
+anomaly: IMMUNOMEDICSINC_08_07_2019-EX-10.1-PROMOTION AGREEMENT:q009: paragraph(s) [375, 377] not keepable under the current drop rule
+anomaly: IMMUNOMEDICSINC_08_07_2019-EX-10.1-PROMOTION AGREEMENT:q016: paragraph(s) [1265] not keepable under the current drop rule
+anomaly: IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT:q004: paragraph(s) [277, 278, 279, 280, 281] not keepable under the current drop rule
+anomaly: IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT:q009: paragraph(s) [227, 228, 229, 230, 231] not keepable under the current drop rule
+anomaly: CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT:q001: paragraph(s) [71] not keepable under the current drop rule
+anomaly: CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT:q005: paragraph(s) [71] not keepable under the current drop rule
+anomaly: CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT:q011: paragraph(s) [89, 90, 91, 92, 93] not keepable under the current drop rule
+anomaly: FEDERATEDGOVERNMENTINCOMESECURITIESINC_04_28_2020-EX-99.SERV AGREE-SERVICES AGREEMENT:q001: paragraph(s) [37, 39, 41, 43] not keepable under the current drop rule
+anomaly: FEDERATEDGOVERNMENTINCOMESECURITIESINC_04_28_2020-EX-99.SERV AGREE-SERVICES AGREEMENT:q003: paragraph(s) [37, 39, 41, 43] not keepable under the current drop rule
+anomaly: INNOVIVA,INC_08_07_2014-EX-10.1-COLLABORATION AGREEMENT:q006: paragraph(s) [297, 299, 309, 311, 312, 313, 315, 317, 319, 321, 323] not keepable under the current drop rule
+anomaly: INNOVIVA,INC_08_07_2014-EX-10.1-COLLABORATION AGREEMENT:q007: paragraph(s) [199, 201, 203, 205, 207] not keepable under the current drop rule
+anomaly: IMPCOTECHNOLOGIESINC_04_15_2003-EX-10.65-JOINT VENTURE AGREEMENT:q003: paragraph(s) [107, 108, 109, 111, 112, 113, 114, 115] not keepable under the current drop rule
+anomaly: AFSALABANCORPINC_08_01_1996-EX-1.1-AGENCY AGREEMENT:q003: paragraph(s) [49, 51] not keepable under the current drop rule
+anomaly: AMERICANPHYSICIANSCAPITALINC_03_31_2003-EX-10.26-AGENCY AGREEMENT:q001: paragraph(s) [73, 75] not keepable under the current drop rule
+anomaly: BIOPURECORP_06_30_1999-EX-10.13-AGENCY AGREEMENT:q008: paragraph(s) [103, 104, 105, 106, 107, 109, 111] not keepable under the current drop rule
+anomaly: AURASYSTEMSINC_06_16_2010-EX-10.25-STRATEGIC ALLIANCE AGREEMENT:q002: paragraph(s) [107, 108, 109, 110, 111, 112, 113, 114, 115] not keepable under the current drop rule
+anomaly: AURASYSTEMSINC_06_16_2010-EX-10.25-STRATEGIC ALLIANCE AGREEMENT:q003: paragraph(s) [107, 108, 109, 110, 111, 112, 113, 114, 115] not keepable under the current drop rule
+anomaly: AURASYSTEMSINC_06_16_2010-EX-10.25-STRATEGIC ALLIANCE AGREEMENT:q006: paragraph(s) [7, 8, 9, 10, 11, 12, 13, 14, 15] not keepable under the current drop rule
+anomaly: AURASYSTEMSINC_06_16_2010-EX-10.25-STRATEGIC ALLIANCE AGREEMENT:q007: paragraph(s) [49, 50, 51, 52, 53, 54, 55, 56, 57] not keepable under the current drop rule
+anomaly: AURASYSTEMSINC_06_16_2010-EX-10.25-STRATEGIC ALLIANCE AGREEMENT:q008: paragraph(s) [7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25] not keepable under the current drop rule
+anomaly: AURASYSTEMSINC_06_16_2010-EX-10.25-STRATEGIC ALLIANCE AGREEMENT:q015: paragraph(s) [201, 202, 203, 204, 205, 206, 207, 208, 209] not keepable under the current drop rule
+anomaly: DUOSTECHNOLOGIESGROUP,INC_04_21_2009-EX-10.1-STRATEGIC ALLIANCE AGREEMENT:q008: paragraph(s) [13, 14, 15, 16, 17] not keepable under the current drop rule
+anomaly: INTRICONCORP_03_10_2009-EX-10.22-Strategic Alliance Agreement:q006: paragraph(s) [233, 235] not keepable under the current drop rule
+anomaly: PHLVARIABLEINSURANCECOCT_08_17_2009-EX-10.1-STRATEGIC ALLIANCE AGREEMENT:q003: paragraph(s) [653, 654, 655, 657, 659] not keepable under the current drop rule
+anomaly: PHLVARIABLEINSURANCECOCT_08_17_2009-EX-10.1-STRATEGIC ALLIANCE AGREEMENT:q006: paragraph(s) [703, 704, 705, 706, 707, 708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 721, 722, 723] not keepable under the current drop rule
+anomaly: ROCKYMOUNTAINCHOCOLATEFACTORY,INC_12_23_2019-EX-10.2-STRATEGIC ALLIANCE AGREEMENT:q006: paragraph(s) [163, 164, 165, 166, 167] not keepable under the current drop rule
+anomaly: TURNKEYCAPITAL,INC_07_20_2017-EX-1.1-Strategic Alliance Agreement:q004: paragraph(s) [109] not keepable under the current drop rule
+anomaly: QIWI_06_16_2017-EX-99.(D)(2)-COOPERATION AGREEMENT:q001: paragraph(s) [183, 185] not keepable under the current drop rule
+anomaly: FIDELITYNATIONALINFORMATIONSERVICES,INC_08_05_2009-EX-10.3-INTELLECTUAL PROPERTY AGREEMENT:q001: paragraph(s) [735, 736, 737, 738, 739] not keepable under the current drop rule
+anomaly: ARMSTRONGFLOORING,INC_01_07_2019-EX-10.2-INTELLECTUAL PROPERTY AGREEMENT:q004: paragraph(s) [437, 438, 439, 440, 441] not keepable under the current drop rule
+anomaly: AIRSPANNETWORKSINC_04_11_2000-EX-10.5-Distributor Agreement:q003: paragraph(s) [31, 32, 33, 34, 35] not keepable under the current drop rule
+anomaly: ENTERTAINMENTGAMINGASIAINC_02_15_2005-EX-10.5-DISTRIBUTOR AGREEMENT:q006: paragraph(s) [115, 117, 119, 121, 131, 133, 135, 137, 138, 139, 140, 141, 143, 145] not keepable under the current drop rule
+anomaly: ENTERTAINMENTGAMINGASIAINC_02_15_2005-EX-10.5-DISTRIBUTOR AGREEMENT:q008: paragraph(s) [21] not keepable under the current drop rule
+anomaly: ETELOS,INC_03_09_2004-EX-10.8-DISTRIBUTOR AGREEMENT:q009: paragraph(s) [229, 231, 232, 233, 234, 235, 236, 237, 239] not keepable under the current drop rule
+anomaly: EUROPEANMICROHOLDINGSINC_03_06_1998-EX-10.6-DISTRIBUTOR AGREEMENT:q007: paragraph(s) [41, 43, 45, 47] not keepable under the current drop rule
+anomaly: EUROPEANMICROHOLDINGSINC_03_06_1998-EX-10.6-DISTRIBUTOR AGREEMENT:q008: paragraph(s) [41, 43, 45, 47] not keepable under the current drop rule
+anomaly: EUROPEANMICROHOLDINGSINC_03_06_1998-EX-10.6-DISTRIBUTOR AGREEMENT:q012: paragraph(s) [329, 330, 331, 332, 333] not keepable under the current drop rule
+anomaly: HYPERIONSOFTWARECORP_09_28_1994-EX-10.47-EXCLUSIVE DISTRIBUTOR AGREEMENT:q006: paragraph(s) [101, 103] not keepable under the current drop rule
+anomaly: LUCIDINC_04_15_2011-EX-10.9-DISTRIBUTOR AGREEMENT:q010: paragraph(s) [31, 32, 33, 34, 35] not keepable under the current drop rule
+anomaly: LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT:q009: paragraph(s) [33, 41, 43, 45, 47, 49, 51, 53] not keepable under the current drop rule
+anomaly: NEOMEDIATECHNOLOGIESINC_12_15_2005-EX-16.1-DISTRIBUTOR AGREEMENT:q009: paragraph(s) [181, 182, 183, 184, 185] not keepable under the current drop rule
+anomaly: OPTIMIZEDTRANSPORTATIONMANAGEMENT,INC_07_26_2000-EX-6.6-DISTRIBUTOR AGREEMENT:q002: paragraph(s) [43, 44, 45, 46, 47] not keepable under the current drop rule
+anomaly: OPTIMIZEDTRANSPORTATIONMANAGEMENT,INC_07_26_2000-EX-6.6-DISTRIBUTOR AGREEMENT:q004: paragraph(s) [19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39] not keepable under the current drop rule
+anomaly: VISIUMTECHNOLOGIES,INC_10_20_2004-EX-10.20-DISTRIBUTOR AGREEMENT:q012: paragraph(s) [291, 292, 293, 294, 295] not keepable under the current drop rule
+anomaly: ENTERPRISEPRODUCTSPARTNERSLP_07_08_1998-EX-10.3-TRANSPORTATION CONTRACT:q009: paragraph(s) [373, 374, 375, 376, 377, 537] not keepable under the current drop rule
+anomaly: ADAMSGOLFINC_03_21_2005-EX-10.17-ENDORSEMENT AGREEMENT:q005: paragraph(s) [57, 59] not keepable under the current drop rule
+anomaly: ADAMSGOLFINC_03_21_2005-EX-10.17-ENDORSEMENT AGREEMENT:q007: paragraph(s) [41, 43, 44, 45, 46, 47, 93, 95] not keepable under the current drop rule
+anomaly: AMBASSADOREYEWEARGROUPINC_11_17_1997-EX-10.28-ENDORSEMENT AGREEMENT:q007: paragraph(s) [45] not keepable under the current drop rule
+anomaly: AMBASSADOREYEWEARGROUPINC_11_17_1997-EX-10.28-ENDORSEMENT AGREEMENT:q009: paragraph(s) [107, 108, 109, 110, 111] not keepable under the current drop rule
+anomaly: HOLIDAYRVSUPERSTORESINC_04_15_2002-EX-10.13-ENDORSEMENT AGREEMENT:q001: paragraph(s) [33, 34, 35, 36, 37] not keepable under the current drop rule
+anomaly: MOVADOGROUPINC_04_30_2003-EX-10.28-ENDORSEMENT AGREEMENT:q002: paragraph(s) [69, 70, 71, 72, 73] not keepable under the current drop rule
+anomaly: WARNINGMANAGEMENTSERVICESINC_12_10_1999-EX-10-ENDORSEMENT AGREEMENT:q011: paragraph(s) [105, 106, 107, 108, 109] not keepable under the current drop rule
+anomaly: WARNERCHILCOTTPLC_12_31_2003-EX-4.36-DEVELOPMENT AGREEMENT:q001: paragraph(s) [217, 218, 219, 220, 221] not keepable under the current drop rule
+anomaly: WARNERCHILCOTTPLC_12_31_2003-EX-4.36-DEVELOPMENT AGREEMENT:q003: paragraph(s) [203, 205] not keepable under the current drop rule
+anomaly: AIRTECHINTERNATIONALGROUPINC_05_08_2000-EX-10.4-FRANCHISE AGREEMENT:q002: paragraph(s) [43, 44, 45, 46, 47, 49, 51, 53, 55, 57] not keepable under the current drop rule
+anomaly: AIRTECHINTERNATIONALGROUPINC_05_08_2000-EX-10.4-FRANCHISE AGREEMENT:q005: paragraph(s) [477] not keepable under the current drop rule
+anomaly: AIRTECHINTERNATIONALGROUPINC_05_08_2000-EX-10.4-FRANCHISE AGREEMENT:q010: paragraph(s) [279, 280, 281, 282, 283] not keepable under the current drop rule
+anomaly: AIRTECHINTERNATIONALGROUPINC_05_08_2000-EX-10.4-FRANCHISE AGREEMENT:q011: paragraph(s) [309, 311, 313] not keepable under the current drop rule
+anomaly: INTERNATIONALFASTFOODCORP_04_04_1997-EX-99-FRANCHISE AGREEMENT:q006: paragraph(s) [689, 691] not keepable under the current drop rule
+anomaly: GOOSEHEADINSURANCE,INC_04_02_2018-EX-10.6-Franchise Agreement:q004: paragraph(s) [477, 479, 480, 481, 482, 483] not keepable under the current drop rule
+anomaly: GOOSEHEADINSURANCE,INC_04_02_2018-EX-10.6-Franchise Agreement:q008: paragraph(s) [209, 211, 212, 213, 214, 215] not keepable under the current drop rule
+anomaly: GOOSEHEADINSURANCE,INC_04_02_2018-EX-10.6-Franchise Agreement:q012: paragraph(s) [403, 405, 406, 407, 408, 409] not keepable under the current drop rule
+anomaly: AMERICASSHOPPINGMALLINC_12_10_1999-EX-10.2-SITE DEVELOPMENT AND HOSTING AGREEMENT:q009: paragraph(s) [17, 89, 90, 91, 92, 93] not keepable under the current drop rule
+anomaly: AMERICASSHOPPINGMALLINC_12_10_1999-EX-10.2-SITE DEVELOPMENT AND HOSTING AGREEMENT:q010: paragraph(s) [89, 90, 91, 92, 93] not keepable under the current drop rule
+anomaly: BLUEFLYINC_03_27_2002-EX-10.27-e-business Hosting Agreement:q005: paragraph(s) [93, 95] not keepable under the current drop rule
+anomaly: BLUEFLYINC_03_27_2002-EX-10.27-e-business Hosting Agreement:q007: paragraph(s) [177] not keepable under the current drop rule
+anomaly: BLUEFLYINC_03_27_2002-EX-10.27-e-business Hosting Agreement:q008: paragraph(s) [177] not keepable under the current drop rule
+anomaly: BLUEFLYINC_03_27_2002-EX-10.27-e-business Hosting Agreement:q010: paragraph(s) [233, 235, 237, 247, 249, 251] not keepable under the current drop rule
+anomaly: BNCMORTGAGEINC_05_17_1999-EX-10.4-LICENSING AND WEB SITE HOSTING AGREEMENT:q007: paragraph(s) [55, 57] not keepable under the current drop rule
+anomaly: BOLIVARMININGCORP_05_23_2003-EX-2.1-VISP WEB SITE BUILDING AND HOSTING AGREEMENT:q007: paragraph(s) [51] not keepable under the current drop rule
+anomaly: CORIOINC_07_20_2000-EX-10.5-LICENSE AND HOSTING AGREEMENT:q008: paragraph(s) [251, 252, 253, 254, 255] not keepable under the current drop rule
+anomaly: CHANGEPOINTCORP_03_08_2000-EX-10.6-LICENSE AND HOSTING AGREEMENT:q007: paragraph(s) [407, 409, 411, 413, 415] not keepable under the current drop rule
+anomaly: CHANGEPOINTCORP_03_08_2000-EX-10.6-LICENSE AND HOSTING AGREEMENT:q012: paragraph(s) [69, 70, 71, 72, 73] not keepable under the current drop rule
+anomaly: CHANGEPOINTCORP_03_08_2000-EX-10.6-LICENSE AND HOSTING AGREEMENT:q013: paragraph(s) [69, 70, 71, 72, 73, 943, 945] not keepable under the current drop rule
+anomaly: INKTOMICORP_06_08_1998-EX-10.14-SOFTWARE HOSTING AGREEMENT:q007: paragraph(s) [81, 82, 83, 84, 85] not keepable under the current drop rule
+anomaly: Columbia Laboratories, (Bermuda) Ltd. - AMEND NO. 2 TO MANUFACTURING AND SUPPLY AGREEMENT:q004: paragraph(s) [105, 107] not keepable under the current drop rule
+anomaly: Magenta Therapeutics, Inc. - Master Development and Manufacturing Agreement:q005: paragraph(s) [201] not keepable under the current drop rule
+anomaly: SFGFINANCIALCORP_05_12_2009-EX-10.1-SOFTWARE LICENSE AND MAINTENANCE AGREEMENT:q005: paragraph(s) [407] not keepable under the current drop rule
+anomaly: SFGFINANCIALCORP_05_12_2009-EX-10.1-SOFTWARE LICENSE AND MAINTENANCE AGREEMENT:q008: paragraph(s) [257, 259, 261, 263, 265] not keepable under the current drop rule
+anomaly: SPARKLINGSPRINGWATERHOLDINGSLTD_07_03_2002-EX-10.13-SOFTWARE LICENSE AND MAINTENANCE AGREEMENT:q009: paragraph(s) [273, 274, 275, 276, 277] not keepable under the current drop rule
+anomaly: SUNTRONCORP_05_17_2006-EX-10.22-MAINTENANCE AGREEMENT:q003: paragraph(s) [29, 30, 31, 32, 33] not keepable under the current drop rule
+anomaly: SUMMAFOURINC_06_19_1998-EX-10.3-SOFTWARE LICENSE AND MAINTENANCE AGREEMENT:q005: paragraph(s) [805, 807, 909, 910, 911, 912, 913] not keepable under the current drop rule
+anomaly: SUMMAFOURINC_06_19_1998-EX-10.3-SOFTWARE LICENSE AND MAINTENANCE AGREEMENT:q012: paragraph(s) [237, 239, 241] not keepable under the current drop rule
+anomaly: VERTICALNETINC_04_01_2002-EX-10.19-MAINTENANCE AND SUPPORT AGREEMENT:q008: paragraph(s) [177, 178, 179, 180, 181] not keepable under the current drop rule
+anomaly: VERTICALNETINC_04_01_2002-EX-10.19-MAINTENANCE AND SUPPORT AGREEMENT:q009: paragraph(s) [177, 178, 179, 180, 181] not keepable under the current drop rule
+anomaly: VERTICALNETINC_04_01_2002-EX-10.19-MAINTENANCE AND SUPPORT AGREEMENT:q010: paragraph(s) [177, 178, 179, 180, 181] not keepable under the current drop rule
+anomaly: LECLANCHÉ S.A. - JOINT DEVELOPMENT AND MARKETING AGREEMENT:q003: paragraph(s) [189] not keepable under the current drop rule
+anomaly: Zounds Hearing, Inc. - MANUFACTURING DESIGN MARKETING AGREEMENT:q011: paragraph(s) [65] not keepable under the current drop rule
+anomaly: Zounds Hearing, Inc. - MANUFACTURING DESIGN MARKETING AGREEMENT:q012: paragraph(s) [47, 48, 49, 50, 51] not keepable under the current drop rule
+anomaly: NETGROCERINC_07_31_1998-EX-10.15-SPONSORSHIP AGREEMENT:q004: paragraph(s) [281, 283, 285] not keepable under the current drop rule
+anomaly: NETGROCERINC_07_31_1998-EX-10.15-SPONSORSHIP AGREEMENT:q006: paragraph(s) [63, 64, 65, 66, 67] not keepable under the current drop rule
+anomaly: RUBIOSRESTAURANTSINC_03_31_2008-EX-10.75-SPONSORSHIP AGREEMENT:q009: paragraph(s) [55, 57] not keepable under the current drop rule
+anomaly: WORLDWIDESTRATEGIESINC_11_02_2005-EX-10-RESELLER AGREEMENT:q013: paragraph(s) [415, 416, 417, 418, 419] not keepable under the current drop rule
+anomaly: VAXCYTE,INC_05_22_2020-EX-10.19-SUPPLY AGREEMENT:q004: paragraph(s) [407, 409, 410, 411, 412, 413, 415] not keepable under the current drop rule
+anomaly: VAXCYTE,INC_05_22_2020-EX-10.19-SUPPLY AGREEMENT:q010: paragraph(s) [265, 267, 269, 270, 271, 272, 273, 275, 277, 279, 281] not keepable under the current drop rule
+anomaly: VERICELCORP_08_06_2019-EX-10.10-SUPPLY AGREEMENT:q012: paragraph(s) [597, 599] not keepable under the current drop rule
+anomaly: HEALTHGATEDATACORP_11_24_1999-EX-10.1-HOSTING AND MANAGEMENT AGREEMENT (1):q012: paragraph(s) [161, 169, 171] not keepable under the current drop rule
+anomaly: HEALTHGATEDATACORP_11_24_1999-EX-10.1-HOSTING AND MANAGEMENT AGREEMENT (1):q013: paragraph(s) [161, 169, 171] not keepable under the current drop rule
+anomaly: HEALTHGATEDATACORP_11_24_1999-EX-10.1-HOSTING AND MANAGEMENT AGREEMENT (1):q015: paragraph(s) [169, 171, 509, 511, 513, 514, 515, 516, 517] not keepable under the current drop rule
+anomaly: NETGEAR,INC_04_21_2003-EX-10.16-DISTRIBUTOR AGREEMENT:q013: paragraph(s) [237, 239] not keepable under the current drop rule
+anomaly: NETGEAR,INC_04_21_2003-EX-10.16-DISTRIBUTOR AGREEMENT:q014: paragraph(s) [143] not keepable under the current drop rule
+anomaly: NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_Amendment:q007: paragraph(s) [39, 40, 41, 42, 43] not keepable under the current drop rule
+anomaly: NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_New:q006: paragraph(s) [63, 65] not keepable under the current drop rule
+anomaly: NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_New:q009: paragraph(s) [325] not keepable under the current drop rule
+anomaly: NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_New:q010: paragraph(s) [63, 65] not keepable under the current drop rule
+anomaly: WOMENSGOLFUNLIMITEDINC_03_29_2000-EX-10.13-ENDORSEMENT AGREEMENT:q004: paragraph(s) [165, 166, 167, 168, 169] not keepable under the current drop rule
+anomaly: WOMENSGOLFUNLIMITEDINC_03_29_2000-EX-10.13-ENDORSEMENT AGREEMENT:q009: paragraph(s) [45, 46, 47, 48, 49] not keepable under the current drop rule
+retrieval: embedding
+dataset: legalbenchrag-cuad
+
+
+## 2026-10-06T12:15:53+00:00 — benchmark sweep_legalbenchrag_cuad — dataset legalbenchrag-cuad — comparison (1 experiment)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.4% | 44.9% | 63.0% | 13.4% | 12.7% | 12.7% | 9.9% | 13.2% | 4/4 | 181s / 106.9s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
+
+## 2026-10-06T12:17:31+00:00 — benchmark sweep_legalbenchrag_cuad — resolved plan
+
+plan    : sweep_legalbenchrag_cuad — 1 experiment(s) over 1 store cell(s)
+dataset : legalbenchrag-cuad
+captures: data/raw/c88547bc806ea086 — 462 capture(s)
+golden  : data/eval/datasets/legalbenchrag-cuad/golden.jsonl — 4046 row(s)
+stores  :
+  baseline               merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-47d5d5a2.json
+experiments:
+  1. baseline-embedding           → baseline               retrieval embedding
+
+
+## 2026-10-06T12:17:31+00:00 — benchmark sweep_legalbenchrag_cuad: baseline-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-47d5d5a2.json` — 18,024 chunks, bge-m3 (1024d), built 2026-10-06T12:11:02+00:00
+golden: `data/eval/datasets/legalbenchrag-cuad/golden.jsonl` — 4046 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.6% | 45.8% | 64.4% | 13.6% | 12.7% | 12.7% | 9.9% | 13.2% |
+| en | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.6% | 45.8% | 64.4% | 13.6% | 12.7% | 12.7% | 9.9% | 13.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.6% | 45.8% | 64.4% | 13.6% | 12.7% | 12.7% | 9.9% | 13.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6007, m002 0.5775, m003 0.6123, m004 0.5847)
+retrieval: embedding
+dataset: legalbenchrag-cuad
+
+
+## 2026-10-06T12:19:11+00:00 — benchmark sweep_legalbenchrag_cuad — dataset legalbenchrag-cuad — comparison (1 experiment)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-embedding | bge-m3 | 1800/0.15/on | embedding | 4042 | 7.7% | 37.2% | 54.8% | 0.297 | 98.7% | 100.0% | 100.0% | 0.993 | 10.6% | 45.8% | 64.4% | 13.6% | 12.7% | 12.7% | 9.9% | 13.2% | 4/4 | reuse / 97.6s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
