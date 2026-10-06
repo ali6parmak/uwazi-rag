@@ -1,0 +1,4 @@
+# checksums.txt — FIXTURE SLICE pins (offline tests only) for legalbenchrag
+
+file   benchmarks/privacy_qa.json   be9d194fcc9d8ad6becdf844ca3228e11c50be5b738fca43784dfb7b40a4f9da
+corpus corpus/privacy_qa            5272e3d73ef023e25388d8aef3df21fd1e549352403c5e0949fa6c487d4a0377

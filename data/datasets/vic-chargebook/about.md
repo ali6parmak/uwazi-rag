@@ -57,10 +57,37 @@ paper and MLEB (`arXiv:2510.19365`). Keep it out of any shipped/commercial artif
 Isaacus sells the Kanon embedders that "top" this benchmark — treat their leaderboard
 as marketing context. The dataset artifact is neutral; we use it for our own sweeps.
 
-## Status
+## Adapter contract (when built)
 
-Upstream verified and parked. Adapter (capture shaping + pass-through chunking +
-golden build) NOT built — integration starts on explicit go. Its dataset id is
-`vic-chargebook` (`instance_key = sha1("dataset:vic-chargebook")[:16]` at adapter
-time); captures would land under `data/raw/<instance_key>/`. `upstream/` is
-gitignored (disposable, re-fetchable, checksum-pinned); this file is committed.
+- one capture PER PASSAGE — the passage is the atomic retrieval unit; its capture holds ONE
+  paragraph (the passage text verbatim), so the gold anchor for a labeled passage is always
+  paragraph position 0
+- pass-through chunking (a dedicated `PassThroughChunker` in `chunking_methods/`): passages
+  arrive pre-chunked, so one capture paragraph → one chunk, no merging/splitting; grading's
+  byte-verify still re-chunks via the recorded chunk config (`passthrough 4096/on`), which on
+  single-paragraph captures is byte-equal to the merge path
+- **the `footnotes` field decision (recorded 2026-10-06 when this adapter landed):** footnotes
+  ride along VERBATIM as a sidecar capture field — preserved for provenance and later
+  attach/drop experiments, but NEVER chunked. Passage = upstream ships it (`text` only), so the
+  instrument stays faithful to the published benchmark until a sweep argues otherwise. 1,907 of
+  4,876 passages carry footnote material.
+- ids unique + slash-free (checked at build); titles may repeat (2,761 unique over 4,876) —
+  identity is the passage id, not the title
+
+## Dataset identity (at adapter time)
+
+- dataset id `vic-chargebook`; `instance_key = sha1("dataset:vic-chargebook")[:16] =
+  c49c2465f4afa801`; captures under `data/raw/c49c2465f4afa801/` (4876 files, one per passage)
+- golden/manual: `data/eval/datasets/vic-chargebook/{golden.jsonl, manual.jsonl}` (committed);
+  golden row ids are `<passage-id>:qNNN` (passages asked twice exist — 5 of them)
+- hand-authored unanswerables live in `manual.jsonl` (commit-time input, merged at build) and
+  give the false-retrieval lens its substrate
+
+## Status (adapter landed 2026-10-06, Step 4a)
+
+Adapter BUILT: one capture per passage, pass-through chunking, golden rows by labeled passage;
+spans/labels verified at build (100/100 labels resolve; checksums pinned in `checksums.txt`).
+Currencies: hit-rate/MRR at passage level (pre-chunked corpus), plus doc-R as the same thing.
+A first recorded sweep lands in `data/eval/results.md` under `— dataset vic-chargebook —` blocks
+once Ollama is up. `upstream/` stays gitignored (disposable, re-fetchable, checksum-pinned);
+`golden.jsonl`/`manual.jsonl` are committed, rebuilt byte-identically by `uwazi-rag dataset`.

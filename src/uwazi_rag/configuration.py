@@ -38,6 +38,9 @@ BENCHMARK_STORES_DIR: Path = DATA_DIR / "benchmark_stores"
 # Step 3.5 eval artifacts. golden.jsonl / manual.jsonl / about.md are committed
 # (the "data is disposable" exception); passages.jsonl is derived and gitignored.
 EVAL_DIR: Path = DATA_DIR / "eval"
+# Step 4a dataset instruments: per-dataset golden/manual live under their dataset id
+# (the instruments are graded separately from the Uwazi golden, never merged into it).
+EVAL_DATASETS_DIR: Path = EVAL_DIR / "datasets"
 # Real captured data for offline unit tests (AGENTS.md testing policy). Committed.
 FIXTURES_DIR: Path = Path(__file__).parent / "tests" / "fixtures"
 
@@ -55,6 +58,16 @@ def instance_key(url: str) -> str:
     store can later serve many instances (PLAN.md golden rule 8, Step 12).
     """
     return hashlib.sha1(url.rstrip("/").encode("utf-8")).hexdigest()[:16]
+
+
+def dataset_instance_key(dataset_id: str) -> str:
+    """The synthetic ``instance_key`` of a benchmark dataset (PLAN.md Step 4a).
+
+    ``sha1("dataset:" + id)[:16]`` — datasets are first-class sources in one
+    global namespace: their captures live under ``data/raw/<instance_key>/``
+    like any Uwazi instance's, sharing chunk identity and store machinery.
+    """
+    return instance_key(f"dataset:{dataset_id}")
 
 
 def uwazi_credentials() -> tuple[str, str, str]:

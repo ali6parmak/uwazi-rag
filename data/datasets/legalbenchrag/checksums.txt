@@ -1,0 +1,14 @@
+# checksums.txt — legalbenchrag adapter pins (committed; upstream/ is gitignored)
+# Pinning exactly what the adapters consume, one source per dataset id
+# (legalbenchrag-privacyqa / -contractnli / -cuad; MAUD is license-gated, unpinned).
+# Measured 2026-10-06 from the parked upstream (HF awinml/legalbench-rag @ 2b9c248bc8179ef0908fd6ba01d50b156facd48b),
+# which had already passed its own SHA256SUMS (718/718) + benchmark-concat check — see data/datasets/legalbenchrag/about.md.
+# Rules (adapters/datasets/pins.py):
+#   file <rel-path>   — sha256 of that file
+#   corpus <rel-dir>  — sha256 over every *.txt under the dir, sorted, as name + "\0" + bytes
+file   benchmarks/privacy_qa.json   12c7afcb0e6e84cdff59914495c3bce005d10bb4665cae12b64a9b57af8fb7b6
+corpus corpus/privacy_qa            bbd5f83e342bde98712f681d25e7914bad582471f49b646029d78e7fb7ee900e
+file   benchmarks/contractnli.json  bc60963c4880e3db3141e96f3a7b75e1dbe195cba8f10f0658872f43430fc77a
+corpus corpus/contractnli           399d39386f0661d6bb4607a8a2fca2f06dd54fad7109af22cbfefd38c2c1a3c8
+file   benchmarks/cuad.json         8e0405b15fb8869c631da424372b488e274f253a81634b78803b21c72c0601f9
+corpus corpus/cuad                  7dbfc5bf5a1ace0755ff52a8687080d01549e677620e9c0c4d4173383b096835

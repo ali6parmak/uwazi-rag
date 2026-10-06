@@ -1,0 +1,4 @@
+# checksums.txt — FIXTURE SLICE pins (offline tests only) for vic-chargebook
+
+file corpus.jsonl c6ad63f7a3afb4ddab80771c481b62379f0b7f8a223705123e6822299bbd6b80
+file qa.jsonl     cc191e6707dde5aa6086d51e5c58337b422ac5b3bd1e752985c35a4a2ceb8c08
