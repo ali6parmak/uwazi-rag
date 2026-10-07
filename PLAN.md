@@ -445,6 +445,18 @@ review. Next work: Step 4a — the instrument adapters (datasets are sourced and
 - Built + verified: privacyqa (194 up + 5 manual; 453 span checks), contractnli (977+5;
   1389), cuad (4042+4; 6247; 1 NFD-referenced file resolved via NFC), vic-chargebook (100+4;
   100/100 labels resolve). Suite 212, ruff/mypy clean.
+- MAUD un-gated + built (2026-10-07, follow-on):
+  license cleared on review — the fourth `legalbenchrag` source registered
+  (pins measured from the same HF revision; fixture slice: Magellan-Centene
+  106 KB + Raven-CNH 208 KB BOM-carrying; adapter tests cover the BOM kept
+  at char 0 under text-mode `utf-8` and the plain `||` amendment-pair names).
+  Built + verified: maud (1676 up + 4 manual; 2839 span self-checks passed) —
+  150 captures + 1,680 golden rows, bit-stable across builds; sampled stale
+  pre-gate captures already under `data/raw/4961ebee…` (3 of 150 checked)
+  turned out byte-identical to the fresh build, so the leftover state
+  carries no drift. `sweep_legalbenchrag_maud.py` declares the instrument
+  (baseline + merge-2400 — the second long-doc pressure case,
+  106 KB–1.01 MB, median 342 KB); first recorded run pending the model-race go.
 - First recorded sweeps (bge-m3, dataset-labeled blocks): privacyqa full geometry ladder —
   merge-2400 leads every chunk/paragraph lens (R@1 36.2%, R@10 95.5%, MRR 0.752); doc-level
   saturated (7 docs). contractnli — baseline leads R@k (R@1 35.7%), merge-1200 leads
@@ -457,7 +469,8 @@ review. Next work: Step 4a — the instrument adapters (datasets are sourced and
   per-model threshold work stays parked.
 - STILL OPEN in 4a: the multi-model race per dataset (bge-m3 only so far — qwen pair,
   nomic-v2-moe, embeddinggemma) and the cuad merge-2400 cell; cuad's store is ~16k chunks so
-  a 5-model sweep is 45+ min (qwen3-8b alone ~25 min). MAUD adapter blocked on license.
+  a 5-model sweep is 45+ min (qwen3-8b alone ~25 min) — and now the maud baseline runs on
+  the same go. MAUD's license gate is RESOLVED (2026-10-07): integration done.
 - `src/uwazi_rag/adapters/datasets/` — one adapter module per upstream dataset, over a
   pure mapping core (offline-testable end to end, per the testing policy):
   - offset-preserving paragraph synthesis from raw corpus text. Reads are Python

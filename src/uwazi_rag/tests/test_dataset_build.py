@@ -169,7 +169,13 @@ def test_upstream_drift_fails_loudly_before_writing(tmp_path: Path) -> None:
 def test_resolve_dataset_wires_the_registry_factories() -> None:
     ids = known_dataset_ids()
 
-    assert set(ids) == {"legalbenchrag-privacyqa", "legalbenchrag-contractnli", "legalbenchrag-cuad", "vic-chargebook"}
+    assert set(ids) == {
+        "legalbenchrag-privacyqa",
+        "legalbenchrag-contractnli",
+        "legalbenchrag-cuad",
+        "legalbenchrag-maud",
+        "vic-chargebook",
+    }
     for dataset_id in ids:
         adapter, hint = resolve_dataset(dataset_id)
         assert adapter.dataset_id == dataset_id

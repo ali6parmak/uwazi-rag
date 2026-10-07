@@ -145,6 +145,7 @@ def test_dataset_instance_key_pins_the_namespace() -> None:
     assert configuration.dataset_instance_key("legalbenchrag-privacyqa") == "8a3f38ffd23a75e2"
     assert configuration.dataset_instance_key("legalbenchrag-contractnli") == "d7f14657e7264534"
     assert configuration.dataset_instance_key("legalbenchrag-cuad") == "c88547bc806ea086"
+    assert configuration.dataset_instance_key("legalbenchrag-maud") == "4961ebee611362f6"
     assert configuration.dataset_instance_key("vic-chargebook") == "c49c2465f4afa801"
 
 
@@ -152,6 +153,7 @@ THE_DATASET_SPECS = [
     ("sweep_legalbenchrag_privacyqa.py", "legalbenchrag-privacyqa", 4),
     ("sweep_legalbenchrag_contractnli.py", "legalbenchrag-contractnli", 3),
     ("sweep_legalbenchrag_cuad.py", "legalbenchrag-cuad", 2),
+    ("sweep_legalbenchrag_maud.py", "legalbenchrag-maud", 2),
     ("sweep_vic_chargebook.py", "vic-chargebook", 2),
 ]
 
