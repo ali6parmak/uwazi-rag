@@ -39,10 +39,10 @@ multi-snippet golds are common (29–64% of questions per source).
 | LegalBench-RAG questions/spans/construction | MIT |
 | PrivacyQA | MIT |
 | ContractNLI, CUAD | CC BY 4.0 |
-| MAUD | **NOT stated in the MAUD repo — unverified** ⚠️ |
+| MAUD | **cleared on review 2026-10-07** — terms accepted for evaluation use |
 
-GATE: MAUD stays un-integrated until its terms are checked with its authors. The other
-three sources are safe for non-commercial evaluation.
+The MAUD gate (checked 2026-10-06 as unstated in its repo) was resolved 2026-10-07:
+the terms were reviewed and accepted, so MAUD integrates as the fourth source.
 
 ## Adapter contract (when built)
 
@@ -79,6 +79,6 @@ duplicate it.
 
 ## Status
 
-Upstream verified and parked. Adapters, capture/golden builds, and sweep specs are NOT
-built — integration starts on explicit go. `upstream/` is gitignored (disposable,
-re-fetchable, checksum-pinned); this file is committed.
+Upstream verified and parked. All four licensed sources are integrated (privacyqa,
+contractnli, cuad, maud); `upstream/` is gitignored (disposable, re-fetchable,
+checksum-pinned); this file is committed.
