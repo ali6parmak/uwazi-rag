@@ -60,10 +60,44 @@ def _nfc(name: str) -> str:
     return unicodedata.normalize("NFC", name)
 
 
-def test_source_ids_exclude_maud() -> None:
-    assert set(SOURCES) == {"legalbenchrag-privacyqa", "legalbenchrag-contractnli", "legalbenchrag-cuad"}
-    with pytest.raises(ValueError, match="MAUD is gated"):
-        LegalBenchRagSource("legalbenchrag-maud")
+def test_sources_cover_all_four_sources_and_reject_unknown_ids() -> None:
+    assert set(SOURCES) == {
+        "legalbenchrag-privacyqa",
+        "legalbenchrag-contractnli",
+        "legalbenchrag-cuad",
+        "legalbenchrag-maud",
+    }
+    with pytest.raises(ValueError, match="legalbenchrag source ids are"):
+        LegalBenchRagSource("legalbenchrag-some-other-source")
+
+
+def test_build_over_the_maud_fixture_slice() -> None:
+    """The MAUD quirks ride the same mapping: BOM kept at char 0, plain ``||`` free names alongside."""
+    adapter = LegalBenchRagSource("legalbenchrag-maud", home_dir=FIXTURE_HOME)
+    result = adapter.build(FIXTURE_HOME / "upstream")
+
+    assert set(result.captures) == {
+        "Magellan Health, Inc._Centene Corporation_en.json",
+        "Raven Industries, Inc._CNH Industrial N.V._en.json",
+    }
+    ids = [row["id"] for row in result.golden_rows]
+    assert ids[:2] == [
+        "Magellan Health, Inc._Centene Corporation:q001",
+        "Magellan Health, Inc._Centene Corporation:q002",
+    ]  # first-appearance document order: Magellan's slice tests precede Raven's
+    assert len(ids) == 12
+    assert result.checks == 17  # every slice snippet passes the span self-check
+
+    raven = result.captures["Raven Industries, Inc._CNH Industrial N.V._en.json"]
+    assert raven["instance_key"] == dataset_instance_key("legalbenchrag-maud")
+    assert raven["template"] == {"id": "dataset", "name": "legalbenchrag-maud"}
+    assert raven["file"] == {
+        "id": "maud/Raven Industries, Inc._CNH Industrial N.V..txt",
+        "name": "Raven Industries, Inc._CNH Industrial N.V..txt",
+    }
+    # the BOM quirk, pinned: the file's first char survives text-mode utf-8 reads
+    # (utf-8-sig would eat it and shift every gold span by one)
+    assert raven["paragraphs"][0]["text"].startswith("\ufeff")
 
 
 def test_build_over_the_fixture_slice() -> None:

@@ -24,7 +24,6 @@ class DatasetSpec(NamedTuple):
     re_fetch_hint: str
 
 
-# MAUD is absent: license-gated (see data/datasets/legalbenchrag/about.md).
 # Re-fetch hints quote each home's verified upstream origin + revision pin.
 _REGISTRY: dict[str, DatasetSpec] = {
     "legalbenchrag-privacyqa": DatasetSpec(
@@ -43,6 +42,13 @@ _REGISTRY: dict[str, DatasetSpec] = {
     ),
     "legalbenchrag-cuad": DatasetSpec(
         make=lambda home: LegalBenchRagSource("legalbenchrag-cuad", home_dir=home),
+        re_fetch_hint=(
+            "hf dataset awinml/legalbench-rag, revision 2b9c248bc8179ef0908fd6ba01d50b156facd48b — "
+            "restore data/datasets/legalbenchrag/upstream/ (benchmarks/ + corpus/) and check SHA256SUMS"
+        ),
+    ),
+    "legalbenchrag-maud": DatasetSpec(
+        make=lambda home: LegalBenchRagSource("legalbenchrag-maud", home_dir=home),
         re_fetch_hint=(
             "hf dataset awinml/legalbench-rag, revision 2b9c248bc8179ef0908fd6ba01d50b156facd48b — "
             "restore data/datasets/legalbenchrag/upstream/ (benchmarks/ + corpus/) and check SHA256SUMS"

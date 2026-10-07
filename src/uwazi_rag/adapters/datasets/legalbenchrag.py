@@ -1,11 +1,15 @@
-"""Step 4a — the legalbenchrag adapter (sources: privacy_qa, contractnli, cuad).
+"""Step 4a — the legalbenchrag adapter (sources: privacy_qa, contractnli,
+cuad, maud).
 
 ZeroEntropy's LegalBench-RAG parked upstream (verified 2026-10-06, see
 ``data/datasets/legalbenchrag/about.md`` — that file is this adapter's
 contract). One dataset per SOURCE (each gets its own instance-key namespace
 and sweep); the upstream package stays shared on disk, never duplicated.
-MAUD is deliberately ABSENT — it is license-gated until its terms are checked
-with its authors.
+MAUD joined 2026-10-07 once its license cleared review — it arrives with the
+source's own quirks the mapping was written for: 148 of its 150 files carry a
+BOM at byte 0 (fine under text-mode ``utf-8`` reads — the BOM is char 0 of
+the offsets' frame, exactly what the gold spans assume) and 16 file names
+carry the ``||`` amendment-pair marker (both sides keep it verbatim).
 
 The mapping (from the home's about.md contract):
 
@@ -47,12 +51,13 @@ from uwazi_rag.adapters.datasets.core import (
 from uwazi_rag.adapters.datasets.pins import PinCheck, verify_pins
 from uwazi_rag.configuration import DATA_DIR, dataset_instance_key
 
-# dataset id → upstream benchmark/corpus source directory. MAUD omitted on
-# purpose (license-gated — see the home's about.md GATE note).
+# dataset id → upstream benchmark/corpus source directory. One id per source;
+# MAUD joined after its license cleared (about.md, 2026-10-07).
 SOURCES: dict[str, str] = {
     "legalbenchrag-privacyqa": "privacy_qa",
     "legalbenchrag-contractnli": "contractnli",
     "legalbenchrag-cuad": "cuad",
+    "legalbenchrag-maud": "maud",
 }
 
 HOME_DIR_NAME = "legalbenchrag"
@@ -68,8 +73,7 @@ class LegalBenchRagSource:
     def __init__(self, dataset_id: str, *, home_dir: Path | None = None) -> None:
         if dataset_id not in SOURCES:
             raise ValueError(
-                f"legalbenchrag source ids are {', '.join(sorted(SOURCES))} "
-                "(MAUD is gated — see data/datasets/legalbenchrag/about.md)"
+                f"legalbenchrag source ids are {', '.join(sorted(SOURCES))} — see data/datasets/legalbenchrag/about.md"
             )
         self._dataset_id = dataset_id
         self.source = SOURCES[dataset_id]
