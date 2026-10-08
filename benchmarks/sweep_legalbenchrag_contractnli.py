@@ -19,7 +19,6 @@ dataset = "legalbenchrag-contractnli"
 
 MODEL_TAGS = [
     "bge-m3",
-    "qwen3-embedding:0.6b",
     "qwen3-embedding:8b",
     "nomic-embed-text-v2-moe",
     "embeddinggemma",
