@@ -2095,3 +2095,386 @@ dataset: legalbenchrag-cuad
 cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
 P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
 
+
+## 2026-10-09T08:58:06+00:00 — benchmark sweep_legalbenchrag_maud — resolved plan
+
+plan    : sweep_legalbenchrag_maud — 14 experiment(s) over 14 store cell(s)
+dataset : legalbenchrag-maud
+captures: data/raw/4961ebee611362f6 — 150 capture(s)
+golden  : data/eval/datasets/legalbenchrag-maud/golden.jsonl — 1680 row(s)
+stores  :
+  baseline-bge-m3        merge 1800/0.15/on     × bge-m3                       → data/benchmark_stores/merge-1800-0.15-on__bge-m3-68231218.json
+  merge-2400-bge-m3      merge 2400/0.15/on     × bge-m3                       → data/benchmark_stores/merge-2400-0.15-on__bge-m3-68231218.json
+  baseline-qwen3-embedding-8b merge 1800/0.15/on     × qwen3-embedding:8b           → data/benchmark_stores/merge-1800-0.15-on__qwen3-embedding-8b-68231218.json
+  merge-2400-qwen3-embedding-8b merge 2400/0.15/on     × qwen3-embedding:8b           → data/benchmark_stores/merge-2400-0.15-on__qwen3-embedding-8b-68231218.json
+  baseline-nomic-embed-text-v2-moe merge 1800/0.15/on     × nomic-embed-text-v2-moe      → data/benchmark_stores/merge-1800-0.15-on__nomic-embed-text-v2-moe-68231218.json
+  merge-2400-nomic-embed-text-v2-moe merge 2400/0.15/on     × nomic-embed-text-v2-moe      → data/benchmark_stores/merge-2400-0.15-on__nomic-embed-text-v2-moe-68231218.json
+  baseline-embeddinggemma merge 1800/0.15/on     × embeddinggemma               → data/benchmark_stores/merge-1800-0.15-on__embeddinggemma-68231218.json
+  merge-2400-embeddinggemma merge 2400/0.15/on     × embeddinggemma               → data/benchmark_stores/merge-2400-0.15-on__embeddinggemma-68231218.json
+  baseline-granite-embedding merge 1800/0.15/on     × granite-embedding            → data/benchmark_stores/merge-1800-0.15-on__granite-embedding-68231218.json
+  merge-2400-granite-embedding merge 2400/0.15/on     × granite-embedding            → data/benchmark_stores/merge-2400-0.15-on__granite-embedding-68231218.json
+  baseline-snowflake-arctic-embed2 merge 1800/0.15/on     × snowflake-arctic-embed2      → data/benchmark_stores/merge-1800-0.15-on__snowflake-arctic-embed2-68231218.json
+  merge-2400-snowflake-arctic-embed2 merge 2400/0.15/on     × snowflake-arctic-embed2      → data/benchmark_stores/merge-2400-0.15-on__snowflake-arctic-embed2-68231218.json
+  baseline-mxbai-embed-large merge 1800/0.15/on     × mxbai-embed-large            → data/benchmark_stores/merge-1800-0.15-on__mxbai-embed-large-68231218.json
+  merge-2400-mxbai-embed-large merge 2400/0.15/on     × mxbai-embed-large            → data/benchmark_stores/merge-2400-0.15-on__mxbai-embed-large-68231218.json
+experiments:
+  1. baseline-bge-m3-embedding    → baseline-bge-m3        retrieval embedding
+  2. merge-2400-bge-m3-embedding  → merge-2400-bge-m3      retrieval embedding
+  3. baseline-qwen3-embedding-8b-embedding → baseline-qwen3-embedding-8b retrieval embedding
+  4. merge-2400-qwen3-embedding-8b-embedding → merge-2400-qwen3-embedding-8b retrieval embedding
+  5. baseline-nomic-embed-text-v2-moe-embedding → baseline-nomic-embed-text-v2-moe retrieval embedding
+  6. merge-2400-nomic-embed-text-v2-moe-embedding → merge-2400-nomic-embed-text-v2-moe retrieval embedding
+  7. baseline-embeddinggemma-embedding → baseline-embeddinggemma retrieval embedding
+  8. merge-2400-embeddinggemma-embedding → merge-2400-embeddinggemma retrieval embedding
+  9. baseline-granite-embedding-embedding → baseline-granite-embedding retrieval embedding
+  10. merge-2400-granite-embedding-embedding → merge-2400-granite-embedding retrieval embedding
+  11. baseline-snowflake-arctic-embed2-embedding → baseline-snowflake-arctic-embed2 retrieval embedding
+  12. merge-2400-snowflake-arctic-embed2-embedding → merge-2400-snowflake-arctic-embed2 retrieval embedding
+  13. baseline-mxbai-embed-large-embedding → baseline-mxbai-embed-large retrieval embedding
+  14. merge-2400-mxbai-embed-large-embedding → merge-2400-mxbai-embed-large retrieval embedding
+
+
+## 2026-10-09T08:58:06+00:00 — benchmark sweep_legalbenchrag_maud: baseline-bge-m3-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__bge-m3-68231218.json` — 38,692 chunks, bge-m3 (1024d), built 2026-10-09T08:58:08+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 11.3% | 23.1% | 30.7% | 0.327 | 94.6% | 97.6% | 98.4% | 0.960 | 17.6% | 35.2% | 45.0% | 19.2% | 22.0% | 10.8% | 7.6% | 16.9% |
+| en | 1676 | 11.3% | 23.1% | 30.7% | 0.327 | 94.6% | 97.6% | 98.4% | 0.960 | 17.6% | 35.2% | 45.0% | 19.2% | 22.0% | 10.8% | 7.6% | 16.9% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 11.3% | 23.1% | 30.7% | 0.327 | 94.6% | 97.6% | 98.4% | 0.960 | 17.6% | 35.2% | 45.0% | 19.2% | 22.0% | 10.8% | 7.6% | 16.9% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6137, m002 0.5811, m003 0.5691, m004 0.5770)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T09:06:18+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-bge-m3-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__bge-m3-68231218.json` — 28,860 chunks, bge-m3 (1024d), built 2026-10-09T09:06:18+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 11.0% | 26.0% | 35.3% | 0.312 | 93.4% | 98.0% | 99.0% | 0.955 | 15.6% | 35.1% | 46.6% | 15.9% | 19.6% | 10.8% | 7.6% | 16.6% |
+| en | 1676 | 11.0% | 26.0% | 35.3% | 0.312 | 93.4% | 98.0% | 99.0% | 0.955 | 15.6% | 35.1% | 46.6% | 15.9% | 19.6% | 10.8% | 7.6% | 16.6% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 11.0% | 26.0% | 35.3% | 0.312 | 93.4% | 98.0% | 99.0% | 0.955 | 15.6% | 35.1% | 46.6% | 15.9% | 19.6% | 10.8% | 7.6% | 16.6% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6228, m002 0.5728, m003 0.5710, m004 0.5636)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T09:13:28+00:00 — benchmark sweep_legalbenchrag_maud: baseline-qwen3-embedding-8b-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__qwen3-embedding-8b-68231218.json` — 38,692 chunks, qwen3-embedding:8b (4096d), built 2026-10-09T09:13:30+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 8.4% | 23.6% | 31.9% | 0.317 | 77.7% | 92.0% | 95.6% | 0.840 | 14.9% | 37.2% | 47.9% | 17.5% | 18.7% | 12.0% | 8.6% | 15.2% |
+| en | 1676 | 8.4% | 23.6% | 31.9% | 0.317 | 77.7% | 92.0% | 95.6% | 0.840 | 14.9% | 37.2% | 47.9% | 17.5% | 18.7% | 12.0% | 8.6% | 15.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 8.4% | 23.6% | 31.9% | 0.317 | 77.7% | 92.0% | 95.6% | 0.840 | 14.9% | 37.2% | 47.9% | 17.5% | 18.7% | 12.0% | 8.6% | 15.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6012, m002 0.5646, m003 0.6574, m004 0.5589)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T10:07:31+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-qwen3-embedding-8b-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__qwen3-embedding-8b-68231218.json` — 28,860 chunks, qwen3-embedding:8b (4096d), built 2026-10-09T10:07:31+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 9.5% | 24.9% | 34.4% | 0.314 | 78.8% | 90.8% | 94.7% | 0.842 | 15.5% | 35.5% | 46.5% | 15.7% | 20.0% | 10.9% | 7.7% | 15.0% |
+| en | 1676 | 9.5% | 24.9% | 34.4% | 0.314 | 78.8% | 90.8% | 94.7% | 0.842 | 15.5% | 35.5% | 46.5% | 15.7% | 20.0% | 10.9% | 7.7% | 15.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 9.5% | 24.9% | 34.4% | 0.314 | 78.8% | 90.8% | 94.7% | 0.842 | 15.5% | 35.5% | 46.5% | 15.7% | 20.0% | 10.9% | 7.7% | 15.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 3/4 (75.0%) (top-1: m001 0.5958, m002 0.5619, m003 0.6345, m004 0.5430)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T10:57:49+00:00 — benchmark sweep_legalbenchrag_maud: baseline-nomic-embed-text-v2-moe-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__nomic-embed-text-v2-moe-68231218.json` — 38,692 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-09T10:57:51+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 9.2% | 19.7% | 26.8% | 0.273 | 82.8% | 90.1% | 92.8% | 0.863 | 14.0% | 29.7% | 39.5% | 15.8% | 17.5% | 9.2% | 6.6% | 13.5% |
+| en | 1676 | 9.2% | 19.7% | 26.8% | 0.273 | 82.8% | 90.1% | 92.8% | 0.863 | 14.0% | 29.7% | 39.5% | 15.8% | 17.5% | 9.2% | 6.6% | 13.5% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 9.2% | 19.7% | 26.8% | 0.273 | 82.8% | 90.1% | 92.8% | 0.863 | 14.0% | 29.7% | 39.5% | 15.8% | 17.5% | 9.2% | 6.6% | 13.5% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.4820, m002 0.4998, m003 0.5020, m004 0.5157)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:03:52+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-nomic-embed-text-v2-moe-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__nomic-embed-text-v2-moe-68231218.json` — 28,860 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-09T11:03:52+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 9.2% | 21.0% | 29.5% | 0.270 | 82.3% | 89.6% | 92.8% | 0.859 | 12.8% | 29.0% | 39.5% | 13.5% | 16.5% | 8.9% | 6.4% | 13.4% |
+| en | 1676 | 9.2% | 21.0% | 29.5% | 0.270 | 82.3% | 89.6% | 92.8% | 0.859 | 12.8% | 29.0% | 39.5% | 13.5% | 16.5% | 8.9% | 6.4% | 13.4% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 9.2% | 21.0% | 29.5% | 0.270 | 82.3% | 89.6% | 92.8% | 0.859 | 12.8% | 29.0% | 39.5% | 13.5% | 16.5% | 8.9% | 6.4% | 13.4% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.4786, m002 0.4998, m003 0.4945, m004 0.5210)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:08:35+00:00 — benchmark sweep_legalbenchrag_maud: baseline-embeddinggemma-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__embeddinggemma-68231218.json` — 38,692 chunks, embeddinggemma (768d), built 2026-10-09T11:08:36+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 9.3% | 21.7% | 29.6% | 0.294 | 92.5% | 97.6% | 99.2% | 0.949 | 15.1% | 32.1% | 42.7% | 17.1% | 18.8% | 10.0% | 7.3% | 14.2% |
+| en | 1676 | 9.3% | 21.7% | 29.6% | 0.294 | 92.5% | 97.6% | 99.2% | 0.949 | 15.1% | 32.1% | 42.7% | 17.1% | 18.8% | 10.0% | 7.3% | 14.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 9.3% | 21.7% | 29.6% | 0.294 | 92.5% | 97.6% | 99.2% | 0.949 | 15.1% | 32.1% | 42.7% | 17.1% | 18.8% | 10.0% | 7.3% | 14.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 1/4 (25.0%) (top-1: m001 0.5465, m002 0.5377, m003 0.5161, m004 0.5518)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:15:00+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-embeddinggemma-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__embeddinggemma-68231218.json` — 28,860 chunks, embeddinggemma (768d), built 2026-10-09T11:15:00+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 9.4% | 24.0% | 33.6% | 0.284 | 90.8% | 97.8% | 98.7% | 0.938 | 13.1% | 32.3% | 43.3% | 14.0% | 16.9% | 9.6% | 7.0% | 14.0% |
+| en | 1676 | 9.4% | 24.0% | 33.6% | 0.284 | 90.8% | 97.8% | 98.7% | 0.938 | 13.1% | 32.3% | 43.3% | 14.0% | 16.9% | 9.6% | 7.0% | 14.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 9.4% | 24.0% | 33.6% | 0.284 | 90.8% | 97.8% | 98.7% | 0.938 | 13.1% | 32.3% | 43.3% | 14.0% | 16.9% | 9.6% | 7.0% | 14.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 1/4 (25.0%) (top-1: m001 0.5299, m002 0.5417, m003 0.5307, m004 0.5751)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:20:37+00:00 — benchmark sweep_legalbenchrag_maud: baseline-granite-embedding-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__granite-embedding-68231218.json` — 38,692 chunks, granite-embedding (384d), built 2026-10-09T11:20:37+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 8.2% | 17.7% | 24.9% | 0.261 | 88.4% | 95.6% | 97.5% | 0.916 | 13.1% | 27.4% | 37.0% | 14.8% | 16.7% | 8.7% | 6.5% | 12.9% |
+| en | 1676 | 8.2% | 17.7% | 24.9% | 0.261 | 88.4% | 95.6% | 97.5% | 0.916 | 13.1% | 27.4% | 37.0% | 14.8% | 16.7% | 8.7% | 6.5% | 12.9% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 8.2% | 17.7% | 24.9% | 0.261 | 88.4% | 95.6% | 97.5% | 0.916 | 13.1% | 27.4% | 37.0% | 14.8% | 16.7% | 8.7% | 6.5% | 12.9% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.7579, m002 0.7689, m003 0.7306, m004 0.7498)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:23:30+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-granite-embedding-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__granite-embedding-68231218.json` — 28,860 chunks, granite-embedding (384d), built 2026-10-09T11:23:30+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 8.2% | 19.5% | 28.0% | 0.254 | 85.9% | 94.9% | 97.6% | 0.900 | 11.5% | 27.4% | 37.6% | 11.8% | 15.3% | 8.5% | 6.3% | 12.4% |
+| en | 1676 | 8.2% | 19.5% | 28.0% | 0.254 | 85.9% | 94.9% | 97.6% | 0.900 | 11.5% | 27.4% | 37.6% | 11.8% | 15.3% | 8.5% | 6.3% | 12.4% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 8.2% | 19.5% | 28.0% | 0.254 | 85.9% | 94.9% | 97.6% | 0.900 | 11.5% | 27.4% | 37.6% | 11.8% | 15.3% | 8.5% | 6.3% | 12.4% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.7663, m002 0.7673, m003 0.7186, m004 0.7454)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:25:54+00:00 — benchmark sweep_legalbenchrag_maud: baseline-snowflake-arctic-embed2-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__snowflake-arctic-embed2-68231218.json` — 38,692 chunks, snowflake-arctic-embed2 (1024d), built 2026-10-09T11:25:56+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 7.2% | 18.3% | 26.2% | 0.255 | 93.7% | 97.7% | 98.7% | 0.954 | 12.2% | 28.4% | 39.0% | 13.9% | 14.9% | 8.9% | 6.7% | 12.4% |
+| en | 1676 | 7.2% | 18.3% | 26.2% | 0.255 | 93.7% | 97.7% | 98.7% | 0.954 | 12.2% | 28.4% | 39.0% | 13.9% | 14.9% | 8.9% | 6.7% | 12.4% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 7.2% | 18.3% | 26.2% | 0.255 | 93.7% | 97.7% | 98.7% | 0.954 | 12.2% | 28.4% | 39.0% | 13.9% | 14.9% | 8.9% | 6.7% | 12.4% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.4927, m002 0.5014, m003 0.5280, m004 0.5287)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:33:06+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-snowflake-arctic-embed2-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__snowflake-arctic-embed2-68231218.json` — 28,860 chunks, snowflake-arctic-embed2 (1024d), built 2026-10-09T11:33:06+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 6.7% | 18.9% | 29.3% | 0.231 | 93.2% | 97.6% | 98.4% | 0.952 | 9.7% | 25.4% | 38.0% | 10.2% | 12.7% | 7.8% | 6.4% | 10.2% |
+| en | 1676 | 6.7% | 18.9% | 29.3% | 0.231 | 93.2% | 97.6% | 98.4% | 0.952 | 9.7% | 25.4% | 38.0% | 10.2% | 12.7% | 7.8% | 6.4% | 10.2% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 6.7% | 18.9% | 29.3% | 0.231 | 93.2% | 97.6% | 98.4% | 0.952 | 9.7% | 25.4% | 38.0% | 10.2% | 12.7% | 7.8% | 6.4% | 10.2% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.5088, m002 0.4913, m003 0.4963, m004 0.5138)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:39:55+00:00 — benchmark sweep_legalbenchrag_maud: baseline-mxbai-embed-large-embedding
+
+store: `data/benchmark_stores/merge-1800-0.15-on__mxbai-embed-large-68231218.json` — 38,692 chunks, mxbai-embed-large (1024d), built 2026-10-09T11:39:56+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 1800, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 8.9% | 19.6% | 27.2% | 0.288 | 88.9% | 96.3% | 98.2% | 0.922 | 14.3% | 30.6% | 40.9% | 16.0% | 17.9% | 9.4% | 6.9% | 13.8% |
+| en | 1676 | 8.9% | 19.6% | 27.2% | 0.288 | 88.9% | 96.3% | 98.2% | 0.922 | 14.3% | 30.6% | 40.9% | 16.0% | 17.9% | 9.4% | 6.9% | 13.8% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 8.9% | 19.6% | 27.2% | 0.288 | 88.9% | 96.3% | 98.2% | 0.922 | 14.3% | 30.6% | 40.9% | 16.0% | 17.9% | 9.4% | 6.9% | 13.8% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6919, m002 0.6385, m003 0.6795, m004 0.6710)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:47:01+00:00 — benchmark sweep_legalbenchrag_maud: merge-2400-mxbai-embed-large-embedding
+
+store: `data/benchmark_stores/merge-2400-0.15-on__mxbai-embed-large-68231218.json` — 28,860 chunks, mxbai-embed-large (1024d), built 2026-10-09T11:47:01+00:00
+golden: `data/eval/datasets/legalbenchrag-maud/golden.jsonl` — 1680 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 2400, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 1676 | 9.1% | 20.8% | 30.0% | 0.277 | 90.0% | 97.3% | 98.6% | 0.933 | 13.3% | 29.3% | 41.0% | 13.5% | 16.8% | 9.0% | 6.7% | 13.7% |
+| en | 1676 | 9.1% | 20.8% | 30.0% | 0.277 | 90.0% | 97.3% | 98.6% | 0.933 | 13.3% | 29.3% | 41.0% | 13.5% | 16.8% | 9.0% | 6.7% | 13.7% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 1676 | 9.1% | 20.8% | 30.0% | 0.277 | 90.0% | 97.3% | 98.6% | 0.933 | 13.3% | 29.3% | 41.0% | 13.5% | 16.8% | 9.0% | 6.7% | 13.7% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6774, m002 0.6421, m003 0.6880, m004 0.6678)
+retrieval: embedding
+dataset: legalbenchrag-maud
+
+
+## 2026-10-09T11:52:29+00:00 — benchmark sweep_legalbenchrag_maud — dataset legalbenchrag-maud — comparison (14 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-bge-m3-embedding | bge-m3 | 1800/0.15/on | embedding | 1676 | 11.3% | 23.1% | 30.7% | 0.327 | 94.6% | 97.6% | 98.4% | 0.960 | 17.6% | 35.2% | 45.0% | 19.2% | 22.0% | 10.8% | 7.6% | 16.9% | 4/4 | 388s / 94.1s |
+| merge-2400-bge-m3-embedding | bge-m3 | 2400/0.15/on | embedding | 1676 | 11.0% | 26.0% | 35.3% | 0.312 | 93.4% | 98.0% | 99.0% | 0.955 | 15.6% | 35.1% | 46.6% | 15.9% | 19.6% | 10.8% | 7.6% | 16.6% | 4/4 | 347s / 78.3s |
+| baseline-qwen3-embedding-8b-embedding | qwen3-embedding:8b | 1800/0.15/on | embedding | 1676 | 8.4% | 23.6% | 31.9% | 0.317 | 77.7% | 92.0% | 95.6% | 0.840 | 14.9% | 37.2% | 47.9% | 17.5% | 18.7% | 12.0% | 8.6% | 15.2% | 4/4 | 2902s / 311.0s |
+| merge-2400-qwen3-embedding-8b-embedding | qwen3-embedding:8b | 2400/0.15/on | embedding | 1676 | 9.5% | 24.9% | 34.4% | 0.314 | 78.8% | 90.8% | 94.7% | 0.842 | 15.5% | 35.5% | 46.5% | 15.7% | 20.0% | 10.9% | 7.7% | 15.0% | 3/4 | 2736s / 261.1s |
+| baseline-nomic-embed-text-v2-moe-embedding | nomic-embed-text-v2-moe | 1800/0.15/on | embedding | 1676 | 9.2% | 19.7% | 26.8% | 0.273 | 82.8% | 90.1% | 92.8% | 0.863 | 14.0% | 29.7% | 39.5% | 15.8% | 17.5% | 9.2% | 6.6% | 13.5% | 0/4 | 294s / 62.0s |
+| merge-2400-nomic-embed-text-v2-moe-embedding | nomic-embed-text-v2-moe | 2400/0.15/on | embedding | 1676 | 9.2% | 21.0% | 29.5% | 0.270 | 82.3% | 89.6% | 92.8% | 0.859 | 12.8% | 29.0% | 39.5% | 13.5% | 16.5% | 8.9% | 6.4% | 13.4% | 0/4 | 231s / 48.1s |
+| baseline-embeddinggemma-embedding | embeddinggemma | 1800/0.15/on | embedding | 1676 | 9.3% | 21.7% | 29.6% | 0.294 | 92.5% | 97.6% | 99.2% | 0.949 | 15.1% | 32.1% | 42.7% | 17.1% | 18.8% | 10.0% | 7.3% | 14.2% | 1/4 | 315s / 62.9s |
+| merge-2400-embeddinggemma-embedding | embeddinggemma | 2400/0.15/on | embedding | 1676 | 9.4% | 24.0% | 33.6% | 0.284 | 90.8% | 97.8% | 98.7% | 0.938 | 13.1% | 32.3% | 43.3% | 14.0% | 16.9% | 9.6% | 7.0% | 14.0% | 1/4 | 279s / 53.8s |
+| baseline-granite-embedding-embedding | granite-embedding | 1800/0.15/on | embedding | 1676 | 8.2% | 17.7% | 24.9% | 0.261 | 88.4% | 95.6% | 97.5% | 0.916 | 13.1% | 27.4% | 37.0% | 14.8% | 16.7% | 8.7% | 6.5% | 12.9% | 4/4 | 133s / 36.9s |
+| merge-2400-granite-embedding-embedding | granite-embedding | 2400/0.15/on | embedding | 1676 | 8.2% | 19.5% | 28.0% | 0.254 | 85.9% | 94.9% | 97.6% | 0.900 | 11.5% | 27.4% | 37.6% | 11.8% | 15.3% | 8.5% | 6.3% | 12.4% | 4/4 | 115s / 26.9s |
+| baseline-snowflake-arctic-embed2-embedding | snowflake-arctic-embed2 | 1800/0.15/on | embedding | 1676 | 7.2% | 18.3% | 26.2% | 0.255 | 93.7% | 97.7% | 98.7% | 0.954 | 12.2% | 28.4% | 39.0% | 13.9% | 14.9% | 8.9% | 6.7% | 12.4% | 0/4 | 354s / 69.5s |
+| merge-2400-snowflake-arctic-embed2-embedding | snowflake-arctic-embed2 | 2400/0.15/on | embedding | 1676 | 6.7% | 18.9% | 29.3% | 0.231 | 93.2% | 97.6% | 98.4% | 0.952 | 9.7% | 25.4% | 38.0% | 10.2% | 12.7% | 7.8% | 6.4% | 10.2% | 0/4 | 339s / 64.4s |
+| baseline-mxbai-embed-large-embedding | mxbai-embed-large | 1800/0.15/on | embedding | 1676 | 8.9% | 19.6% | 27.2% | 0.288 | 88.9% | 96.3% | 98.2% | 0.922 | 14.3% | 30.6% | 40.9% | 16.0% | 17.9% | 9.4% | 6.9% | 13.8% | 4/4 | 348s / 69.2s |
+| merge-2400-mxbai-embed-large-embedding | mxbai-embed-large | 2400/0.15/on | embedding | 1676 | 9.1% | 20.8% | 30.0% | 0.277 | 90.0% | 97.3% | 98.6% | 0.933 | 13.3% | 29.3% | 41.0% | 13.5% | 16.8% | 9.0% | 6.7% | 13.7% | 4/4 | 268s / 54.9s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
