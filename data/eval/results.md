@@ -2478,3 +2478,386 @@ dataset: legalbenchrag-maud
 cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
 P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
 
+
+## 2026-10-09T12:07:05+00:00 — benchmark sweep_vic_chargebook — resolved plan
+
+plan    : sweep_vic_chargebook — 14 experiment(s) over 14 store cell(s)
+dataset : vic-chargebook
+captures: data/raw/c49c2465f4afa801 — 4876 capture(s)
+golden  : data/eval/datasets/vic-chargebook/golden.jsonl — 104 row(s)
+stores  :
+  baseline-bge-m3        passthrough 4096/on    × bge-m3                       → data/benchmark_stores/passthrough-4096-on__bge-m3-6adfbee8.json
+  noheader-bge-m3        passthrough 4096/off   × bge-m3                       → data/benchmark_stores/passthrough-4096-off__bge-m3-6adfbee8.json
+  baseline-qwen3-embedding-8b passthrough 4096/on    × qwen3-embedding:8b           → data/benchmark_stores/passthrough-4096-on__qwen3-embedding-8b-6adfbee8.json
+  noheader-qwen3-embedding-8b passthrough 4096/off   × qwen3-embedding:8b           → data/benchmark_stores/passthrough-4096-off__qwen3-embedding-8b-6adfbee8.json
+  baseline-nomic-embed-text-v2-moe passthrough 4096/on    × nomic-embed-text-v2-moe      → data/benchmark_stores/passthrough-4096-on__nomic-embed-text-v2-moe-6adfbee8.json
+  noheader-nomic-embed-text-v2-moe passthrough 4096/off   × nomic-embed-text-v2-moe      → data/benchmark_stores/passthrough-4096-off__nomic-embed-text-v2-moe-6adfbee8.json
+  baseline-embeddinggemma passthrough 4096/on    × embeddinggemma               → data/benchmark_stores/passthrough-4096-on__embeddinggemma-6adfbee8.json
+  noheader-embeddinggemma passthrough 4096/off   × embeddinggemma               → data/benchmark_stores/passthrough-4096-off__embeddinggemma-6adfbee8.json
+  baseline-granite-embedding passthrough 4096/on    × granite-embedding            → data/benchmark_stores/passthrough-4096-on__granite-embedding-6adfbee8.json
+  noheader-granite-embedding passthrough 4096/off   × granite-embedding            → data/benchmark_stores/passthrough-4096-off__granite-embedding-6adfbee8.json
+  baseline-snowflake-arctic-embed2 passthrough 4096/on    × snowflake-arctic-embed2      → data/benchmark_stores/passthrough-4096-on__snowflake-arctic-embed2-6adfbee8.json
+  noheader-snowflake-arctic-embed2 passthrough 4096/off   × snowflake-arctic-embed2      → data/benchmark_stores/passthrough-4096-off__snowflake-arctic-embed2-6adfbee8.json
+  baseline-mxbai-embed-large passthrough 4096/on    × mxbai-embed-large            → data/benchmark_stores/passthrough-4096-on__mxbai-embed-large-6adfbee8.json
+  noheader-mxbai-embed-large passthrough 4096/off   × mxbai-embed-large            → data/benchmark_stores/passthrough-4096-off__mxbai-embed-large-6adfbee8.json
+experiments:
+  1. baseline-bge-m3-embedding    → baseline-bge-m3        retrieval embedding
+  2. noheader-bge-m3-embedding    → noheader-bge-m3        retrieval embedding
+  3. baseline-qwen3-embedding-8b-embedding → baseline-qwen3-embedding-8b retrieval embedding
+  4. noheader-qwen3-embedding-8b-embedding → noheader-qwen3-embedding-8b retrieval embedding
+  5. baseline-nomic-embed-text-v2-moe-embedding → baseline-nomic-embed-text-v2-moe retrieval embedding
+  6. noheader-nomic-embed-text-v2-moe-embedding → noheader-nomic-embed-text-v2-moe retrieval embedding
+  7. baseline-embeddinggemma-embedding → baseline-embeddinggemma retrieval embedding
+  8. noheader-embeddinggemma-embedding → noheader-embeddinggemma retrieval embedding
+  9. baseline-granite-embedding-embedding → baseline-granite-embedding retrieval embedding
+  10. noheader-granite-embedding-embedding → noheader-granite-embedding retrieval embedding
+  11. baseline-snowflake-arctic-embed2-embedding → baseline-snowflake-arctic-embed2 retrieval embedding
+  12. noheader-snowflake-arctic-embed2-embedding → noheader-snowflake-arctic-embed2 retrieval embedding
+  13. baseline-mxbai-embed-large-embedding → baseline-mxbai-embed-large retrieval embedding
+  14. noheader-mxbai-embed-large-embedding → noheader-mxbai-embed-large retrieval embedding
+
+
+## 2026-10-09T12:07:05+00:00 — benchmark sweep_vic_chargebook: baseline-bge-m3-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__bge-m3-6adfbee8.json` — 4,876 chunks, bge-m3 (1024d), built 2026-10-09T12:07:07+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% |
+| en | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 3/4 (75.0%) (top-1: m001 0.5837, m002 0.5563, m003 0.5499, m004 0.5571)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:07:58+00:00 — benchmark sweep_vic_chargebook: noheader-bge-m3-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__bge-m3-6adfbee8.json` — 4,876 chunks, bge-m3 (1024d), built 2026-10-09T12:07:58+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% |
+| en | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 3/4 (75.0%) (top-1: m001 0.5696, m002 0.5526, m003 0.5351, m004 0.5504)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:08:46+00:00 — benchmark sweep_vic_chargebook: baseline-qwen3-embedding-8b-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__qwen3-embedding-8b-6adfbee8.json` — 4,876 chunks, qwen3-embedding:8b (4096d), built 2026-10-09T12:08:47+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 28.0% | 19.0% | 10.8% | 7.0% | 19.0% |
+| en | 100 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 28.0% | 19.0% | 10.8% | 7.0% | 19.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 28.0% | 19.0% | 10.8% | 7.0% | 19.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 2/4 (50.0%) (top-1: m001 0.6060, m002 0.5410, m003 0.6149, m004 0.5348)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:15:01+00:00 — benchmark sweep_vic_chargebook: noheader-qwen3-embedding-8b-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__qwen3-embedding-8b-6adfbee8.json` — 4,876 chunks, qwen3-embedding:8b (4096d), built 2026-10-09T12:15:01+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 22.0% | 17.0% | 10.0% | 6.9% | 17.0% |
+| en | 100 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 22.0% | 17.0% | 10.0% | 6.9% | 17.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 22.0% | 17.0% | 10.0% | 6.9% | 17.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 2/4 (50.0%) (top-1: m001 0.6043, m002 0.5277, m003 0.5970, m004 0.5249)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:21:10+00:00 — benchmark sweep_vic_chargebook: baseline-nomic-embed-text-v2-moe-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__nomic-embed-text-v2-moe-6adfbee8.json` — 4,876 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-09T12:21:11+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 18.0% | 10.0% | 8.0% | 5.0% | 10.0% |
+| en | 100 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 18.0% | 10.0% | 8.0% | 5.0% | 10.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 18.0% | 10.0% | 8.0% | 5.0% | 10.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.5488, m002 0.5372, m003 0.5080, m004 0.4864)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:21:46+00:00 — benchmark sweep_vic_chargebook: noheader-nomic-embed-text-v2-moe-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__nomic-embed-text-v2-moe-6adfbee8.json` — 4,876 chunks, nomic-embed-text-v2-moe (768d), built 2026-10-09T12:21:46+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 20.0% | 17.0% | 7.6% | 4.8% | 17.0% |
+| en | 100 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 20.0% | 17.0% | 7.6% | 4.8% | 17.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 20.0% | 17.0% | 7.6% | 4.8% | 17.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 1/4 (25.0%) (top-1: m001 0.5580, m002 0.5368, m003 0.5073, m004 0.4746)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:22:20+00:00 — benchmark sweep_vic_chargebook: baseline-embeddinggemma-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__embeddinggemma-6adfbee8.json` — 4,876 chunks, embeddinggemma (768d), built 2026-10-09T12:22:21+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 22.0% | 18.0% | 6.8% | 4.4% | 18.0% |
+| en | 100 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 22.0% | 18.0% | 6.8% | 4.4% | 18.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 22.0% | 18.0% | 6.8% | 4.4% | 18.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.4915, m002 0.5093, m003 0.5028, m004 0.5120)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:23:03+00:00 — benchmark sweep_vic_chargebook: noheader-embeddinggemma-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__embeddinggemma-6adfbee8.json` — 4,876 chunks, embeddinggemma (768d), built 2026-10-09T12:23:03+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 23.0% | 21.0% | 7.2% | 4.8% | 21.0% |
+| en | 100 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 23.0% | 21.0% | 7.2% | 4.8% | 21.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 23.0% | 21.0% | 7.2% | 4.8% | 21.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.5179, m002 0.4776, m003 0.5307, m004 0.4987)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:23:42+00:00 — benchmark sweep_vic_chargebook: baseline-granite-embedding-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__granite-embedding-6adfbee8.json` — 4,876 chunks, granite-embedding (384d), built 2026-10-09T12:23:43+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 14.0% | 14.0% | 5.4% | 4.0% | 14.0% |
+| en | 100 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 14.0% | 14.0% | 5.4% | 4.0% | 14.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 14.0% | 14.0% | 5.4% | 4.0% | 14.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.7812, m002 0.7583, m003 0.7613, m004 0.7308)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:23:59+00:00 — benchmark sweep_vic_chargebook: noheader-granite-embedding-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__granite-embedding-6adfbee8.json` — 4,876 chunks, granite-embedding (384d), built 2026-10-09T12:23:59+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 16.0% | 11.0% | 5.4% | 3.9% | 11.0% |
+| en | 100 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 16.0% | 11.0% | 5.4% | 3.9% | 11.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 16.0% | 11.0% | 5.4% | 3.9% | 11.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.7662, m002 0.7534, m003 0.7483, m004 0.7209)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:24:16+00:00 — benchmark sweep_vic_chargebook: baseline-snowflake-arctic-embed2-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__snowflake-arctic-embed2-6adfbee8.json` — 4,876 chunks, snowflake-arctic-embed2 (1024d), built 2026-10-09T12:24:22+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 32.0% | 26.0% | 8.6% | 5.6% | 26.0% |
+| en | 100 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 32.0% | 26.0% | 8.6% | 5.6% | 26.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 32.0% | 26.0% | 8.6% | 5.6% | 26.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.4907, m002 0.5085, m003 0.5152, m004 0.5275)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:25:13+00:00 — benchmark sweep_vic_chargebook: noheader-snowflake-arctic-embed2-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__snowflake-arctic-embed2-6adfbee8.json` — 4,876 chunks, snowflake-arctic-embed2 (1024d), built 2026-10-09T12:25:13+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 27.0% | 21.0% | 8.0% | 4.9% | 21.0% |
+| en | 100 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 27.0% | 21.0% | 8.0% | 4.9% | 21.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 27.0% | 21.0% | 8.0% | 4.9% | 21.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 0/4 (0.0%) (top-1: m001 0.4876, m002 0.4987, m003 0.4976, m004 0.5168)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:25:59+00:00 — benchmark sweep_vic_chargebook: baseline-mxbai-embed-large-embedding
+
+store: `data/benchmark_stores/passthrough-4096-on__mxbai-embed-large-6adfbee8.json` — 4,876 chunks, mxbai-embed-large (1024d), built 2026-10-09T12:26:05+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 12.0% | 8.0% | 6.2% | 3.7% | 8.0% |
+| en | 100 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 12.0% | 8.0% | 6.2% | 3.7% | 8.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 12.0% | 8.0% | 6.2% | 3.7% | 8.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6301, m002 0.6977, m003 0.6261, m004 0.6352)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:26:46+00:00 — benchmark sweep_vic_chargebook: noheader-mxbai-embed-large-embedding
+
+store: `data/benchmark_stores/passthrough-4096-off__mxbai-embed-large-6adfbee8.json` — 4,876 chunks, mxbai-embed-large (1024d), built 2026-10-09T12:26:46+00:00
+golden: `data/eval/datasets/vic-chargebook/golden.jsonl` — 104 rows (0 synthetic / 4 manual); ranked depth 100
+chunk config: max-chars 4096, overlap 0, header OFF
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 100 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 13.0% | 10.0% | 5.8% | 3.8% | 10.0% |
+| en | 100 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 13.0% | 10.0% | 5.8% | 3.8% | 10.0% |
+| synthetic | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| manual | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| cross-language | 0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| same-language | 100 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 13.0% | 10.0% | 5.8% | 3.8% | 10.0% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 4 rows, threshold ≥ 0.550 → false-retrieval 4/4 (100.0%) (top-1: m001 0.6477, m002 0.7060, m003 0.6300, m004 0.6530)
+retrieval: embedding
+dataset: vic-chargebook
+
+
+## 2026-10-09T12:27:27+00:00 — benchmark sweep_vic_chargebook — dataset vic-chargebook — comparison (14 experiments)
+
+| experiment | model | chunk cfg | retrieval | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP | false-retr | build/score time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline-bge-m3-embedding | bge-m3 | 4096/0/on | embedding | 100 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 0.248 | 16.0% | 35.0% | 42.0% | 18.0% | 16.0% | 7.0% | 4.2% | 16.0% | 3/4 | 48s / 1.8s |
+| noheader-bge-m3-embedding | bge-m3 | 4096/0/off | embedding | 100 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 0.229 | 13.0% | 34.0% | 41.0% | 15.0% | 13.0% | 6.8% | 4.1% | 13.0% | 3/4 | 45s / 2.3s |
+| baseline-qwen3-embedding-8b-embedding | qwen3-embedding:8b | 4096/0/on | embedding | 100 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 0.356 | 19.0% | 54.0% | 70.0% | 28.0% | 19.0% | 10.8% | 7.0% | 19.0% | 2/4 | 364s / 6.9s |
+| noheader-qwen3-embedding-8b-embedding | qwen3-embedding:8b | 4096/0/off | embedding | 100 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 0.322 | 17.0% | 50.0% | 69.0% | 22.0% | 17.0% | 10.0% | 6.9% | 17.0% | 2/4 | 357s / 7.7s |
+| baseline-nomic-embed-text-v2-moe-embedding | nomic-embed-text-v2-moe | 4096/0/on | embedding | 100 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 0.241 | 10.0% | 40.0% | 50.0% | 18.0% | 10.0% | 8.0% | 5.0% | 10.0% | 0/4 | 33s / 1.4s |
+| noheader-nomic-embed-text-v2-moe-embedding | nomic-embed-text-v2-moe | 4096/0/off | embedding | 100 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 0.272 | 17.0% | 38.0% | 48.0% | 20.0% | 17.0% | 7.6% | 4.8% | 17.0% | 1/4 | 32s / 1.4s |
+| baseline-embeddinggemma-embedding | embeddinggemma | 4096/0/on | embedding | 100 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 0.274 | 18.0% | 34.0% | 44.0% | 22.0% | 18.0% | 6.8% | 4.4% | 18.0% | 0/4 | 40s / 1.5s |
+| noheader-embeddinggemma-embedding | embeddinggemma | 4096/0/off | embedding | 100 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 0.289 | 21.0% | 36.0% | 48.0% | 23.0% | 21.0% | 7.2% | 4.8% | 21.0% | 0/4 | 37s / 1.8s |
+| baseline-granite-embedding-embedding | granite-embedding | 4096/0/on | embedding | 100 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 0.212 | 14.0% | 27.0% | 40.0% | 14.0% | 14.0% | 5.4% | 4.0% | 14.0% | 4/4 | 15s / 1.1s |
+| noheader-granite-embedding-embedding | granite-embedding | 4096/0/off | embedding | 100 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 0.197 | 11.0% | 27.0% | 39.0% | 16.0% | 11.0% | 5.4% | 3.9% | 11.0% | 4/4 | 15s / 0.9s |
+| baseline-snowflake-arctic-embed2-embedding | snowflake-arctic-embed2 | 4096/0/on | embedding | 100 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 0.352 | 26.0% | 43.0% | 56.0% | 32.0% | 26.0% | 8.6% | 5.6% | 26.0% | 0/4 | 48s / 2.0s |
+| noheader-snowflake-arctic-embed2-embedding | snowflake-arctic-embed2 | 4096/0/off | embedding | 100 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 0.308 | 21.0% | 40.0% | 49.0% | 27.0% | 21.0% | 8.0% | 4.9% | 21.0% | 0/4 | 43s / 2.2s |
+| baseline-mxbai-embed-large-embedding | mxbai-embed-large | 4096/0/on | embedding | 100 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 0.194 | 8.0% | 31.0% | 37.0% | 12.0% | 8.0% | 6.2% | 3.7% | 8.0% | 4/4 | 39s / 1.6s |
+| noheader-mxbai-embed-large-embedding | mxbai-embed-large | 4096/0/off | embedding | 100 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 13.0% | 10.0% | 5.8% | 3.8% | 10.0% | 4/4 | 38s / 1.8s |
+
+cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+
