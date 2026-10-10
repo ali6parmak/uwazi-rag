@@ -538,6 +538,90 @@ entities.
 
 ---
 
+## Step 4c — Chunking-method stage (Stage ladder waves 3.0–3.3, pre-stated 2026-10-09)
+
+**Goal:** measure the chunking-method axis the way the model axis was measured — one question
+per wave, methods pure and offline-testable, fixed reference model — then lock chunking +
+model together before Step 5.
+
+**Ladder (settled):** Stage 1 model races (RECORDED) → Stage 2 verdicts (recorded in
+results.md) → Stage 3 methods: [merge, SegmentChunker, SectionChunker] with rung 2
+(+sentence-boundary splitting, +section breadcrumb) on the winner only → Stage 4 model
+re-race at the locked geometry → Stage 5 bm25/rrf arms at the lock = Step 5's
+baseline-to-beat. Rules in force: small instruments (uwazi/privacyqa/contractnli) for wide
+grids, cuad/maud for finalists; false-retr is a GATE, not a bonus metric; comparisons
+within a dataset only; verdicts are snapshots. **vic-chargebook is out of scope for
+chunking methods** — pre-chunked fixed passages; its config does not change.
+
+**Stage 1 + 2 (RECORDED 2026-10-07/09 — data/eval/results.md Stage 2 verdict block,
+commits 08822d0…55bf43f):** 21 uwazi cells + 5×14 dataset cells (qwen3-embedding:0.6b
+excluded from the dataset specs pre-run; the uwazi race itself ran 7 models). Verdict: no
+single model leads everywhere — embeddinggemma uwazi/contractnli/cuad, bge-m3
+privacyqa@2400 + maud, snowflake-arctic-embed2 vic; the false-retr gate tracks the model,
+not the geometry (threshold recalibration pre-declared before Step 5). Reference model for
+the method stage = **bge-m3** (contingency: embeddinggemma joins the small-instrument race
+if the arm ranking looks unstable). Step 5 shortlist snapshot: bge-m3 / embeddinggemma /
+snowflake-arctic-embed2.
+
+**Wave 3.0 — heading-detection calibration (offline, no embeddings; PRE-STATED, must run
+before the method race):**
+
+- Build: a pure deterministic heading detector (frozen code constants, no knobs) — a
+  heading line starts with an enumerated marker (`ARTICLE|SECTION|§|EXHIBIT|SCHEDULE|ANNEX|
+  APPENDIX|PART|RECITALS`, uppercase) or an ordinal (`\d+(\.\d+)*` at line start), or is a
+  short all-caps line (≤ ~110 chars, no terminal `.,;:`). Line-initial only — mid-line
+  cross-references never split.
+- Measure across all six capture homes: captures with ≥1 heading; share of docs whose
+  section partition differs from the merge partition; median/95th-pct section length;
+  chunk count vs the incumbent merge store; 5 sampled headings per instrument.
+  Hand-recorded block in results.md.
+- **Go/no-go pre-stated:** < 30% of contract documents (contractnli/cuad/maud) with any
+  heading → cut the SectionChunker arm before any embeddings. SegmentChunker proceeds
+  regardless.
+
+**Wave 3.1 — method race (small instruments, fixed reference bge-m3):**
+
+- Arms at each instrument's recorded leader geometry: uwazi@1200 (merge, segment, section),
+  privacyqa@2400 (merge, section), contractnli@1200 (merge, section) — 8 cells.
+- **SegmentChunker** = one DLA segment per chunk (merge-off mode in `build_chunks`; an
+  over-long segment still splits at word boundaries ~2400, overlap 0) — uwazi-only, since
+  it degenerates to line-per-chunk on the LBR line-partitioned captures.
+- **SectionChunker** = heading partition; interior spans packed at the SAME per-dataset
+  budget as its merge competitor; over-cap sections split at paragraph boundaries with
+  overlap 0; header on; no-heading documents byte-equal to the merge path (graceful
+  fallback, divergence printed). Code acceptance: `build_chunks` grows merge-off/split
+  params with back-compat defaults so legacy stores byte-verify unchanged; chunk-config
+  round-trips through grading; new methods only race after their stores byte-verify.
+- Readout: the Stage-2 headline lenses + a chunk-count column; false-retr directional only
+  (global 0.55).
+
+**Wave 3.2 — finalists (cuad + maud):** surviving arms at 2400 only ([merge-2400] vs
+[section-2400]) on bge-m3 — the long-doc decider.
+
+**Wave 3.3 — rung 2 on the winner (one change at a time):** + sentence-boundary splitting;
++ section breadcrumb header ("title — section"). Small instruments first, finalists
+confirm.
+
+**Lock wave — before Step 5:** one `uwazi-rag eval` block on `data/eval/golden.jsonl` at
+the locked config (the AGENTS parity gate); per-model false-retr threshold re-derivation
+on manual rows (justified by the Stage-2 gate finding); `_build_naive_store` carries the
+new chunk-config keys. Then Stage 4 re-race (bge-m3, embeddinggemma,
+snowflake-arctic-embed2, qwen3-8b) at the locked geometry.
+
+**Parked / given up (2026-10-09):** topic-shift/semantic-splitting boundaries (embeds
+during chunking — method×model fused; pre-declared fallback only for a headingless prose
+corpus); late chunking (Ollama exposes no token-level embeddings; corpora exceed its
+context; revisit post-lock atop sections); LLM chunk context + hypothetical-question index
+(LLM-dependent chunk text cannot survive the rebuild guard; per-chunk LLM cost);
+table/figure descriptions (no non-text segments); boilerplate drop (section+packer covers
+it; honest form = index-side mask only); fixed-size windows (external 36-method benchmark:
+paragraph-grouping ≫ fixed-size — and the incumbent already is paragraph-grouping).
+
+**Done when (4c):** waves 3.0–3.3 each recorded as separate results blocks + the lock
+wave's eval parity block; PLAN here updated; then STOP for review before Stage 4.
+
+---
+
 ## Step 5 — Real vector store (Postgres + pgvector) and hybrid search
 
 **Goal:** the production-shaped storage, plus the single biggest retrieval upgrade: hybrid

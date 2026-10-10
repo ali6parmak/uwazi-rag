@@ -2859,5 +2859,30 @@ dataset: vic-chargebook
 | noheader-mxbai-embed-large-embedding | mxbai-embed-large | 4096/0/off | embedding | 100 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 0.188 | 10.0% | 29.0% | 38.0% | 13.0% | 10.0% | 5.8% | 3.8% | 10.0% | 4/4 | 38s / 1.8s |
 
 cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
-P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
+P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage it quotes); compare configs, never absolutes
+
+
+## 2026-10-09 — Stage 2 verdict (hand-recorded: read of the race comparisons above — no new runs, no new numbers)
+
+Scope: sweep2_models (uwazi golden, 21 cells) + the five dataset races (14 cells each; qwen3-embedding:0.6b was excluded from the dataset specs before the run — commit 08822d0 — while the uwazi race itself already ran 7 models). Lenses per the agreed methodology: doc R@10 = decider, chunk R@1 + chunk MRR on under-saturated instruments, false-retr at the single global 0.55 = GATE, cov@3000 = cross-geometry lens. Comparisons within a dataset only; verdicts are snapshots, not permanent picks.
+
+| instrument | decider lens (doc) | chunk lens leader | false-retr gate (0.55) |
+|---|---|---|---|
+| uwazi | LIVE: gemma@1200 97.8% = qwen3-8b@1200 97.8% > nomic@1800 95.1% > bge-m3 max 93.6% | qwen3-8b 39.7 / gemma 37.2 / snowflake 37.3 @1 (all @1200) | qwen3-8b trips (1/3, 2/3, 1/3); gemma 0/3 = clean leader |
+| privacyqa | saturated (7 docs, 100% except granite 99.5%) | bge-m3@2400: 36.2% @1 / 0.752 MRR (incumbent lead confirmed) | granite + mxbai 5/5; qwen3-8b 3/5 — killed |
+| contractnli | gemma: doc@1 90.6–91.2% vs bge 84.0%; doc@10 98.3–99.1% | gemma 41.7% @1 / 0.641 MRR (+6 pts over bge); snowflake 35.7 @1 with 0/5 = clean runner-up | gemma 1–2/5; qwen3-8b 3/5; granite + mxbai 5/5 |
+| cuad | compressed: doc@10 99.5–100% for all, doc@1 92.3–98.8% | gemma@2400: 16.8% @1 / 0.421 MRR; incumbent bge chunk-weak (9.8%) | bge trips 4/4; gemma/nomic/snowflake 1/4 |
+| maud | bge-m3: doc@1 94.6% / doc@10 99.0% (leader); qwen3-8b collapses (77.7% doc@1) | bge-m3: 11.3% @1 / 0.327 MRR (next best ~9.3%) | snowflake + nomic 0/4; bge trips 4/4 |
+| vic | = chunk (hit-rate currency; doc=chunk by construction) | snowflake: 26% @1 / 56% @10, 0/4 (clean leader); qwen3-8b raw-best @10 (70%) yet 2/4 | bge 3/4; header on/off flips direction per model |
+
+Findings (in-dataset comparisons only):
+
+1. **No model leads everywhere.** embeddinggemma — uwazi / contractnli / cuad; bge-m3 — privacyqa@2400 + maud; snowflake-arctic-embed2 — vic. The split is what the Stage-4 re-race (at the locked geometry) exists to settle.
+2. **The false-retr gate tracks the model, not the geometry.** Each model's trip count is ~constant across a dataset's two geometries (bge-m3 3/5→3/5 contractnli, 4/4→4/4 cuad+maud; qwen3-8b 4/4→3/4 cuad) while it varies enormously across models: granite + mxbai trip everywhere (and collapse multilingually), nomic/gemma/snowflake stay at 0–1 trips per dataset → per-model FALSE_RETRIEVAL_THRESHOLD re-derivation (deferred at Step 3.6) is now justified and pre-declared as its own wave before Step 5.
+3. **Multilingual scope (uwazi only).** Cross-language doc@10 near-saturated for the good models (98.5–100%); cross-language chunk R@1: gemma@1200 35.1% leads, nomic@1800 30.0%, qwen3-8b@1200 29.5% (its 44.6% @2400 rides a 65-row scope — small n), bge-m3 23–24%. granite (6.9%) and mxbai (9.2%) are effectively monolingual.
+4. **Model × geometry interaction is real.** gemma prefers 1800 on privacyqa (34.8 → 27.1 at 2400) while snowflake prefers 2400 there (27.9 → 33.8) and bge prefers 2400 (32.5 → 36.2) — geometry is re-decided inside each Stage-3 method, never as a global knob.
+5. **cov@3000 does its cross-geometry job.** 1200-char geometry packs ~1.5–2× more anchor text into the budget (uwazi bge 36.1 → 49.3; gemma 40.7 → 54.3) — pack lens and ranking lens move in opposite directions, so both stay in every future verdict table.
+6. **Cost lens (Step 5 planning).** qwen3-8b: 4096 dims, 24–48 min per maud store (2,902s baseline / 1,418s cuad merge-2400) vs ~2–6 min for the mid field; embeddinggemma's 768 dims = smallest stores. qwen3-embedding:0.6b dropped from the roster after the Step 3.5 records; not reintroduced. nomic-embed-text:v1.5 stayed out by design (English-centric).
+
+Decision recorded (user, 2026-10-09): Stage 3 method race runs at fixed reference model **bge-m3** (incumbent; maud — the flagship long-doc instrument — is its best dataset; Stage 4 re-races all models at the locked geometry, so nothing is frozen out). Pre-stated contingency: embeddinggemma joins the small-instrument method race if the arm ranking looks unstable. Step 5 shortlist (snapshot): bge-m3 / embeddinggemma / snowflake-arctic-embed2; qwen3-8b re-checked at Stage 4. vic-chargebook: config unchanged by both stages (pre-chunked corpus; out of scope for chunking methods).
 
