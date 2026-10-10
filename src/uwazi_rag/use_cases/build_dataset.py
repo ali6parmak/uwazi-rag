@@ -3,7 +3,7 @@
 ``uwazi-rag dataset <name>`` — the orchestration half of the dataset
 adapters: resolve the adapter, verify the upstream against the home's
 committed checksum pins, map the upstream into captures + upstream golden rows,
-merge the hand-authored unanswerables (the home's ``manual.jsonl``), and write
+merge the LLM-drafted unanswerables (the home's ``manual.jsonl``), and write
 both artifacts:
 
 - captures (byte-identical on every rebuild — no clock inside) to the dataset's
@@ -104,7 +104,7 @@ def build_dataset(
 
 
 def _validated_manual(dataset_id: str, golden_dir: Path, upstream_rows: list[dict]) -> list[dict]:
-    """Read + validate the dataset's hand-authored unanswerables (absent file → none)."""
+    """Read + validate the dataset's LLM-drafted unanswerables (absent file → none)."""
     manual_path = golden_dir / MANUAL_FILE
     if not manual_path.exists():
         return []

@@ -440,8 +440,9 @@ review. Next work: Step 4a — the instrument adapters (datasets are sourced and
   summary; idempotent; bit-stable across rebuilds); `run_sweep(dataset=…)`: sweep specs name
   their instrument, the runner repoints captures + golden at the dataset and labels every
   plan/experiment/comparison block (`— dataset <name> — comparison`), comparisons stay
-  WITHIN a dataset. Manual unanswerables per dataset (grep-verified absent topics; origin
-  manual, expected null) — 199/982/4046/104 rows total per dataset.
+  WITHIN a dataset. Manual unanswerables per dataset (LLM-drafted topics, absence
+  grep-verified, no human review; expected null) — 199/982/4046/104 rows total per
+  dataset.
 - Built + verified: privacyqa (194 up + 5 manual; 453 span checks), contractnli (977+5;
   1389), cuad (4042+4; 6247; 1 NFD-referenced file resolved via NFC), vic-chargebook (100+4;
   100/100 labels resolve). Suite 212, ruff/mypy clean.
@@ -465,7 +466,7 @@ review. Next work: Step 4a — the instrument adapters (datasets are sourced and
   doc=chunk=passage columns identical by construction. cuad baseline — doc R@1 98.7% but
   chunk R@1 7.7% / R@10 54.8%: the long-document pressure test the harness lacked, now
   measured. False-retrieval bites everywhere (m-top1 ≥ 0.55: 1/5, 3–4/5, 3/4, 4/4 per
-  dataset) — the hand-authored rows earn their keep; threshold stays the one global 0.55,
+  dataset) — the LLM-drafted rows earn their keep; threshold stays the one global 0.55,
   per-model threshold work stays parked.
 - STILL OPEN in 4a: the multi-model race per dataset (bge-m3 only so far — qwen pair,
   nomic-v2-moe, embeddinggemma) and the cuad merge-2400 cell; cuad's store is ~16k chunks so
@@ -480,9 +481,10 @@ review. Next work: Step 4a — the instrument adapters (datasets are sourced and
     `[start, end)`); the dataset's built-in self-check is the adapter's acceptance
     test (`text[start:end] == snippet["answer"]` — holds for all 10,928
     `legalbenchrag` snippets, so correctness is verifiable, not assumed);
-  - golden rows in the house format + per-dataset `manual.jsonl` for hand-authored
-    unanswerables (every upstream question here is answerable — the false-retrieval
-    lens has nothing to bite on until we add those rows), merged at build;
+  - golden rows in the house format + per-dataset `manual.jsonl` for LLM-drafted
+    unanswerables — topics grep-verified absent from the corpus (every upstream
+    question is answerable, so these rows are the false-retrieval lens), merged at
+    build;
   - determinism asserted: same upstream revision + same code → byte-identical
     captures and golden; tiny committed fixture slices (`tests/fixtures/datasets/`)
     keep adapter tests offline.

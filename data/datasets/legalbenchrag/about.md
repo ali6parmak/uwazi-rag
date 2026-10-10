@@ -64,8 +64,9 @@ the full currency ladder (R@k/MRR, cov@k, cov@3000, P@k/RP) stays meaningful —
 char-span labels map to paragraph anchors, giving real variable-size gold sets. MAUD's
 300k–1M-char documents are the long-document pressure test the 77-capture harness lacks.
 
-Known gaps: every question is answerable (no false-retrieval rows — hand-authored
-unanswerables must be added per source); English-only (US); all snippets of a question
+Known gaps: every question is answerable (no false-retrieval rows upstream — the
+unanswerables we added are LLM-drafted per source, absence grep-verified, no human
+review); English-only (US); all snippets of a question
 share one document (no cross-document questions); multiple questions often share the
 same gold span (86% privacy_qa, 51% contractnli).
 

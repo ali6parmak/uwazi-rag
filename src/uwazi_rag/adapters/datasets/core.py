@@ -19,7 +19,7 @@ The core contract (each home's ``about.md``):
   spans and our captures), whatever the paragraph rule is;
 - golden rows use the house format every downstream consumer already relies on
   (``build_golden.make_golden_rows`` shape), with ``origin="upstream"`` for
-  expert-labeled upstream questions and ``origin="manual"`` for hand-authored
+  expert-labeled upstream questions and ``origin="manual"`` for LLM-drafted
   unanswerables (``expected: null`` — the false-retrieval lens).
 """
 
@@ -36,7 +36,7 @@ from uwazi_rag.use_cases.chunking import keepable
 ParagraphSpan = tuple[int, int]
 
 # House golden-row origins beyond the Uwazi golden's "synthetic": dataset rows
-# quote their upstream expert labels; "manual" stays hand-authored unanswerables.
+# quote their upstream expert labels; "manual" = LLM-drafted unanswerables.
 UPSTREAM_ORIGIN = "upstream"
 MANUAL_ORIGIN = "manual"
 
@@ -199,14 +199,14 @@ def make_dataset_capture(
 
 
 def manual_row_problems(rows: Sequence[Mapping[str, Any]], *, golden_rows: Sequence[Mapping[str, Any]]) -> list[str]:
-    """Why a dataset's hand-authored unanswerable rows cannot merge (empty = mergeable).
+    """Why a dataset's LLM-drafted unanswerable rows cannot merge (empty = mergeable).
 
     Dataset manual rows are ALL unanswerables (``expected`` and
     ``source_group_id`` both null) — the upstream instruments have no
     built-in false-retrieval lens, these rows are it. Strict like the house
     ``merge_manual_rows``: problems abort the build before anything is
-    written, and every row must be a top real corpus-absent topic (checking
-    that is a human grep job, recorded in the manual file's provenance).
+    written, and every row must be a top real corpus-absent topic (absence
+    is grep-verified over the corpus, not human-reviewed).
     """
     problems: list[str] = []
     taken_ids = {str(row["id"]) for row in golden_rows if row.get("id")}
@@ -235,5 +235,5 @@ def manual_row_problems(rows: Sequence[Mapping[str, Any]], *, golden_rows: Seque
 
 
 def merge_manual_rows(golden_rows: list[dict[str, Any]], manual_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    """Append validated hand-authored rows after the upstream rows (deterministic)."""
+    """Append validated LLM-drafted rows after the upstream rows (deterministic)."""
     return [*golden_rows, *(dict(row) for row in manual_rows)]

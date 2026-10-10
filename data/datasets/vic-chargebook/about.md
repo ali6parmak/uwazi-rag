@@ -48,7 +48,8 @@ paper and MLEB (`arXiv:2510.19365`). Keep it out of any shipped/commercial artif
   chunker is required and the currency currencies collapse to hit@k/MRR at passage
   level (doc level ≈ passage level). Documented as expected — measure with that in
   mind, not as a fault.
-- Known gaps: no unanswerables (hand-authored rows needed); English only (en-AU);
+- Known gaps: no upstream unanswerables (the added rows are LLM-drafted, absence
+  grep-verified, no human review); English only (en-AU);
   single-gold labels (no qrels sets); small (100 questions — treat differences as
   fragile until they clear a margin).
 
@@ -80,8 +81,8 @@ as marketing context. The dataset artifact is neutral; we use it for our own swe
   c49c2465f4afa801`; captures under `data/raw/c49c2465f4afa801/` (4876 files, one per passage)
 - golden/manual: `data/eval/datasets/vic-chargebook/{golden.jsonl, manual.jsonl}` (committed);
   golden row ids are `<passage-id>:qNNN` (passages asked twice exist — 5 of them)
-- hand-authored unanswerables live in `manual.jsonl` (commit-time input, merged at build) and
-  give the false-retrieval lens its substrate
+- LLM-drafted unanswerables (absence grep-verified) live in `manual.jsonl` (commit-time
+  input, merged at build) and give the false-retrieval lens its substrate
 
 ## Status (adapter landed 2026-10-06, Step 4a)
 
