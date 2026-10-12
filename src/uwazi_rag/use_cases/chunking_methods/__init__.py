@@ -14,6 +14,7 @@ from uwazi_rag.use_cases.chunking_methods.base import ChunkMethod
 from uwazi_rag.use_cases.chunking_methods.merge import MergeChunker
 from uwazi_rag.use_cases.chunking_methods.passthrough import PassThroughChunker
 from uwazi_rag.use_cases.chunking_methods.section import SectionChunker
+from uwazi_rag.use_cases.chunking_methods.section_split import SectionSplitChunker
 from uwazi_rag.use_cases.chunking_methods.segment import SegmentChunker
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "MergeChunker",
     "PassThroughChunker",
     "SectionChunker",
+    "SectionSplitChunker",
     "SegmentChunker",
 ]

@@ -18,7 +18,13 @@ import pytest
 from uwazi_rag.configuration import FIXTURES_DIR
 from uwazi_rag.domain.chunk import Chunk
 from uwazi_rag.use_cases.chunking import TARGET_MAX_CHARS, build_chunks
-from uwazi_rag.use_cases.chunking_methods import ChunkMethod, MergeChunker, SectionChunker, SegmentChunker
+from uwazi_rag.use_cases.chunking_methods import (
+    ChunkMethod,
+    MergeChunker,
+    SectionChunker,
+    SectionSplitChunker,
+    SegmentChunker,
+)
 from uwazi_rag.use_cases.chunking_methods.segment import SEGMENT_SPLIT_BUDGET
 from uwazi_rag.use_cases.eval_retrieval import ChunkConfig, config_kwargs
 from uwazi_rag.use_cases.index_captures import capture_to_chunks
@@ -254,6 +260,70 @@ def test_section_chunker_repeats_the_heading_on_continuation_chunks() -> None:
     assert chunks == capture_to_chunks(capture, **SectionChunker(max_chars=300).chunk_config())
 
 
+def test_section_split_chunker_config_and_bytes() -> None:
+    chunker = SectionSplitChunker(max_chars=1200)
+    capture = _capture()
+
+    assert chunker.name == "section-split"
+    assert chunker.params() == {"max_chars": 1200, "header": True}
+    assert chunker.chunk_config() == {
+        "target_max_chars": 1200,
+        "overlap_ratio": 0.15,  # merge-style: governs cuts inside a monster paragraph
+        "prepend_header": True,
+        "split_mode": "section-split",
+    }
+    assert chunker.describe() == "section-split 1200/on"
+    assert chunker.chunk(capture) == capture_to_chunks(capture, **chunker.chunk_config())
+    assert all(chunk.paragraph_ids for chunk in chunker.chunk(capture))
+
+
+def test_section_split_word_splits_monsters_with_merge_style_overlap() -> None:
+    heading = "SECTION 7. LIMITATION OF LIABILITY"  # 34 chars
+    paragraphs = [
+        {"text": heading},
+        {"text": "w" * 4000},  # the monster: no internal boundary, over the 2400 budget
+        {"text": "Normal short paragraph after the monster."},
+    ]
+    chunks = build_chunks(
+        paragraphs,
+        instance_key="k",
+        shared_id="d",
+        language="en",
+        file_id="f",
+        entity_title="T",
+        template_name="X",
+        target_max_chars=2400,
+        prepend_header=False,
+        split_mode="section-split",
+    )
+    assert [chunk.paragraph_ids for chunk in chunks] == [[0], [0, 1], [0, 1], [0, 2]]
+    assert [len(chunk.text) for chunk in chunks] == [
+        len(heading),
+        len(heading) + 1 + 2400,
+        len(heading) + 1 + 1960,
+        len(heading) + 1 + len(paragraphs[2]["text"]),
+    ]
+    first, piece1, piece2, last = chunks
+    assert first.text == heading  # the heading chunk itself is not prefixed
+    assert piece1.text.split("\n")[0] == heading and piece2.text.split("\n")[0] == heading  # repeat on every piece
+    assert last.text.split("\n")[0] == heading  # the trailing normal paragraph is a continuation too
+    # the merge-style cut: the pieces share the 0.15-overlap band (0.15 * 2400 = 360 chars)
+    assert piece1.text.split("\n", 1)[1][-360:] == piece2.text.split("\n", 1)[1][:360]
+
+
+def test_section_split_is_byte_equal_to_section_without_monsters() -> None:
+    paragraphs = [
+        {"text": "Preamble of the agreement."},
+        {"text": "ARTICLE 1. SCOPE"},
+        {"text": "y" * 700},
+        {"text": "z" * 50},
+        {"text": "ARTICLE 2. TERM"},
+    ]
+    capture = _synthetic_capture(paragraphs)
+    assert all(len(str(p["text"]).strip()) < 1200 for p in paragraphs)  # no monster at this budget
+    assert SectionSplitChunker(max_chars=1200).chunk(capture) == SectionChunker(max_chars=1200).chunk(capture)
+
+
 def test_section_chunker_headingless_document_is_byte_equal_to_merge() -> None:
     paragraphs = [{"text": "plain prose " * 130}, {"text": "more plain prose " * 5}]  # no heading anywhere
     capture = _synthetic_capture(paragraphs)
@@ -265,10 +335,11 @@ def test_section_chunker_headingless_document_is_byte_equal_to_merge() -> None:
 
 def test_chunk_config_round_trips_every_method_through_the_science_guard() -> None:
     capture = _capture()
-    methods: list[tuple[str, MergeChunker | SectionChunker | SegmentChunker]] = [
+    methods: list[tuple[str, MergeChunker | SectionChunker | SectionSplitChunker | SegmentChunker]] = [
         ("merge", MergeChunker(max_chars=1200)),
         ("segment", SegmentChunker()),
         ("section", SectionChunker(max_chars=1200)),
+        ("section-split", SectionSplitChunker(max_chars=1200)),
     ]
     for label, method in methods:
         stored = method.chunk_config()

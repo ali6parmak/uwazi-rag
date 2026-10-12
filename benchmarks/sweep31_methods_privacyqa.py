@@ -1,10 +1,14 @@
 """Step 4c wave 3.1 — the chunking-method race on the privacyqa instrument.
 
-Three shortlisted models (user call 2026-10-11) × the privacyqa arms at the
+Three shortlisted models (user call 2026-10-11) × two method arms at the
 recorded leader geometry (merge-2400, Stage 2: bge-m3's incumbent lead was
 confirmed there). The wave-3.0 scan measured 1/7 privacyqa documents with any
 heading — the SectionChunker mostly measures its headingless fallback here,
 which is exactly the point of racing the arm on an almost-headingless corpus.
+
+The section-split arm is SKIPPED here (user call 2026-10-11): privacyqa's
+largest paragraph is 1,064 chars — zero monsters at 2400, so the variant is
+byte-equal to section on this home and there is nothing to measure.
 
 The merge-2400 stores already exist (Stage-2 model race, same slug) and are
 reused. Run: `uv run uwazi-rag benchmark --spec

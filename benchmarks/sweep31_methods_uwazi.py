@@ -1,10 +1,10 @@
 """Step 4c wave 3.1 — the chunking-method race on the Uwazi golden (small instrument).
 
 Three shortlisted models (user call 2026-10-11: bge-m3, embeddinggemma,
-snowflake-arctic-embed2) × three method arms at the recorded uwazi leader
+snowflake-arctic-embed2) × four method arms at the recorded uwazi leader
 geometry (merge-1200; Stage-2 chunk leaders all ran @1200). The merge-1200
 stores already exist from sweep2_models — same slug, so they are reused, not
-rebuilt (only the segment/section stores build).
+rebuilt (only the segment/section/section-split stores build).
 
 - segment-2400: one DLA segmentation segment per chunk (merge-off); an
   over-long segment still word-splits at ~2400 with overlap 0 — the
@@ -12,7 +12,11 @@ rebuilt (only the segment/section stores build).
   dataset captures this degenerates to line-per-chunk).
 - section-1200: heading partition (typed Uwazi heading types first), interior
   spans packed at 1200 like the merge competitor; headingless docs fall back
-  byte-equal to merge.
+  byte-equal to merge; over-long paragraphs stay whole (378 of them here,
+  14.9% of text mass).
+- section-split-1200: the same section method, but a single paragraph over
+  the budget word-splits (merge-style 0.15 overlap) — the monster handler the
+  long-doc readout needs.
 
 False-retr at the single global 0.55 is directional only (the gate tracks the
 model, not the geometry). Readout lenses: the Stage-2 headline set + a
@@ -20,7 +24,7 @@ chunk-count column. Run: `uv run uwazi-rag benchmark --spec
 benchmarks/sweep31_methods_uwazi.py`
 """
 
-from uwazi_rag.use_cases.chunking_methods import MergeChunker, SectionChunker, SegmentChunker
+from uwazi_rag.use_cases.chunking_methods import MergeChunker, SectionChunker, SectionSplitChunker, SegmentChunker
 from uwazi_rag.use_cases.retrieval_methods import EmbeddingRetrieval
 from uwazi_rag.use_cases.run_sweep import StoreCell, define_sweep
 
@@ -33,6 +37,7 @@ ARMS = [
     ("merge-1200", MergeChunker(max_chars=1200)),
     ("segment-2400", SegmentChunker()),
     ("section-1200", SectionChunker(max_chars=1200)),
+    ("section-split-1200", SectionSplitChunker(max_chars=1200)),
 ]
 
 experiments = define_sweep(

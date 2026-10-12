@@ -36,6 +36,12 @@ Split modes (Step 4c wave 3.1 — the method axis, never a knob flip):
   packing — the heading never counts against the budget); a document with no
   heading falls back to the merge path byte-equal (the SectionChunker's
   graceful fallback).
+- ``"section-split"`` — the same partition with monster handling: a single
+  paragraph over the budget (always alone in its packing group) word-splits
+  into consecutive pieces — ``overlap_ratio`` governs cuts INSIDE a paragraph
+  (merge-style) while packing boundaries stay overlap-free; every piece chunk
+  repeats its section heading, and the monster's paragraph anchors all its
+  pieces, exactly like merge's split paragraphs.
 """
 
 from __future__ import annotations
@@ -50,7 +56,7 @@ DROP_TYPES = {"page header", "page footer"}
 # The chunking-method axis (PLAN.md Step 4c wave 3.1): recorded in store
 # ``chunk_config`` as ``split_mode`` and re-driven by grading. "merge" is the
 # default so legacy stores re-chunk byte-identically without the key.
-SPLIT_MODES = ("merge", "segment", "section")
+SPLIT_MODES = ("merge", "segment", "section", "section-split")
 
 
 def keepable(paragraph: dict) -> bool:
@@ -187,11 +193,12 @@ def build_chunks(
                 )
         return segment_chunks
 
-    if split_mode == "section":
+    if split_mode in ("section", "section-split"):
         # Lazy import: headings.py holds keepable's second consumer (the detector), so the
         # detector cannot be a top-level import here without a cycle.
         from uwazi_rag.use_cases.headings import is_heading, pack_sections, partition_sections
 
+        word_split = split_mode == "section-split"
         if not any(keepable(paragraph) and is_heading(paragraph) for paragraph in paragraphs):
             # Graceful fallback: a headingless document chunks exactly like merge —
             # byte-equal by construction (verified in tests).
@@ -219,26 +226,44 @@ def build_chunks(
             # section/partition counts stay exact. The chunk header shows the heading's page.
             heading_pid = section[0] if is_heading(paragraphs[section[0]]) else None
             for group in pack_sections([section], paragraphs, target_max_chars):
-                body_parts: list[tuple[str, int | None, int]] = []
-                if heading_pid is not None and group[0] != heading_pid:
-                    heading = paragraphs[heading_pid]
-                    body_parts.append((str(heading["text"]).strip(), heading.get("pageNumber"), heading_pid))
-                body_parts.extend(
-                    (str(paragraphs[pid]["text"]).strip(), paragraphs[pid].get("pageNumber"), pid) for pid in group
-                )
-                section_chunks.append(
-                    _emit_chunk(
-                        body_parts=body_parts,
-                        instance_key=instance_key,
-                        shared_id=shared_id,
-                        language=language,
-                        file_id=file_id,
-                        entity_title=entity_title,
-                        template_name=template_name,
-                        prepend_header=prepend_header,
-                        index=len(section_chunks),
+                # A monster (a single paragraph over the budget) is always alone in its packing
+                # group: plain section keeps it whole; section-split word-splits it into
+                # consecutive pieces — overlap_ratio governs cuts INSIDE a paragraph
+                # (merge-style), packing boundaries stay overlap-free. Every chunk emitted
+                # from a continuation group repeats the section heading on top.
+                monster_pid = None
+                if word_split and len(group) == 1:
+                    only_text = str(paragraphs[group[0]]["text"]).strip()
+                    if len(only_text) > target_max_chars:
+                        monster_pid = group[0]
+                if monster_pid is not None:
+                    monster = paragraphs[monster_pid]
+                    page = monster.get("pageNumber")
+                    bodies: list[list[tuple[str, int | None, int]]] = [
+                        [(piece, page, monster_pid)]
+                        for piece in _split_long(str(monster["text"]).strip(), target_max_chars, overlap_chars)
+                    ]
+                else:
+                    bodies = [
+                        [(str(paragraphs[pid]["text"]).strip(), paragraphs[pid].get("pageNumber"), pid) for pid in group]
+                    ]
+                for body_parts in bodies:
+                    if heading_pid is not None and group[0] != heading_pid:
+                        heading = paragraphs[heading_pid]
+                        body_parts = [(str(heading["text"]).strip(), heading.get("pageNumber"), heading_pid), *body_parts]
+                    section_chunks.append(
+                        _emit_chunk(
+                            body_parts=body_parts,
+                            instance_key=instance_key,
+                            shared_id=shared_id,
+                            language=language,
+                            file_id=file_id,
+                            entity_title=entity_title,
+                            template_name=template_name,
+                            prepend_header=prepend_header,
+                            index=len(section_chunks),
+                        )
                     )
-                )
         return section_chunks
 
     # (text piece, page, raw paragraph position) — the position anchors the

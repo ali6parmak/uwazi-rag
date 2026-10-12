@@ -590,8 +590,11 @@ before the method race):**
 2026-10-11):**
 
 - Arms at each instrument's recorded leader geometry (bge-m3 / embeddinggemma /
-  snowflake-arctic-embed2): uwazi@1200 (merge, segment, section), privacyqa@2400 (merge,
-  section), contractnli@1200 (merge, section) — 3+2+2 = 7 cells per model, 21 cells total.
+  snowflake-arctic-embed2): uwazi@1200 (merge, segment, section, section-split),
+  privacyqa@2400 (merge, section), contractnli@1200 (merge, section, section-split) — 4+2+3 =
+  9 cells per model, 27 cells total. The section-split arm is SKIPPED on privacyqa (largest
+  paragraph 1,064 chars — zero monsters at 2400, byte-equal to section there, nothing to
+  measure).
 - **SegmentChunker** = one DLA segment per chunk (merge-off mode in `build_chunks`; an
   over-long segment still splits at word boundaries ~2400, overlap 0) — uwazi-only, since
   it degenerates to line-per-chunk on the LBR line-partitioned captures.
@@ -606,18 +609,27 @@ before the method race):**
   stays a separate measured change). Code acceptance: `build_chunks` grows merge-off/split
   params with back-compat defaults so legacy stores byte-verify unchanged; chunk-config
   round-trips through grading; new methods only race after their stores byte-verify.
+- **SectionSplitChunker** = the SectionChunker plus monster handling (user call 2026-10-11,
+  raced together with the other arms): a single paragraph over the budget — always alone in
+  its packing group — word-splits at word boundaries into consecutive pieces; `overlap_ratio`
+  (0.15, merge-style) governs cuts INSIDE a paragraph while packing boundaries stay
+  overlap-free; every piece chunk repeats its section heading line; the monster's
+  paragraph_id anchors all its pieces, exactly like merge's split paragraphs. Byte-equal to
+  section on monster-free captures. Wave 3.1 shows the deltas on uwazi (378 monsters, 14.9%
+  of text mass) and contractnli (82, 12.7%); the decisive readout is maud in wave 3.2
+  (7,454 monsters, 52.1% of text mass).
 - Readout: the Stage-2 headline lenses + a chunk-count column; false-retr directional only
   (global 0.55).
 
 **Wave 3.2 — finalists (cuad + maud):** surviving arms at 2400 only ([merge-2400] vs
-[section-2400]) on bge-m3 — the long-doc decider.
+[section-2400 or section-split-2400 — the wave-3.1 readout picks the section form]) on
+bge-m3 — the long-doc decider; maud is the monster home (52.1% of its text mass exceeds
+2400 chars), so it is where the section-split question is finally priced.
 
 **Wave 3.3 — rung 2 on the winner (one change at a time):** + sentence-boundary splitting;
-+ section breadcrumb header ("title — section"); + monster-paragraph splitting (conditional,
-pre-declared 2026-10-11: single over-budget paragraphs stay whole in wave 3.1 — maud alone
-has 7,454 paragraphs >2400 chars, 52.1% of its text mass, carried whole up to ~10.9k chars —
-so this joins the rung-2 queue ONLY if the long-doc readout shows the section arm hurt by
-them). Small instruments first, finalists confirm.
++ section breadcrumb header ("title — section"). (The monster-paragraph question moved OUT
+of rung 2 on 2026-10-11 — it is raced directly as the section-split arm in wave 3.1.)
+Small instruments first, finalists confirm.
 
 **Lock wave — before Step 5:** one `uwazi-rag eval` block on `data/eval/golden.jsonl` at
 the locked config (the AGENTS parity gate); per-model false-retr threshold re-derivation

@@ -17,7 +17,11 @@ proceeds regardless. Per the same user call, this record lives here and NOT in
 
 Wave 3.1 build note (2026-10-11): a split section's continuation chunks repeat the section's
 heading line at the top of their text (text-assembly layer, added after packing, never counted
-against the budget; PLAN Step 4c carries the amendment). This record's numbers measure the
+against the budget; PLAN Step 4c carries the amendment). A fourth arm (`section-split`)
+word-splits those over-budget single paragraphs with merge-style 0.15 overlap — same
+partition, so this record's counts stay exact for it too; the variant arm is skipped on
+privacyqa (largest paragraph 1,064 chars — zero monsters, byte-equal to section there).
+This record's numbers measure the
 PARTITION only, so they stay exact — chunk counts and partitions are identical before and
 after the rule; no rescan needed.
 
