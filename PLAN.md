@@ -619,12 +619,21 @@ before the method race):**
   of text mass) and contractnli (82, 12.7%); the decisive readout is maud in wave 3.2
   (7,454 monsters, 52.1% of text mass).
 - Readout: the Stage-2 headline lenses + a chunk-count column; false-retr directional only
-  (global 0.55).
+  (global 0.55). (User call 2026-10-12: no separate 3.1 pick — cuad + maud run the full
+  small-race arm set first, then ONE combined verdict over all five homes is recorded; see
+  wave 3.2.)
 
-**Wave 3.2 — finalists (cuad + maud):** surviving arms at 2400 only ([merge-2400] vs
-[section-2400 or section-split-2400 — the wave-3.1 readout picks the section form]) on
-bge-m3 — the long-doc decider; maud is the monster home (52.1% of its text mass exceeds
-2400 chars), so it is where the section-split question is finally priced.
+**Wave 3.2 — finalists (cuad + maud; user call 2026-10-12 — the full small-race method grid,
+verdict deferred):** merge-2400, section-2400 and section-split-2400 × the three shortlisted
+models — 3 × 3 × 2 = 18 cells (merge-2400 stores reuse from Stage 2 for every model; 12
+builds). segment stays OUT by pre-statement (uwazi-only): the finalist homes are
+line-partitioned LBR captures — line-per-chunk for it, ≈71k-line stores on cuad and
+72k on maud — and its value was measured and disqualified on uwazi (highest P@1 of all
+arms, collapsed chunk R@1 19.6–22.8%, lowest cov@3000). The 3.x verdict is ONE combined
+block over all five homes, recorded after these runs (the wave-3.1 blocks stand as
+recorded). maud is the monster home (7,454 paragraphs >2400, 52.1% of text mass) and cuad
+carries 2,039 (26.6%, max 8,349) — both are where the section-split question is finally
+priced.
 
 **Wave 3.3 — rung 2 on the winner (one change at a time):** + sentence-boundary splitting;
 + section breadcrumb header ("title — section"). (The monster-paragraph question moved OUT
