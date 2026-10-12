@@ -8,6 +8,13 @@ packed interior spans at the SAME per-dataset budget as the merge competitor
 (``max_chars``), over-cap sections split at paragraph boundaries with overlap
 0, an over-long single paragraph staying whole, header on by default.
 
+A split section's CONTINUATION chunks repeat the section's heading line at the
+top of their text (user call 2026-10-11): a chunk retrieved alone still names
+its section, the heading paragraph anchors its whole section through
+``paragraph_ids``, and the repeated line is a text-assembly layer — added
+after packing, NOT counted against the budget, so the wave-3.0 scan's
+section/partition counts stay exact.
+
 A document with no heading falls back to the merge path BYTE-EQUAL (verified
 in tests) — the graceful fallback PLAN.md pre-states, so headingless corpora
 (or a doc with none) measure merge, not a degenerate one-chunk-monolith. The

@@ -228,6 +228,32 @@ def test_section_chunker_splits_at_headings_on_typeless_documents() -> None:
     assert chunks == capture_to_chunks(capture, **SectionChunker(max_chars=1200).chunk_config())
 
 
+def test_section_chunker_repeats_the_heading_on_continuation_chunks() -> None:
+    heading = "ARTICLE 1. DEFINITIONS"  # 22 chars
+    paragraphs = [
+        {"text": heading},
+        {"text": "b" * 277},  # heading + this = exactly the 300 budget
+        {"text": "c" * 299},  # overflows -> continuation chunk
+        {"text": "ARTICLE 2. TERM"},
+        {"text": "closing body"},
+    ]
+    capture = _synthetic_capture(paragraphs)
+    chunks = SectionChunker(max_chars=300).chunk(capture)
+
+    # Packing is unchanged: [0, 1] fits the budget exactly, [2] is the overflow.
+    assert [chunk.paragraph_ids for chunk in chunks] == [[0, 1], [0, 2], [3, 4]]
+    first, continuation, last = chunks
+    assert first.text.split("\n")[1] == heading  # the heading opens its own chunk — no prefix needed
+    assert continuation.text.split("\n", 1)[0].startswith("syn — DOCUMENT")  # doc-context header first
+    section_text = continuation.text.split("\n", 1)[1]  # the section layer below the doc header
+    assert section_text.split("\n")[0] == heading  # repeated heading line on top
+    assert section_text.split("\n")[1] == "c" * 299
+    assert continuation.paragraph_ids == [0, 2]  # the heading paragraph anchors its whole section
+    assert len(section_text) == 22 + 1 + 299  # the repeated line is NOT counted against the budget
+    assert last.text.split("\n")[1] == "ARTICLE 2. TERM"  # a section that fits is not prefixed
+    assert chunks == capture_to_chunks(capture, **SectionChunker(max_chars=300).chunk_config())
+
+
 def test_section_chunker_headingless_document_is_byte_equal_to_merge() -> None:
     paragraphs = [{"text": "plain prose " * 130}, {"text": "more plain prose " * 5}]  # no heading anywhere
     capture = _synthetic_capture(paragraphs)

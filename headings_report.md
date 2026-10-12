@@ -15,6 +15,12 @@ embeddings. Outcome: **693 / 707 = 98.0% → SectionChunker arm KEPT**; the Segm
 proceeds regardless. Per the same user call, this record lives here and NOT in
 `data/eval/results.md` (a corpus-structure measurement is not an eval result).
 
+Wave 3.1 build note (2026-10-11): a split section's continuation chunks repeat the section's
+heading line at the top of their text (text-assembly layer, added after packing, never counted
+against the budget; PLAN Step 4c carries the amendment). This record's numbers measure the
+PARTITION only, so they stay exact — chunk counts and partitions are identical before and
+after the rule; no rescan needed.
+
 ---
 
 # Wave 3.0 heading scan — 7 capture home(s), offline (no embeddings, no services, no stores)

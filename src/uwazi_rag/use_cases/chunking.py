@@ -31,9 +31,11 @@ Split modes (Step 4c wave 3.1 — the method axis, never a knob flip):
   word-split with NO overlap (the SegmentChunker's merge-off mode).
 - ``"section"`` — heading partition (typed Uwazi heading types first, regex
   on typeless lines), interior spans packed at the budget at paragraph
-  boundaries, over-long paragraphs stay whole; a document with no heading
-  falls back to the merge path byte-equal (the SectionChunker's graceful
-  fallback).
+  boundaries, over-long paragraphs stay whole; a split section's continuation
+  chunks repeat its heading line at the top (text-assembly layer, added after
+  packing — the heading never counts against the budget); a document with no
+  heading falls back to the merge path byte-equal (the SectionChunker's
+  graceful fallback).
 """
 
 from __future__ import annotations
@@ -206,23 +208,37 @@ def build_chunks(
                 prepend_header=prepend_header,
                 split_mode="merge",
             )
-        groups = pack_sections(partition_sections(paragraphs), paragraphs, target_max_chars)
         section_chunks: list[Chunk] = []
-        for group in groups:
-            body_parts = [(str(paragraphs[pid]["text"]).strip(), paragraphs[pid].get("pageNumber"), pid) for pid in group]
-            section_chunks.append(
-                _emit_chunk(
-                    body_parts=body_parts,
-                    instance_key=instance_key,
-                    shared_id=shared_id,
-                    language=language,
-                    file_id=file_id,
-                    entity_title=entity_title,
-                    template_name=template_name,
-                    prepend_header=prepend_header,
-                    index=len(section_chunks),
+        for section in partition_sections(paragraphs):
+            # Every section opens at its heading — except a leading preamble (no heading at
+            # all). A split section's CONTINUATION chunks repeat the heading line at the top
+            # so a chunk retrieved alone still names its section: the heading paragraph also
+            # anchors the continuation through paragraph_ids. The repeated line is added at
+            # text assembly, AFTER packing — not counted against the budget (user call
+            # 2026-10-11) — exactly like prepend_header, which is why the wave-3.0 scan's
+            # section/partition counts stay exact. The chunk header shows the heading's page.
+            heading_pid = section[0] if is_heading(paragraphs[section[0]]) else None
+            for group in pack_sections([section], paragraphs, target_max_chars):
+                body_parts: list[tuple[str, int | None, int]] = []
+                if heading_pid is not None and group[0] != heading_pid:
+                    heading = paragraphs[heading_pid]
+                    body_parts.append((str(heading["text"]).strip(), heading.get("pageNumber"), heading_pid))
+                body_parts.extend(
+                    (str(paragraphs[pid]["text"]).strip(), paragraphs[pid].get("pageNumber"), pid) for pid in group
                 )
-            )
+                section_chunks.append(
+                    _emit_chunk(
+                        body_parts=body_parts,
+                        instance_key=instance_key,
+                        shared_id=shared_id,
+                        language=language,
+                        file_id=file_id,
+                        entity_title=entity_title,
+                        template_name=template_name,
+                        prepend_header=prepend_header,
+                        index=len(section_chunks),
+                    )
+                )
         return section_chunks
 
     # (text piece, page, raw paragraph position) — the position anchors the
