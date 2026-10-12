@@ -46,7 +46,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from uwazi_rag.domain.chunk import Chunk
-from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, TARGET_MAX_CHARS
+from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, SPLIT_MODES, TARGET_MAX_CHARS
 from uwazi_rag.use_cases.index_captures import capture_to_chunks
 
 RECALL_KS = (1, 5, 10)
@@ -81,6 +81,7 @@ class ChunkConfig:
     target_max_chars: int = TARGET_MAX_CHARS
     overlap_ratio: float = OVERLAP_RATIO
     prepend_header: bool = True
+    split_mode: str = "merge"
 
     @classmethod
     def from_store(cls, stored: Mapping[str, Any] | None) -> ChunkConfig:
@@ -92,6 +93,7 @@ class ChunkConfig:
                 target_max_chars=int(stored["target_max_chars"]),
                 overlap_ratio=float(stored["overlap_ratio"]),
                 prepend_header=bool(stored["prepend_header"]),
+                split_mode=str(stored.get("split_mode", "merge")),  # legacy stores carry none — they were all merge
             )
             config.validate()
         except (KeyError, TypeError, ValueError) as error:
@@ -104,6 +106,8 @@ class ChunkConfig:
             raise ValueError(f"target_max_chars must be >= 1, got {self.target_max_chars}")
         if not 0.0 <= self.overlap_ratio < 0.5:
             raise ValueError(f"overlap_ratio must be in [0, 0.5), got {self.overlap_ratio}")
+        if self.split_mode not in SPLIT_MODES:
+            raise ValueError(f"split_mode must be one of {', '.join(SPLIT_MODES)}, got {self.split_mode!r}")
 
 
 @dataclass(frozen=True)
@@ -303,6 +307,7 @@ def config_kwargs(config: ChunkConfig) -> dict[str, Any]:
         "target_max_chars": config.target_max_chars,
         "overlap_ratio": config.overlap_ratio,
         "prepend_header": config.prepend_header,
+        "split_mode": config.split_mode,
     }
 
 

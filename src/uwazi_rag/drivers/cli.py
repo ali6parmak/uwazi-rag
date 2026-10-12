@@ -44,6 +44,7 @@ from uwazi_rag.use_cases.fetch_document import (
 from uwazi_rag.use_cases.index_captures import IndexStats, index_captures
 from uwazi_rag.use_cases.passage_groups import GROUPS_PER_DOCUMENT, build_passage_groups, format_group_view
 from uwazi_rag.use_cases.run_sweep import SweepSpecError, load_sweep_spec, run_sweep
+from uwazi_rag.use_cases.scan_headings import scan_report
 from uwazi_rag.use_cases.semantic_search import format_search_results, semantic_search
 
 
@@ -192,6 +193,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="build one benchmark dataset instrument: verify upstream checksums → captures + golden (Step 4a)",
     )
     dataset.add_argument("name", help="dataset id, e.g. legalbenchrag-privacyqa (see data/datasets/*/about.md)")
+
+    scan_headings = subparsers.add_parser(
+        "scan-headings",
+        help="wave 3.0: offline heading census over every capture home — no embeddings, no services (Step 4c)",
+    )
+    scan_headings.add_argument(
+        "--source", default=None, help="scan exactly one home dir (default: every home under data/raw)"
+    )
 
     return parser
 
@@ -681,6 +690,17 @@ def _run_dataset(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_scan_headings(args: argparse.Namespace) -> int:
+    """Wave 3.0: the offline heading scan — print the report for review (the record stays hand-written)."""
+    try:
+        report = scan_report(Path(args.source)) if args.source else scan_report(configuration.RAW_DIR)
+    except (FileNotFoundError, ValueError) as error:
+        print(f"error: heading scan failed — {error}", file=sys.stderr)
+        return 1
+    print(report, end="")
+    return 0
+
+
 def _stub(name: str) -> int:
     print(f"error: '{name}' is a stub — implemented in a later step of PLAN.md", file=sys.stderr)
     return 2
@@ -709,6 +729,8 @@ def main() -> int:
         return _run_benchmark(args)
     if args.command == "dataset":
         return _run_dataset(args)
+    if args.command == "scan-headings":
+        return _run_scan_headings(args)
     # Everything else is a stub until its PLAN step is implemented.
     return _stub(args.command)
 

@@ -60,6 +60,7 @@ def capture_to_chunks(
     target_max_chars: int = TARGET_MAX_CHARS,
     overlap_ratio: float = OVERLAP_RATIO,
     prepend_header: bool = True,
+    split_mode: str = "merge",
 ) -> list[Chunk]:
     """One raw capture → ``Chunk``s (exactly the ``chunk`` command's logic)."""
     return build_chunks(
@@ -73,6 +74,7 @@ def capture_to_chunks(
         target_max_chars=target_max_chars,
         overlap_ratio=overlap_ratio,
         prepend_header=prepend_header,
+        split_mode=split_mode,
     )
 
 
@@ -87,6 +89,7 @@ def index_captures(
     target_max_chars: int = TARGET_MAX_CHARS,
     overlap_ratio: float = OVERLAP_RATIO,
     prepend_header: bool = True,
+    split_mode: str = "merge",
 ) -> IndexStats:
     """Chunk + embed every capture under ``raw_dir`` into ``store``.
 
@@ -95,8 +98,8 @@ def index_captures(
     no keepable text) are skipped and counted, never fatal — Step 4's
     resilience rule, rehearsed early. Embeds in ``batch_size`` batches so one
     ``POST /api/embed`` stays reasonably sized and progress is visible. The
-    chunking knobs (Step 3.5 benchmark surface) default to the Step 2
-    constants so existing calls keep the committed baseline behavior.
+    The chunking knobs (Step 3.5 benchmark surface, Step 4c wave 3.1 ``split_mode``)
+    default to the Step 2 constants so existing calls keep the committed baseline behavior.
     """
     if batch_size < 1:
         raise ValueError(f"batch_size must be >= 1, got {batch_size}")
@@ -123,6 +126,7 @@ def index_captures(
             target_max_chars=target_max_chars,
             overlap_ratio=overlap_ratio,
             prepend_header=prepend_header,
+            split_mode=split_mode,
         )
         if not capture_chunks:
             skipped_no_chunks += 1

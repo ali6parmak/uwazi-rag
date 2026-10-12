@@ -560,31 +560,38 @@ commits 08822d0…55bf43f):** 21 uwazi cells + 5×14 dataset cells (qwen3-embedd
 excluded from the dataset specs pre-run; the uwazi race itself ran 7 models). Verdict: no
 single model leads everywhere — embeddinggemma uwazi/contractnli/cuad, bge-m3
 privacyqa@2400 + maud, snowflake-arctic-embed2 vic; the false-retr gate tracks the model,
-not the geometry (threshold recalibration pre-declared before Step 5). Reference model for
-the method stage = **bge-m3** (contingency: embeddinggemma joins the small-instrument race
-if the arm ranking looks unstable). Step 5 shortlist snapshot: bge-m3 / embeddinggemma /
-snowflake-arctic-embed2.
+not the geometry (threshold recalibration pre-declared before Step 5). Reference readout
+model for the method stage = **bge-m3**; waves 3.2–3.3 run on bge-m3 alone. (User call
+2026-10-11: wave 3.1 is upgraded to run ALL THREE shortlisted models — bge-m3 /
+embeddinggemma / snowflake-arctic-embed2 — superseding the earlier "embeddinggemma joins
+if the arm ranking looks unstable" contingency.) Step 5 shortlist snapshot: bge-m3 /
+embeddinggemma / snowflake-arctic-embed2.
 
 **Wave 3.0 — heading-detection calibration (offline, no embeddings; PRE-STATED, must run
 before the method race):**
 
 - Build: a pure deterministic heading detector (frozen code constants, no knobs) — a
   heading line starts with an enumerated marker (`ARTICLE|SECTION|§|EXHIBIT|SCHEDULE|ANNEX|
-  APPENDIX|PART|RECITALS`, uppercase) or an ordinal (`\d+(\.\d+)*` at line start), or is a
+  APPENDIX|PART|RECITALS`, uppercase) or an ordinal (`\d+(\.\d+)*\b` at line start —
+  word-bounded like the markers: user call 2026-10-11, option b, after the wave-3.0 scan
+  surfaced digit-initial words such as `23andMe` heading via a bare `23`), or is a
   short all-caps line (≤ ~110 chars, no terminal `.,;:`). Line-initial only — mid-line
   cross-references never split.
 - Measure across all six capture homes: captures with ≥1 heading; share of docs whose
   section partition differs from the merge partition; median/95th-pct section length;
-  chunk count vs the incumbent merge store; 5 sampled headings per instrument.
-  Hand-recorded block in results.md.
+  chunk count vs the incumbent merge store; 5 sampled headings per instrument. Recorded
+  as `headings_report.md` (user call 2026-10-11: not an eval result — kept out of the
+  append-only results.md).
 - **Go/no-go pre-stated:** < 30% of contract documents (contractnli/cuad/maud) with any
   heading → cut the SectionChunker arm before any embeddings. SegmentChunker proceeds
   regardless.
 
-**Wave 3.1 — method race (small instruments, fixed reference bge-m3):**
+**Wave 3.1 — method race (small instruments, all three shortlisted models — user call
+2026-10-11):**
 
-- Arms at each instrument's recorded leader geometry: uwazi@1200 (merge, segment, section),
-  privacyqa@2400 (merge, section), contractnli@1200 (merge, section) — 8 cells.
+- Arms at each instrument's recorded leader geometry (bge-m3 / embeddinggemma /
+  snowflake-arctic-embed2): uwazi@1200 (merge, segment, section), privacyqa@2400 (merge,
+  section), contractnli@1200 (merge, section) — 3+2+2 = 7 cells per model, 21 cells total.
 - **SegmentChunker** = one DLA segment per chunk (merge-off mode in `build_chunks`; an
   over-long segment still splits at word boundaries ~2400, overlap 0) — uwazi-only, since
   it degenerates to line-per-chunk on the LBR line-partitioned captures.
