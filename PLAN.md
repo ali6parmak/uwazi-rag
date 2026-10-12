@@ -598,7 +598,12 @@ before the method race):**
 - **SectionChunker** = heading partition; interior spans packed at the SAME per-dataset
   budget as its merge competitor; over-cap sections split at paragraph boundaries with
   overlap 0; header on; no-heading documents byte-equal to the merge path (graceful
-  fallback, divergence printed). Code acceptance: `build_chunks` grows merge-off/split
+  fallback, divergence printed). A split section's CONTINUATION chunks repeat the section's
+  heading line at the top of their text (user call 2026-10-11, before racing): the heading
+  paragraph then anchors its whole section via paragraph_ids, and the repeated line is a
+  text-assembly layer added after packing — never counted against the budget, so the
+  wave-3.0 section/partition counts stay exact (the wave-3.3 breadcrumb-every-chunk arm
+  stays a separate measured change). Code acceptance: `build_chunks` grows merge-off/split
   params with back-compat defaults so legacy stores byte-verify unchanged; chunk-config
   round-trips through grading; new methods only race after their stores byte-verify.
 - Readout: the Stage-2 headline lenses + a chunk-count column; false-retr directional only
@@ -608,8 +613,11 @@ before the method race):**
 [section-2400]) on bge-m3 — the long-doc decider.
 
 **Wave 3.3 — rung 2 on the winner (one change at a time):** + sentence-boundary splitting;
-+ section breadcrumb header ("title — section"). Small instruments first, finalists
-confirm.
++ section breadcrumb header ("title — section"); + monster-paragraph splitting (conditional,
+pre-declared 2026-10-11: single over-budget paragraphs stay whole in wave 3.1 — maud alone
+has 7,454 paragraphs >2400 chars, 52.1% of its text mass, carried whole up to ~10.9k chars —
+so this joins the rung-2 queue ONLY if the long-doc readout shows the section arm hurt by
+them). Small instruments first, finalists confirm.
 
 **Lock wave — before Step 5:** one `uwazi-rag eval` block on `data/eval/golden.jsonl` at
 the locked config (the AGENTS parity gate); per-model false-retr threshold re-derivation
