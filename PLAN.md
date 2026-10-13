@@ -665,10 +665,15 @@ per-dataset budgets regardless — geometry stays config, never code).
   mode, and it partially overlaps the section arm's heading-repeat — which is exactly why it
   is measured on merge, the winner, not on the rejected section arms.
 - Race: arms {merge incumbent (reuse), merge+sentence_cuts, merge+breadcrumb, merge+both} ×
-  the 3 shortlist models — on uwazi@1200 and contractnli@1200. privacyqa cannot measure rung
-  2: largest paragraph 1,064 < 2400 leaves no monster cuts, and 6/7 of its docs are
-  byte-equal fallback so the crumb is near-no-op (same skip logic as the section-split
-  skip). Finalists confirm on cuad/maud (the combined arm included).
+  the 3 shortlist models — (user call 2026-10-13: ALL FOUR homes in ONE wave, no
+  smalls-first-then-confirm split; per the wave-3.2 precedent the readout is ONE combined
+  3.3 verdict block recorded after the runs). uwazi@1200 and contractnli@1200 carry the
+  small-race signal (uwazi: 378 monsters + 74/77 typed headings; contractnli: 82 monsters +
+  92/95 regex headings); cuad/maud run the same 4-arm grid at 2400 — the homes rung 2
+  exists for (maud = 52.1% of text mass in over-budget paragraphs; both ~100% regex-headed;
+  merge-2400 stores reuse from Stage 2, 18 new builds). privacyqa is OUT by pre-statement
+  (largest paragraph 1,064 < 2400 → no monster cuts; 6/7 byte-equal fallback → the crumb is
+  a near-no-op; same skip logic as the section-split skip).
 
 **Wave 3.4 — type-aware merge (uwazi-only arm; user call 2026-10-13, raced after the 3.3
 small-race readouts):** merge's exact packing arithmetic (budget, 0.15 overlap, header) plus
