@@ -631,14 +631,57 @@ line-partitioned LBR captures — line-per-chunk for it, ≈71k-line stores on c
 72k on maud — and its value was measured and disqualified on uwazi (highest P@1 of all
 arms, collapsed chunk R@1 19.6–22.8%, lowest cov@3000). The 3.x verdict is ONE combined
 block over all five homes, recorded after these runs (the wave-3.1 blocks stand as
-recorded). maud is the monster home (7,454 paragraphs >2400, 52.1% of text mass) and cuad
+recorded (the wave-3.1 blocks stand as
+recorded). maud is the monster home (7,454 monsters, 52.1% of text mass) and cuad
 carries 2,039 (26.6%, max 8,349) — both are where the section-split question is finally
 priced.
 
-**Wave 3.3 — rung 2 on the winner (one change at a time):** + sentence-boundary splitting;
-+ section breadcrumb header ("title — section"). (The monster-paragraph question moved OUT
-of rung 2 on 2026-10-11 — it is raced directly as the section-split arm in wave 3.1.)
-Small instruments first, finalists confirm.
+**Stage 3 verdict (RECORDED 2026-10-13 — the combined 3.x block in results.md):** merge
+wins the decider on all five homes; section/section-split/segment arms are rejected for the
+lock (ss's cov@3000 wins — contractnli +3.9/+3.9/+7.0, cuad +2.5/+6.0/+3.1 — never
+purchase the decider; on maud the ss monster-cut repair confirms the 2026-10-11 mechanism
+without beating merge anywhere; the gate again tracked the model, not the geometry). Lock
+chunker = merge at each recorded leader geometry (uwazi@1200 / privacyqa@2400 /
+contractnli@1200 / cuad@2400 / maud@2400, header on, overlap 0.15; vic passthrough-4096
+unchanged, pre-chunked, out of scope). Open for the lock wave: the production default
+budget for real instances (1200 is the measured-on-Uwazi candidate; benchmarks keep
+per-dataset budgets regardless — geometry stays config, never code).
+
+**Wave 3.3 — rung 2 on the winner = merge (one change at a time; pre-stated 2026-10-13):**
+
+- (a) **sentence-boundary splitting**: ONLY merge's intra-paragraph (monster) cuts change —
+  the cut window (same ~0.8-budget floor as the word cut) prefers the last sentence end
+  (`.!?` followed by whitespace); no sentence boundary in the window → the exact legacy word
+  cut; `overlap_ratio` 0.15 still governs the overlap band; budget and paragraph packing are
+  unchanged. Pure cut code in chunking.py behind a `sentence_cuts` flag (merge mode only);
+  the key round-trips through the store's chunk_config and grading; stores built without it
+  stay byte-identical (flag-off defaults change nothing — the merge bytes are the lock's).
+- (b) **every-chunk breadcrumb "title — section"**: a `breadcrumb` flag on the merge path —
+  when a chunk's first paragraph sits in a section that has a heading, the existing context
+  header's template slot is replaced by that heading's first line ("{title} — {heading line}
+  (page n)"); preamble chunks (before the first heading) keep today's header; a
+  text-assembly layer added AFTER packing, NOT counted against the budget; paragraph_ids
+  never move. It requires prepend_header (the crumb IS the header's context slot) and merge
+  mode, and it partially overlaps the section arm's heading-repeat — which is exactly why it
+  is measured on merge, the winner, not on the rejected section arms.
+- Race: arms {merge incumbent (reuse), merge+sentence_cuts, merge+breadcrumb, merge+both} ×
+  the 3 shortlist models — on uwazi@1200 and contractnli@1200. privacyqa cannot measure rung
+  2: largest paragraph 1,064 < 2400 leaves no monster cuts, and 6/7 of its docs are
+  byte-equal fallback so the crumb is near-no-op (same skip logic as the section-split
+  skip). Finalists confirm on cuad/maud (the combined arm included).
+
+**Wave 3.4 — type-aware merge (uwazi-only arm; user call 2026-10-13, raced after the 3.3
+small-race readouts):** merge's exact packing arithmetic (budget, 0.15 overlap, header) plus
+ONE rule: a packing run breaks when a keepable paragraph's content type changes;
+`section header`/`title` are glue — they take the effective type of the body run they
+preface (a trailing glue run keeps its own type), implementing the user's "same types merge
+together; header and title may go together". New `type-merge` split mode + a
+`TypeMergeChunker` face over the one shared chunker; LBR/vic homes are single-type corpora
+→ byte-equal to merge there by construction. Pre-statement scan (offline, pure,
+2026-10-13): live uwazi home merge 4,488 chunks → ~5,565 type-merge chunks (+24%; 2,033
+effective type boundaries — footnotes ×2,690 and list items ×813 are what the runs separate
+from body text). Race: type-merge-1200 × the 3 shortlist models vs the merge-1200 incumbent
+(reuse) — 6 cells, 3 builds.
 
 **Lock wave — before Step 5:** one `uwazi-rag eval` block on `data/eval/golden.jsonl` at
 the locked config (the AGENTS parity gate); per-model false-retr threshold re-derivation
@@ -655,8 +698,9 @@ table/figure descriptions (no non-text segments); boilerplate drop (section+pack
 it; honest form = index-side mask only); fixed-size windows (external 36-method benchmark:
 paragraph-grouping ≫ fixed-size — and the incumbent already is paragraph-grouping).
 
-**Done when (4c):** waves 3.0–3.3 each recorded as separate results blocks + the lock
-wave's eval parity block; PLAN here updated; then STOP for review before Stage 4.
+**Done when (4c):** waves 3.0–3.4 recorded (3.1+3.2 combined into the single 3.x verdict
+block; waves 3.3/3.4 each recorded as their own results blocks) + the lock wave's eval
+parity block; PLAN here updated; then STOP for review before Stage 4.
 
 ---
 

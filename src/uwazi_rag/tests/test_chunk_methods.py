@@ -17,16 +17,18 @@ import pytest
 
 from uwazi_rag.configuration import FIXTURES_DIR
 from uwazi_rag.domain.chunk import Chunk
-from uwazi_rag.use_cases.chunking import TARGET_MAX_CHARS, build_chunks
+from uwazi_rag.use_cases.chunking import TARGET_MAX_CHARS, _split_long, build_chunks, sentence_split
 from uwazi_rag.use_cases.chunking_methods import (
     ChunkMethod,
     MergeChunker,
     SectionChunker,
     SectionSplitChunker,
     SegmentChunker,
+    TypeMergeChunker,
 )
 from uwazi_rag.use_cases.chunking_methods.segment import SEGMENT_SPLIT_BUDGET
 from uwazi_rag.use_cases.eval_retrieval import ChunkConfig, config_kwargs
+from uwazi_rag.use_cases.headings import effective_types, is_heading, partition_sections
 from uwazi_rag.use_cases.index_captures import capture_to_chunks
 
 FIXTURE_CAPTURE = FIXTURES_DIR / "64hnagcpvk_en.json"
@@ -335,11 +337,12 @@ def test_section_chunker_headingless_document_is_byte_equal_to_merge() -> None:
 
 def test_chunk_config_round_trips_every_method_through_the_science_guard() -> None:
     capture = _capture()
-    methods: list[tuple[str, MergeChunker | SectionChunker | SectionSplitChunker | SegmentChunker]] = [
+    methods: list[tuple[str, MergeChunker | SectionChunker | SectionSplitChunker | SegmentChunker | TypeMergeChunker]] = [
         ("merge", MergeChunker(max_chars=1200)),
         ("segment", SegmentChunker()),
         ("section", SectionChunker(max_chars=1200)),
         ("section-split", SectionSplitChunker(max_chars=1200)),
+        ("type-merge", TypeMergeChunker(max_chars=1200)),
     ]
     for label, method in methods:
         stored = method.chunk_config()
@@ -374,3 +377,268 @@ def test_build_chunks_rejects_an_unknown_split_mode() -> None:
             template_name="X",
             split_mode="SEGMENT",  # case-sensitive, like every recorded config value
         )
+
+
+# ---------------------------------------------------------------------
+# Step 4c wave 3.3 — rung 2 layers on the winner (offline, no mocks)
+# ---------------------------------------------------------------------
+
+
+def test_merge_rung2_flags_record_only_when_on() -> None:
+    plain = MergeChunker(max_chars=1200)
+    assert plain.params() == {"max_chars": 1200, "overlap": 0.15, "header": True}  # legacy identity intact
+    assert "sentence_cuts" not in plain.chunk_config()
+    assert "breadcrumb" not in plain.chunk_config()
+    assert plain.describe() == "merge 1200/0.15/on"
+
+    sent = MergeChunker(max_chars=1200, sentence_cuts=True)
+    assert sent.params() == {"max_chars": 1200, "overlap": 0.15, "header": True, "layers": "sentences"}
+    assert sent.chunk_config() == {
+        "target_max_chars": 1200,
+        "overlap_ratio": 0.15,
+        "prepend_header": True,
+        "sentence_cuts": True,
+    }
+    assert sent.describe() == "merge 1200/0.15/on +sentences"
+
+    both = MergeChunker(max_chars=1200, sentence_cuts=True, breadcrumb=True)
+    assert both.params() == {
+        "max_chars": 1200,
+        "overlap": 0.15,
+        "header": True,
+        "layers": "sentences-crumb",
+    }
+    assert both.describe() == "merge 1200/0.15/on +sentences +breadcrumb"
+
+    with pytest.raises(ValueError, match="header"):
+        MergeChunker(max_chars=1200, breadcrumb=True, header=False)
+
+
+def test_sentence_split_prefers_sentence_ends_in_the_cut_window() -> None:
+    text = " ".join(f"Sentence {number} tells a story." for number in range(1, 41))
+    budget = 300
+    overlap = int(budget * 0.15)
+
+    pieces = sentence_split(text, budget, overlap)
+    assert all(len(piece) <= budget for piece in pieces)
+    for piece in pieces[:-1]:
+        assert piece.endswith(".")  # every interior cut lands right after a sentence end
+    assert pieces[1].startswith(pieces[0][-overlap:])  # the legacy overlap band is shared
+
+
+def test_sentence_split_falls_back_to_the_exact_word_cut() -> None:
+    unbreakable = "w" * 9000  # no spaces, no sentence ends — identical to the legacy cut
+    assert sentence_split(unbreakable, 2400, 360) == _split_long(unbreakable, 2400, 360)
+
+    # delimiters with no whitespace after them are not sentence ends — same fallback
+    tricky = "a.b" * 3000
+    assert sentence_split(tricky, 2400, 360) == _split_long(tricky, 2400, 360)
+
+
+def test_merge_sentence_cuts_change_only_monster_piece_texts() -> None:
+    monster = " ".join(f"Sentence {number} tells a story." for number in range(1, 121))
+    paragraphs = [{"text": monster}]
+    capture = _synthetic_capture(paragraphs)
+
+    # the flags-off instance is byte-identical to the incumbent merge instance
+    plain = MergeChunker(max_chars=1500, header=False).chunk(capture)
+    assert plain == MergeChunker(max_chars=1500, header=False, sentence_cuts=False).chunk(capture)
+
+    sent = MergeChunker(max_chars=1500, header=False, sentence_cuts=True).chunk(capture)
+    assert [chunk.chunk_id for chunk in plain] == [chunk.chunk_id for chunk in sent]  # identity never moves
+    assert [chunk.paragraph_ids for chunk in plain] == [chunk.paragraph_ids for chunk in sent]
+    assert [chunk.text for chunk in plain] != [chunk.text for chunk in sent]  # the cuts moved to sentence ends
+    assert all(len(chunk.text) <= 1500 for chunk in sent)
+    assert sent  # the monster is over the 1500 budget — sentence cuts must engage
+    for chunk in sent[:-1]:
+        assert chunk.text.endswith(".")
+
+
+def test_breadcrumb_replaces_the_template_slot_with_the_section() -> None:
+    capture = _capture()  # the real Uwazi fixture — 23 typed headings
+    plain = MergeChunker(max_chars=1200).chunk(capture)
+    crumb = MergeChunker(max_chars=1200, breadcrumb=True).chunk(capture)
+
+    assert [chunk.chunk_id for chunk in plain] == [chunk.chunk_id for chunk in crumb]  # identity never moves
+    assert [chunk.paragraph_ids for chunk in plain] == [chunk.paragraph_ids for chunk in crumb]  # packing unchanged
+    assert any(p.text != c.text for p, c in zip(plain, crumb))  # the fixture must gain crumbs
+
+    # mirror the chunker's own crumb map from the shared partition — one rule, verified twice
+    expected: dict[int, str] = {}
+    for section in partition_sections(capture["paragraphs"]):
+        head = section[0] if is_heading(capture["paragraphs"][section[0]]) else None
+        if head is None:
+            continue
+        line = str(capture["paragraphs"][head]["text"]).splitlines()[0].strip()
+        if line:
+            expected.update((pid, line) for pid in section)
+    for plain_chunk, crumb_chunk in zip(plain, crumb):
+        expected_line = expected.get(plain_chunk.paragraph_ids[0])
+        page = f" (page {plain_chunk.page_start})" if plain_chunk.page_start is not None else ""
+        if expected_line is None:
+            assert crumb_chunk.text.split("\n")[0] == plain_chunk.text.split("\n")[0]  # preamble: today's header
+        else:
+            assert crumb_chunk.text.split("\n")[0] == f"{capture['title']} — {expected_line}{page}"
+            # the crumb is a header-slot swap: the body below it is untouched
+            assert "\n".join(crumb_chunk.text.split("\n")[1:]) == "\n".join(plain_chunk.text.split("\n")[1:])
+
+
+def test_build_chunks_rejects_rung2_flags_outside_merge() -> None:
+    with pytest.raises(ValueError, match="sentence_cuts"):
+        build_chunks(
+            [{"text": "x"}],
+            instance_key="k",
+            shared_id="d",
+            language="en",
+            file_id="f",
+            entity_title="T",
+            template_name="X",
+            split_mode="section",
+            sentence_cuts=True,
+        )
+    with pytest.raises(ValueError, match="breadcrumb"):
+        build_chunks(
+            [{"text": "x"}],
+            instance_key="k",
+            shared_id="d",
+            language="en",
+            file_id="f",
+            entity_title="T",
+            template_name="X",
+            split_mode="type-merge",
+            breadcrumb=True,
+        )
+    with pytest.raises(ValueError, match="prepend_header"):
+        build_chunks(
+            [{"text": "x"}],
+            instance_key="k",
+            shared_id="d",
+            language="en",
+            file_id="f",
+            entity_title="T",
+            template_name="X",
+            prepend_header=False,
+            breadcrumb=True,
+        )
+
+
+def test_chunk_config_round_trips_the_rung2_layers() -> None:
+    stored = MergeChunker(max_chars=1200, sentence_cuts=True, breadcrumb=True).chunk_config()
+    config = ChunkConfig.from_store(stored)
+    assert config.split_mode == "merge" and config.sentence_cuts and config.breadcrumb
+
+    capture = _capture()
+    assert MergeChunker(max_chars=1200, sentence_cuts=True, breadcrumb=True).chunk(capture) == capture_to_chunks(
+        capture, **config_kwargs(config)
+    )
+
+    with pytest.raises(ValueError, match="store chunk_config is invalid"):
+        ChunkConfig.from_store(
+            {
+                "target_max_chars": 1200,
+                "overlap_ratio": 0.15,
+                "prepend_header": True,
+                "sentence_cuts": True,
+                "split_mode": "section",
+            }
+        )
+
+    legacy = ChunkConfig.from_store({"target_max_chars": 1200, "overlap_ratio": 0.15, "prepend_header": True})
+    assert legacy.sentence_cuts is False and legacy.breadcrumb is False  # stores before wave 3.3
+
+
+# ---------------------------------------------------------------------
+# Step 4c wave 3.4 — the type-aware merge arm (offline, no mocks)
+# ---------------------------------------------------------------------
+
+
+def test_type_merge_chunker_config_and_bytes() -> None:
+    chunker = TypeMergeChunker(max_chars=1200)
+    capture = _capture()
+
+    assert chunker.name == "type-merge"
+    assert chunker.params() == {"max_chars": 1200, "overlap": 0.15, "header": True}
+    assert chunker.chunk_config() == {
+        "target_max_chars": 1200,
+        "overlap_ratio": 0.15,
+        "prepend_header": True,
+        "split_mode": "type-merge",
+    }
+    assert chunker.describe() == "type-merge 1200/0.15/on"
+    assert chunker.chunk(capture) == capture_to_chunks(capture, **chunker.chunk_config())
+    assert all(chunk.paragraph_ids for chunk in chunker.chunk(capture))
+    assert chunker.chunk(capture) != MergeChunker(max_chars=1200).chunk(capture)  # the fixture mixes types
+
+
+def test_type_merge_runs_break_at_content_type_changes() -> None:
+    paragraphs = [
+        {"text": "Body text one.", "type": "text"},
+        {"text": "Footnote alpha.", "type": "footnote"},
+        {"text": "Body text two.", "type": "text"},
+    ]
+    base: dict[str, Any] = {
+        "instance_key": "k",
+        "shared_id": "d",
+        "language": "en",
+        "file_id": "f",
+        "entity_title": "T",
+        "template_name": "X",
+        "target_max_chars": 300,
+        "prepend_header": False,
+    }
+    typed = build_chunks(paragraphs, **base, split_mode="type-merge")
+    assert [chunk.paragraph_ids for chunk in typed] == [[0], [1], [2]]  # one run per type
+
+    merged = build_chunks(paragraphs, **base, split_mode="merge")
+    assert [chunk.paragraph_ids for chunk in merged] == [[0, 1, 2]]  # merge packs the three blindly together
+
+
+def test_type_merge_glues_header_and_title_to_the_run_they_preface() -> None:
+    paragraphs = [
+        {"text": "Body text one.", "type": "text"},
+        {"text": "I. SUMMARY", "type": "section header"},
+        {"text": "Title box", "type": "title"},
+        {"text": "Body text two.", "type": "text"},
+    ]
+    base: dict[str, Any] = {
+        "instance_key": "k",
+        "shared_id": "d",
+        "language": "en",
+        "file_id": "f",
+        "entity_title": "T",
+        "template_name": "X",
+        "target_max_chars": 300,
+        "prepend_header": False,
+    }
+    glue_chunks = build_chunks(paragraphs, **base, split_mode="type-merge")
+    assert [chunk.paragraph_ids for chunk in glue_chunks] == [[0, 1, 2, 3]]  # header+title ride the body run
+    assert glue_chunks == build_chunks(paragraphs, **base, split_mode="merge")  # single-type → byte-equal
+
+    trailing = build_chunks(
+        [
+            {"text": "Body text one.", "type": "text"},
+            {"text": "I. END", "type": "section header"},
+        ],
+        **base,
+        split_mode="type-merge",
+    )
+    assert [chunk.paragraph_ids for chunk in trailing] == [[0], [1]]  # a trailing glue run keeps its own type
+
+
+def test_type_merge_is_byte_equal_to_merge_on_typeless_documents() -> None:
+    paragraphs = [{"text": "plain prose " * 130}, {"text": "more plain prose " * 5}]  # LBR-shaped: no types at all
+    capture = _synthetic_capture(paragraphs)
+    assert TypeMergeChunker(max_chars=1200).chunk(capture) == MergeChunker(max_chars=1200).chunk(capture)
+
+
+def test_effective_types_glue_forward_to_the_body_they_preface() -> None:
+    paragraphs = [
+        {"text": "a", "type": "text"},
+        {"text": "F.", "type": "footnote"},
+        {"text": "H", "type": "section header"},
+        {"text": "b", "type": "text"},
+        {"text": "T", "type": "title"},
+    ]
+    effective = effective_types(paragraphs)
+    # the header glues forward to the body text; the trailing title keeps its own type
+    assert effective == {0: "text", 1: "footnote", 2: "text", 3: "text", 4: "title"}

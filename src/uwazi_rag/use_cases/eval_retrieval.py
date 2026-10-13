@@ -82,6 +82,9 @@ class ChunkConfig:
     overlap_ratio: float = OVERLAP_RATIO
     prepend_header: bool = True
     split_mode: str = "merge"
+    # Step 4c wave 3.3 rung-2 layers (merge mode only); legacy stores carry no keys.
+    sentence_cuts: bool = False
+    breadcrumb: bool = False
 
     @classmethod
     def from_store(cls, stored: Mapping[str, Any] | None) -> ChunkConfig:
@@ -94,6 +97,8 @@ class ChunkConfig:
                 overlap_ratio=float(stored["overlap_ratio"]),
                 prepend_header=bool(stored["prepend_header"]),
                 split_mode=str(stored.get("split_mode", "merge")),  # legacy stores carry none — they were all merge
+                sentence_cuts=bool(stored.get("sentence_cuts", False)),
+                breadcrumb=bool(stored.get("breadcrumb", False)),
             )
             config.validate()
         except (KeyError, TypeError, ValueError) as error:
@@ -108,6 +113,8 @@ class ChunkConfig:
             raise ValueError(f"overlap_ratio must be in [0, 0.5), got {self.overlap_ratio}")
         if self.split_mode not in SPLIT_MODES:
             raise ValueError(f"split_mode must be one of {', '.join(SPLIT_MODES)}, got {self.split_mode!r}")
+        if (self.sentence_cuts or self.breadcrumb) and self.split_mode != "merge":
+            raise ValueError(f"sentence_cuts/breadcrumb only apply to the merge split mode, got {self.split_mode!r}")
 
 
 @dataclass(frozen=True)
@@ -308,6 +315,8 @@ def config_kwargs(config: ChunkConfig) -> dict[str, Any]:
         "overlap_ratio": config.overlap_ratio,
         "prepend_header": config.prepend_header,
         "split_mode": config.split_mode,
+        "sentence_cuts": config.sentence_cuts,
+        "breadcrumb": config.breadcrumb,
     }
 
 

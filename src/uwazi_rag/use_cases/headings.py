@@ -128,3 +128,34 @@ def pack_sections(sections: list[list[int]], paragraphs: list[dict], target_max_
         if group:
             groups.append(group)
     return groups
+
+
+# Wave 3.4 (user call 2026-10-13): in the type-aware merge arm the heading types double as
+# GLUE — a section header/title paragraph carries the effective content type of the body run
+# it prefaces, so "same types merge together" while header and title may go together (the
+# user's rule). A trailing glue run (no body after it) keeps its own type. Missing/blank
+# types are body text — the dataset homes are fully typeless.
+DEFAULT_BODY_TYPE = "text"
+
+
+def effective_types(paragraphs: list[dict]) -> dict[int, str]:
+    """Keepable-paragraph id → effective content type for the type-merge arm (pure).
+
+    The paragraph's own Uwazi type (missing/blank → ``DEFAULT_BODY_TYPE``), except
+    ``UWAZI_HEADING_TYPES``, which glue forward to the body run they preface. All five
+    LBR/vic corpora are single-type ("text" everywhere) → the type-merge arm is byte-equal
+    to merge there by construction (asserted in tests); the Uwazi homes are where the runs
+    separate (footnotes, list items).
+    """
+    keepable_ids = [i for i, paragraph in enumerate(paragraphs) if keepable(paragraph)]
+    raw = [(i, (paragraphs[i].get("type") or "").strip().lower()) for i in keepable_ids]
+    effective: dict[int, str] = {}
+    carry: str | None = None
+    for pid, type_name in reversed(raw):
+        if type_name in UWAZI_HEADING_TYPES:
+            effective[pid] = carry if carry is not None else type_name
+        else:
+            body = type_name or DEFAULT_BODY_TYPE
+            effective[pid] = body
+            carry = body
+    return effective
