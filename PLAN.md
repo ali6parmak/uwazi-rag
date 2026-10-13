@@ -680,8 +680,11 @@ together; header and title may go together". New `type-merge` split mode + a
 → byte-equal to merge there by construction. Pre-statement scan (offline, pure,
 2026-10-13): live uwazi home merge 4,488 chunks → ~5,565 type-merge chunks (+24%; 2,033
 effective type boundaries — footnotes ×2,690 and list items ×813 are what the runs separate
-from body text). Race: type-merge-1200 × the 3 shortlist models vs the merge-1200 incumbent
-(reuse) — 6 cells, 3 builds.
+from body text). Race (user call 2026-10-13: the wave-3.3 breadcrumb composes with this arm;
+one change at a time is kept by the 2×2): {merge, type-merge} × {plain, +breadcrumb} × the
+3 shortlist models — 12 cells; the merge and merge+breadcrumb stores are reused from
+sweep33 (same slugs), so 6 new builds. The 2×2 gives both main effects cleanly
+(type-vs-merge, crumb-vs-no-crumb) plus the interaction.
 
 **Lock wave — before Step 5:** one `uwazi-rag eval` block on `data/eval/golden.jsonl` at
 the locked config (the AGENTS parity gate); per-model false-retr threshold re-derivation

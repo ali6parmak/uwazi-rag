@@ -113,8 +113,10 @@ class ChunkConfig:
             raise ValueError(f"overlap_ratio must be in [0, 0.5), got {self.overlap_ratio}")
         if self.split_mode not in SPLIT_MODES:
             raise ValueError(f"split_mode must be one of {', '.join(SPLIT_MODES)}, got {self.split_mode!r}")
-        if (self.sentence_cuts or self.breadcrumb) and self.split_mode != "merge":
-            raise ValueError(f"sentence_cuts/breadcrumb only apply to the merge split mode, got {self.split_mode!r}")
+        if self.sentence_cuts and self.split_mode != "merge":
+            raise ValueError(f"sentence_cuts only applies to the merge split mode, got {self.split_mode!r}")
+        if self.breadcrumb and self.split_mode not in ("merge", "type-merge"):
+            raise ValueError(f"breadcrumb only applies to the merge family split modes, got {self.split_mode!r}")
 
 
 @dataclass(frozen=True)

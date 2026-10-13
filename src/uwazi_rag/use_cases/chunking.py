@@ -62,7 +62,9 @@ keep every legacy store byte-identical):
   (page n)") when the chunk's first paragraph sits in a heading section;
   preamble chunks keep today's header. Text-assembly layer added after
   packing — never counted against the budget. Requires ``prepend_header``
-  and merge mode (the crumb IS the header's context slot).
+  and the merge family (``merge`` or ``type-merge`` — the wave-3.4 arm
+  composes with it; user call 2026-10-13); the crumb IS the header's
+  context slot.
 """
 
 from __future__ import annotations
@@ -246,11 +248,28 @@ def build_chunks(
         raise ValueError(f"split_mode must be one of {', '.join(SPLIT_MODES)}, got {split_mode!r}")
     if sentence_cuts and split_mode != "merge":
         raise ValueError(f"sentence_cuts only applies to split_mode 'merge', got {split_mode!r}")
-    if breadcrumb and split_mode != "merge":
-        raise ValueError(f"breadcrumb only applies to split_mode 'merge', got {split_mode!r}")
+    if breadcrumb and split_mode not in ("merge", "type-merge"):
+        raise ValueError(f"breadcrumb only applies to split_mode 'merge' or 'type-merge', got {split_mode!r}")
     if breadcrumb and not prepend_header:
         raise ValueError("breadcrumb needs prepend_header — the crumb IS the header's context slot")
     overlap_chars = int(target_max_chars * overlap_ratio)
+
+    # Merge-family crumb map (wave 3.3; the wave-3.4 type-merge arm composes with it —
+    # user call 2026-10-13): first pid → its section's heading line; preamble chunks stay
+    # headerless-of-crumb (None → today's template header). Nothing here can move ids,
+    # pages, or packing — only the header's context slot text.
+    crumbs: dict[int, str] = {}
+    if breadcrumb:
+        # Lazy import (same cycle reason as the section branch).
+        from uwazi_rag.use_cases.headings import is_heading, partition_sections
+
+        for section in partition_sections(paragraphs):
+            heading_pid = section[0] if is_heading(paragraphs[section[0]]) else None
+            if heading_pid is None:
+                continue
+            heading_line = str(paragraphs[heading_pid]["text"]).splitlines()[0].strip()
+            if heading_line:
+                crumbs.update((pid, heading_line) for pid in section)
 
     if split_mode == "segment":
         # Merge-off: one segmentation segment per chunk; an over-long segment splits at word
@@ -310,6 +329,7 @@ def build_chunks(
                     template_name=template_name,
                     prepend_header=prepend_header,
                     index=len(type_chunks),
+                    context=crumbs.get(type_buffer[0][2]),
                 )
             )
             type_buffer.clear()
@@ -396,22 +416,6 @@ def build_chunks(
                         )
                     )
         return section_chunks
-
-    # Merge mode: the wave-3.3 crumb map (first pid → its section's heading line) is
-    # built before the parts stream; preamble chunks stay headerless-of-crumb (None →
-    # today's template header), and nothing here can move ids, pages, or packing.
-    crumbs: dict[int, str] = {}
-    if breadcrumb:
-        # Lazy import (same cycle reason as the section branch).
-        from uwazi_rag.use_cases.headings import is_heading, partition_sections
-
-        for section in partition_sections(paragraphs):
-            heading_pid = section[0] if is_heading(paragraphs[section[0]]) else None
-            if heading_pid is None:
-                continue
-            heading_line = str(paragraphs[heading_pid]["text"]).splitlines()[0].strip()
-            if heading_line:
-                crumbs.update((pid, heading_line) for pid in section)
 
     # (text piece, page, raw paragraph position) — the position anchors the
     # chunk back to paragraph_ids even where dropped paragraphs leave gaps.

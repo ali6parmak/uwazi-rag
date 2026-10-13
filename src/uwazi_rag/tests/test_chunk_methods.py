@@ -505,7 +505,7 @@ def test_build_chunks_rejects_rung2_flags_outside_merge() -> None:
             file_id="f",
             entity_title="T",
             template_name="X",
-            split_mode="type-merge",
+            split_mode="segment",
             breadcrumb=True,
         )
     with pytest.raises(ValueError, match="prepend_header"):
@@ -545,6 +545,13 @@ def test_chunk_config_round_trips_the_rung2_layers() -> None:
 
     legacy = ChunkConfig.from_store({"target_max_chars": 1200, "overlap_ratio": 0.15, "prepend_header": True})
     assert legacy.sentence_cuts is False and legacy.breadcrumb is False  # stores before wave 3.3
+
+    type_stored = TypeMergeChunker(max_chars=1200, breadcrumb=True).chunk_config()
+    type_config = ChunkConfig.from_store(type_stored)
+    assert type_config.split_mode == "type-merge" and type_config.breadcrumb
+    assert TypeMergeChunker(max_chars=1200, breadcrumb=True).chunk(capture) == capture_to_chunks(
+        capture, **config_kwargs(type_config)
+    )
 
 
 # ---------------------------------------------------------------------
@@ -642,3 +649,31 @@ def test_effective_types_glue_forward_to_the_body_they_preface() -> None:
     effective = effective_types(paragraphs)
     # the header glues forward to the body text; the trailing title keeps its own type
     assert effective == {0: "text", 1: "footnote", 2: "text", 3: "text", 4: "title"}
+
+
+def test_type_merge_composes_with_breadcrumb() -> None:
+    chunker = TypeMergeChunker(max_chars=1200, breadcrumb=True)
+    assert chunker.params() == {"max_chars": 1200, "overlap": 0.15, "header": True, "layers": "crumb"}
+    assert chunker.chunk_config() == {
+        "target_max_chars": 1200,
+        "overlap_ratio": 0.15,
+        "prepend_header": True,
+        "split_mode": "type-merge",
+        "breadcrumb": True,
+    }
+    assert chunker.describe() == "type-merge 1200/0.15/on +breadcrumb"
+
+    with pytest.raises(ValueError, match="header"):
+        TypeMergeChunker(max_chars=1200, breadcrumb=True, header=False)
+
+    capture = _capture()  # the real fixture: 23 typed headings + footnote/list-item runs
+    plain = TypeMergeChunker(max_chars=1200).chunk(capture)
+    crumb = TypeMergeChunker(max_chars=1200, breadcrumb=True).chunk(capture)
+    assert [chunk.chunk_id for chunk in plain] == [chunk.chunk_id for chunk in crumb]  # identity never moves
+    assert [chunk.paragraph_ids for chunk in plain] == [chunk.paragraph_ids for chunk in crumb]  # runs unchanged
+    assert any(p.text != c.text for p, c in zip(plain, crumb))  # the fixture gains crumbs
+    for plain_chunk, crumb_chunk in zip(plain, crumb):
+        if crumb_chunk.text != plain_chunk.text:
+            # the crumb swaps the header's template slot only — the body below is untouched
+            assert "\n".join(crumb_chunk.text.split("\n")[1:]) == "\n".join(plain_chunk.text.split("\n")[1:])
+            assert crumb_chunk.text.split("\n")[0].startswith(f"{capture['title']} — ")
