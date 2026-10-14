@@ -5891,3 +5891,25 @@ Caveats, recorded with the numbers:
 
 Consumption: Stage 4 model re-race reports false-retr per model at the common 0.55 (comparable geometry ruler) and cites each model's proposed cut for the honest gate view; Step 6 takes the per-model cut as its initial production answer-gate. The `FALSE_RETRIEVAL_THRESHOLD` env/config stays 0.55 for the harness until Step 6 needs the per-model cut as a setting.
 
+
+## 2026-10-14T09:08:38+00:00 — lock parity merge-1200 bge-m3
+
+store: `data/naive_store.json` — 4,488 chunks, bge-m3 (1024d), built 2026-10-14T09:07:59+00:00
+golden: `data/eval/golden.jsonl` — 270 rows (255 synthetic / 15 manual); ranked depth 100
+chunk config: max-chars 1200, overlap 0.15, header on
+
+| scope | n | chunk R@1 | chunk R@5 | chunk R@10 | chunk MRR | doc R@1 | doc R@5 | doc R@10 | doc MRR | cov@1 | cov@5 | cov@10 | cov@3000 | P@1 | P@5 | P@10 | RP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | 267 | 31.4% | 62.8% | 73.5% | 0.479 | 62.9% | 91.8% | 93.6% | 0.751 | 32.7% | 64.9% | 75.7% | 49.3% | 33.0% | 13.4% | 7.9% | 32.8% |
+| en | 169 | 32.8% | 64.2% | 73.4% | 0.484 | 68.0% | 92.9% | 93.5% | 0.782 | 33.3% | 66.3% | 75.0% | 50.5% | 33.7% | 13.6% | 7.8% | 34.3% |
+| es | 98 | 28.9% | 60.4% | 73.8% | 0.470 | 54.1% | 89.8% | 93.9% | 0.698 | 31.6% | 62.6% | 76.9% | 47.3% | 31.6% | 13.1% | 8.1% | 30.3% |
+| synthetic | 255 | 31.3% | 62.6% | 73.1% | 0.479 | 62.4% | 91.4% | 93.3% | 0.747 | 32.7% | 64.8% | 75.4% | 49.7% | 32.9% | 13.4% | 7.9% | 32.8% |
+| manual | 12 | 33.3% | 66.7% | 83.3% | 0.476 | 75.0% | 100.0% | 100.0% | 0.833 | 33.3% | 66.7% | 83.3% | 41.7% | 33.3% | 13.3% | 8.3% | 33.3% |
+| cross-language | 65 | 23.6% | 53.3% | 70.0% | 0.412 | 55.4% | 92.3% | 95.4% | 0.701 | 25.1% | 56.9% | 72.1% | 37.4% | 26.2% | 11.7% | 7.8% | 24.1% |
+| same-language | 202 | 33.9% | 65.8% | 74.7% | 0.500 | 65.3% | 91.6% | 93.1% | 0.767 | 35.1% | 67.5% | 76.9% | 53.1% | 35.1% | 14.0% | 7.9% | 35.6% |
+
+coverage lens: cov@k — anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 — same within the first 3,000 retrieved chars (whole packed chunks)
+precision caveat: gold is self-anchored — every question was drafted from the passage it quotes — so P@k/RP read systematically pessimistic; compare configs, never absolutes
+
+Unanswerable: 3 rows, threshold ≥ 0.550 → false-retrieval 0/3 (0.0%) (top-1: m013 0.5359, m014 0.5081, m015 0.4582)
+

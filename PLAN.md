@@ -709,18 +709,19 @@ store files can't collide); the crumb is a pre-stated Step-6 revisit (citation c
 per-instance config flip). Type-merge REJECTED. Stage-3 method ladder COMPLETE —
 incumbent merge locks; section, section-split, segment and type-merge raced and rejected.
 
-**Lock wave — before Step 5 (IN PROGRESS 2026-10-14):** (i) DONE — `_build_naive_store`
+**Lock wave — before Step 5 (COMPLETE 2026-10-14 — all four items done, parity held;
+STOP for review before Stage 4):** (i) DONE — `_build_naive_store`
 carries the new chunk-config keys (split_mode + sentence_cuts/breadcrumb knobs, OFF at
 the lock; keys-only-when-non-default so the merge default keeps the legacy store
-identity); (ii) DECIDED (user call 2026-10-14) — production default budget 1200, wired
+identity — confirmed by the parity run's recorded chunk_config); (ii) DECIDED (user call 2026-10-14) — production default budget 1200, wired
 as `INDEX_MAX_CHARS` in configuration.py (env-overridable; the Step 2 constant and the
-benchmark specs' per-dataset budgets are untouched); (iii) PENDING user run — one
-`uwazi-rag eval` block on `data/eval/golden.jsonl` at the locked config (the AGENTS
-parity gate; expected: the CLI-built store reproduces the sweep33 merge-1200-bge
-identity bit-for-bit); (iv) DONE — per-model false-retr threshold re-derivation
+benchmark specs' per-dataset budgets are untouched); (iii) DONE (user run
+2026-10-14T09:08, `lock parity merge-1200 bge-m3` in results.md) — the CLI-built
+naive store reproduces the sweep33 merge-1200-bge identity bit-for-bit: 4,488 chunks,
+every scope row and the unanswerable top-1s equal to 4 decimals; (iv) DONE — per-model false-retr threshold re-derivation
 recorded in results.md (cuts 0.63/0.64/0.58 for bge-m3/embeddinggemma/snowflake,
 hand-recorded offline from the sweep33 blocks' unanswerable top-1 lists; the common
-0.55 stays the harness ruler until Step 6). Then Stage 4 re-race (bge-m3,
+0.55 stays the harness ruler until Step 6). Next: Stage 4 re-race (bge-m3,
 embeddinggemma, snowflake-arctic-embed2, qwen3-8b) at the locked geometry — readouts
 carry both false-retr views per the derivation block.
 
