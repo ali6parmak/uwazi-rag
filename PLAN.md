@@ -721,9 +721,45 @@ naive store reproduces the sweep33 merge-1200-bge identity bit-for-bit: 4,488 ch
 every scope row and the unanswerable top-1s equal to 4 decimals; (iv) DONE — per-model false-retr threshold re-derivation
 recorded in results.md (cuts 0.63/0.64/0.58 for bge-m3/embeddinggemma/snowflake,
 hand-recorded offline from the sweep33 blocks' unanswerable top-1 lists; the common
-0.55 stays the harness ruler until Step 6). Next: Stage 4 re-race (bge-m3,
-embeddinggemma, snowflake-arctic-embed2, qwen3-8b) at the locked geometry — readouts
-carry both false-retr views per the derivation block.
+0.55 stays the harness ruler until Step 6). Next: Stage 4 re-race — pre-stated below.
+
+**Stage 4 — model re-race at the locked geometry (pre-stated 2026-10-14):** the method
+axis is frozen; the model axis is re-priced on it. Models: the Stage-2 shortlist
+(bge-m3, embeddinggemma, snowflake-arctic-embed2) plus qwen3-embedding:8b re-checked
+(it raced only uwazi in Step 3.5, at the pre-lock 1800 geometry; 4,096 dims — the
+store-cost lens prices its footprint explicitly). Homes = the six at their locked
+configs: uwazi@1200 (production default merge), privacyqa@2400, contractnli@1200,
+cuad@2400, maud@2400, vic passthrough-4096 (header on; config unchanged). Grid: 6 homes
+× 4 models = 24 cells — 12 reuses (uwazi/contractnli/cuad/maud × the 3 shortlist
+models, same slugs as the sweep33 incumbents) + 12 new builds (qwen × 6 homes;
+privacyqa × 3 and vic × 3 for the shortlist — no incumbent stores exist under the
+current slugs, so `_ensure_store` rebuilds what it cannot validate). Readout: the
+Stage-2 lenses (doc@10 = decider, chunk R@1/MRR = ranking lens, P@1, cov@3000 = pack
+lens), false-retr = GATE in BOTH views per the 2026-10-14 derivation block (common-0.55
+hit counts AND each model's per-home unanswerable maxes against its proposed cut), plus
+the chunks×dims store-cost column. The race also completes the threshold ruler: the
+privacyqa + vic blocks carry the remaining 9 unanswerable rows (16/25 → 25/25; qwen's
+cut derives post-race from its own blocks). One spec per home — comparisons never mix
+instruments; the verdict is ONE combined Stage-4 block across the six comparisons,
+hand-recorded on completion: the production default model for the live instance + the
+Step-5 shortlist. Specs: benchmarks/sweep4_models_{uwazi, privacyqa, contractnli,
+cuad, maud, vic}.py.
+
+**Stage 4 verdict (RECORDED 2026-10-14 — the combined block in results.md):** 24 cells,
+no failures; bit-stability held on all reuses and on the fresh privacyqa shortlist
+rebuilds. gemma wins/ties the doc@10 decider on 3 of 6 homes (contractnli, cuad, uwazi
+via doc@1 on the 97.8 = qwen tie) with the smallest store (768d) and gate 4/25 at 0.55
+(clean at its cut); bge keeps privacyqa/maud; snowflake keeps vic with the cleanest
+gate (1/25); qwen3-embedding:8b — ranking best on the live home and vic @5/@10 — is
+re-checked and REJECTED: dirtiest gate (16/25 at 0.55, own cut 0.69), long-doc decider
+collapse (maud 94.7, cuad 99.5, contractnli last everywhere), 4× dims at ~9× build /
+3.9× score cost. Decisions: production default model = embeddinggemma (.env flip
+EMBEDDING_MODEL=embeddinggemma, EMBEDDING_DIMENSIONS=768 when adopted + production
+store rebuild at the same merge-1200 identity); Step-5 shortlist unchanged (bge-m3 /
+embeddinggemma / snowflake-arctic-embed2); threshold ruler COMPLETE at 25/25 rows per
+model (cuts 0.63/0.64/0.58/0.69). Next: the ladder's Stage 5 — bm25/rrf retrieval arms
+at the locked geometry = Step 5's baseline-to-beat — then Step 5 (Postgres + pgvector
+hybrid) at the locked geometry with the shortlist.
 
 **Parked / given up (2026-10-09):** topic-shift/semantic-splitting boundaries (embeds
 during chunking — method×model fused; pre-declared fallback only for a headingless prose
