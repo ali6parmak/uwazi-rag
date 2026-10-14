@@ -101,6 +101,13 @@ EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "bge-m3")
 # Dimensions come from config, never code (PLAN.md golden rule 7). The real
 # size is verified at startup by embedding one probe text (see `hello`).
 EMBEDDING_DIMENSIONS: int = int(os.environ.get("EMBEDDING_DIMENSIONS", "1024"))
+# Step 4c lock (user call 2026-10-14): the production default chunk budget for
+# real instances. 1200 is the geometry measured on real Uwazi captures — the
+# Step 3.5 geometry sweep recorded 1200 a wash vs the Step 2 default 1800 and
+# 2400 strictly worse — and the whole 3.x method ladder + the golden set run
+# at it. Benchmark datasets keep their per-dataset budgets in the sweep specs
+# (geometry stays config, never code); per-instance overrides ride this env.
+INDEX_MAX_CHARS: int = int(os.environ.get("INDEX_MAX_CHARS", "1200"))
 # Step 3.5 scorecard: cosine similarity above which an unanswerable golden row
 # (expected nothing relevant, e.g. m013-m015) counts as a false retrieval.
 # A knob in config, not code — its right value depends on each embedding

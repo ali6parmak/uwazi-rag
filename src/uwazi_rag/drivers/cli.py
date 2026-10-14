@@ -27,7 +27,7 @@ from uwazi_rag.use_cases.build_golden import (
     read_jsonl,
     write_passages_file,
 )
-from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, SPLIT_MODES, TARGET_MAX_CHARS, build_chunks
+from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, SPLIT_MODES, build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
 from uwazi_rag.use_cases.eval_retrieval import RESULTS_FILE, render, score_rows
 from uwazi_rag.use_cases.eval_run import (
@@ -82,8 +82,9 @@ def _build_parser() -> argparse.ArgumentParser:
     build_index.add_argument(
         "--max-chars",
         type=int,
-        default=TARGET_MAX_CHARS,
-        help=f"chunk character budget for the eval sweep (default: Step 2 constant {TARGET_MAX_CHARS})",
+        default=configuration.INDEX_MAX_CHARS,
+        help=f"chunk character budget (default: config INDEX_MAX_CHARS = {configuration.INDEX_MAX_CHARS},"
+        " the Step 4c lock; the Step 3.5 sweep baseline was 1800)",
     )
     build_index.add_argument(
         "--overlap",
@@ -395,7 +396,9 @@ def _run_build_index(args: argparse.Namespace) -> int:
     ``--overlap``, ``--no-header``) and an embedding-model override (``--embedding-model``
     + probed/declared ``--embedding-dimensions``). Step 4c grew the method
     surface: ``--split-mode`` (every ``SPLIT_MODES`` entry) and the wave-3.3
-    rung-2 layers (``--sentence-cuts``/``--breadcrumb``). All join the store's
+    rung-2 layers (``--sentence-cuts``/``--breadcrumb``). The budget default
+    is the config ``INDEX_MAX_CHARS`` (Step 4c lock, user call 2026-10-14:
+    production default 1200). All join the store's
     recorded chunk_config by the same keys-only-when-non-default rule, so
     `eval` grades exactly what was built and the merge default keeps the
     legacy store identity (the lock's byte-parity gate).
