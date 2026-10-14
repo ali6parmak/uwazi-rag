@@ -761,6 +761,47 @@ model (cuts 0.63/0.64/0.58/0.69). Next: the ladder's Stage 5 — bm25/rrf retrie
 at the locked geometry = Step 5's baseline-to-beat — then Step 5 (Postgres + pgvector
 hybrid) at the locked geometry with the shortlist.
 
+**Stage 5 — retrieval arms at the lock (pre-stated 2026-10-14):** the last retrieval-axis
+question before Step 5: does lexical (bm25) or rank-fused (rrf) retrieval beat
+semantic-only at the locked chunking? One store cell per home — the locked geometry at
+the Stage-4 production default model embeddinggemma, whose store exists at all six
+homes (sweep33 + Stage-4 builds) — × three retrieval arms: `EmbeddingRetrieval()`
+(cosine-calibrated incumbent), `Bm25Retrieval()` (Okapi k1=1.2 b=0.75, lexical,
+no embeddings), `RrfRetrieval()` (k=60, weights 1/1 — fusion of the two rankings).
+Scoring only: zero builds, zero new embeddings beyond the embedding arm's query embeds.
+One spec per home — benchmarks/sweep5_retrieval_{uwazi, privacyqa, contractnli, cuad,
+maud, vic}.py — 3 experiments each. Readout: the same lenses; false-retr is measured
+ONLY on the embedding arm (bm25/rrf are not cosine-calibrated — the harness records
+them unmeasured rather than guessed; the hybrid answer-gate is a Step-6 design
+question). Verdict: ONE combined Stage-5 block (the 3.x/4 precedent) answering *does
+fusion beat semantic-only at the lock* — the winner shape becomes Step 5's
+pgvector-hybrid acceptance criteria (the baseline-to-beat reads directly off this
+stage), and per-home winners are recorded either way.
+
+**Stage 5 verdict (RECORDED 2026-10-14 — the combined block in results.md):** 18 cells,
+zero builds (all six embeddinggemma stores reused), no failures. Semantic-only wins:
+the embedding arm leads every ranking lens on every home; bm25 collapses the citation
+currency (chunk R@1 0.9–30.0) while keeping doc@10 high on the 2400 homes (localizes
+docs, not citation paragraphs); equal-weight rrf sits strictly between the arms, never
+above embedding (1/1 fusion dilutes the stronger arm); the lone real fusion gain is
+vic's doc@10 +6.0 — the lexically-dissimilar corpus. Lexical arms break on manual
+paraphrase rows (8.3 vs 33.3 R@1) and cross-language (7.7 vs 23.6), and bm25/rrf carry
+no cosine scale so a hybrid "not found" gate is unmeasurable on them (Step-6 design
+question). Decisions: **Step 5 ships semantic-only retrieval** — the pgvector
+acceptance criteria = reproduce the embedding-arm scorecards at the locked geometry;
+bm25/rrf stay recorded race arms; weighted-RRF + lexical-ID support parked (revisit if
+lexically-pinned queries appear). **The Step-4c ladder is COMPLETE:** Stage 1 model
+races → Stage 2 verdicts → Stage 3 methods → Stage 4 re-race → Stage 5 retrieval arms.
+
+**Post-Stage-5 rider (2026-10-14, user-side):** the user flipped `.env` to the Stage-4
+production default — EMBEDDING_MODEL=embeddinggemma, EMBEDDING_DIMENSIONS=768. The
+production naive store (data/naive_store.json) is still the bge-m3 lock-parity build,
+and the store loader guards model match — so search/ask require one rebuild + one eval
+block at the new default (merge-1200 gemma identity, ~1 min): expected 4,488 chunks and
+the Stage-4/sweep33 gemma uwazi rows exactly (bit-stability). Step 5 itself is NOT
+started (user call 2026-10-14) — it opens after the rider, at the locked geometry with
+the shortlist.
+
 **Parked / given up (2026-10-09):** topic-shift/semantic-splitting boundaries (embeds
 during chunking — method×model fused; pre-declared fallback only for a headingless prose
 corpus); late chunking (Ollama exposes no token-level embeddings; corpora exceed its
