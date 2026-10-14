@@ -709,14 +709,20 @@ store files can't collide); the crumb is a pre-stated Step-6 revisit (citation c
 per-instance config flip). Type-merge REJECTED. Stage-3 method ladder COMPLETE —
 incumbent merge locks; section, section-split, segment and type-merge raced and rejected.
 
-**Lock wave — before Step 5 (IN PROGRESS 2026-10-14):** (i) `_build_naive_store` carries
-the new chunk-config keys (split_mode + sentence_cuts/breadcrumb knobs, OFF at the lock);
-(ii) production default budget for real instances — OPEN user decision (1200 candidate,
-measured on Uwazi; per-dataset benchmark budgets stay config-only); (iii) one
+**Lock wave — before Step 5 (IN PROGRESS 2026-10-14):** (i) DONE — `_build_naive_store`
+carries the new chunk-config keys (split_mode + sentence_cuts/breadcrumb knobs, OFF at
+the lock; keys-only-when-non-default so the merge default keeps the legacy store
+identity); (ii) DECIDED (user call 2026-10-14) — production default budget 1200, wired
+as `INDEX_MAX_CHARS` in configuration.py (env-overridable; the Step 2 constant and the
+benchmark specs' per-dataset budgets are untouched); (iii) PENDING user run — one
 `uwazi-rag eval` block on `data/eval/golden.jsonl` at the locked config (the AGENTS
-parity gate); (iv) per-model false-retr threshold re-derivation on manual rows
-(justified by the Stage-2 gate finding; pre-declared). Then Stage 4 re-race (bge-m3,
-embeddinggemma, snowflake-arctic-embed2, qwen3-8b) at the locked geometry.
+parity gate; expected: the CLI-built store reproduces the sweep33 merge-1200-bge
+identity bit-for-bit); (iv) DONE — per-model false-retr threshold re-derivation
+recorded in results.md (cuts 0.63/0.64/0.58 for bge-m3/embeddinggemma/snowflake,
+hand-recorded offline from the sweep33 blocks' unanswerable top-1 lists; the common
+0.55 stays the harness ruler until Step 6). Then Stage 4 re-race (bge-m3,
+embeddinggemma, snowflake-arctic-embed2, qwen3-8b) at the locked geometry — readouts
+carry both false-retr views per the derivation block.
 
 **Parked / given up (2026-10-09):** topic-shift/semantic-splitting boundaries (embeds
 during chunking — method×model fused; pre-declared fallback only for a headingless prose

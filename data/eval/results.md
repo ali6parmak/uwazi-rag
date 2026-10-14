@@ -5867,3 +5867,27 @@ The doc-attribution currency is real (contractnli doc@1 up on all three models) 
 
 (i) `_build_naive_store` grows the new chunk-config keys (split_mode + sentence_cuts/breadcrumb knobs, OFF at the lock); (ii) production default budget decision for real instances (1200 candidate, measured on Uwazi; benchmarks keep per-dataset budgets); (iii) `uwazi-rag eval` parity block on `data/eval/golden.jsonl` at the locked config; (iv) per-model false-retr threshold re-derivation on manual rows (pre-declared Stage 2). Then STOP for review before Stage 4 (model re-race, bge-m3 / embeddinggemma / snowflake-arctic-embed2 / qwen3-8b, at the locked geometry → Step 5).
 
+## 2026-10-14 — Per-model false-retr threshold re-derivation (hand-recorded from the sweep33 blocks above — the incumbent merge cells already record every unanswerable row's top-1; no new runs)
+
+Pre-declared at Stage 2 ("the false-retr gate tracks the model, not the geometry") and now justified by rows: at the single global 0.55 cut, bge-m3 false-answers 11 of 16 unanswerable golden rows while snowflake answers 1 and gemma 4 — the same ruler measures three different score scales. Data = the plain merge cells' per-row unanswerable top-1 lists exactly as recorded above (all four homes × 3 models, 16 rows each; privacyqa's 5 and vic's 4 unanswerable rows are not covered by this ruler — no incumbent merge store at those homes' lock slugs / out of method scope). 0.55 cut hit counts re-derive from these rows and match the recorded false-retr cells cell-for-cell (a cross-check that the recorded top-1s and hit counts agree).
+
+| model | uwazi@1200 max | contractnli@1200 max | cuad@2400 max | maud@2400 max | global max | false-retr @ 0.55 | proposed cut (max + ~0.01) |
+|---|---|---|---|---|---|---|---|
+| bge-m3 | 0.5359 (m013) | 0.5987 (m001) | 0.6199 (m003) | 0.6228 (m001) | 0.6228 | 11/16 | **0.63** |
+| embeddinggemma | 0.4994 (m013) | 0.6348 (m001) | 0.5898 (m003) | 0.5751 (m004) | 0.6348 | 4/16 | **0.64** |
+| snowflake-arctic-embed2 | 0.4227 (m013) | 0.5421 (m001) | 0.5743 (m003) | 0.5138 (m004) | 0.5743 | 1/16 | **0.58** |
+
+Per-home full top-1 lists (recorded rows re-read, descending within each cell):
+
+- bge-m3: uwazi m013 0.5359 / m014 0.5081 / m015 0.4582; contractnli m001 0.5987 / m002 0.5915 / m004 0.5906 / m003 0.5079 / m005 0.5354; cuad m003 0.6199 / m001 0.6057 / m004 0.5856 / m002 0.5807; maud m001 0.6228 / m002 0.5728 / m003 0.5710 / m004 0.5636.
+- embeddinggemma: uwazi m013 0.4994 / m014 0.4174 / m015 0.3793; contractnli m001 0.6348 / m004 0.5654 / m002 0.5382 / m005 0.4834 / m003 0.4253; cuad m003 0.5898 / m002 0.5389 / m001 0.5256 / m004 0.5026; maud m004 0.5751 / m002 0.5417 / m001 0.5299 / m003 0.5307.
+- snowflake-arctic-embed2: uwazi m013 0.4227 / m014 0.4076 / m015 0.3614; contractnli m001 0.5421 / m002 0.5065 / m004 0.4755 / m005 0.4074 / m003 0.3097; cuad m003 0.5743 / m002 0.4814 / m004 0.4756 / m001 0.4727; maud m004 0.5138 / m001 0.5088 / m003 0.4963 / m002 0.4913.
+
+Caveats, recorded with the numbers:
+
+1. n = 16 rows per model — the cuts are snapshots (verdicts are snapshots), not a calibrated ROC; treat them as ruler corrections, not product constants.
+2. A single top-1 cosine cut is an imperfect production gate where a model's unanswerable and weak-answerable distributions overlap. On the recorded uwazi baseline, bge-m3 unanswerables sat 0.5040–0.5081 vs answerable p25 0.581 (clean separation — 0.55 was calibrated there); but bge's contract-home unanswerables reach 0.6228, above that p25. So the separation that makes 0.55 work on the live home does not transfer to contract-shaped corpora with this model. Step 6's "not found in this collection" gate likely needs top-1 + runner-up margin or an LLM abstain; the cuts here are the starting point, not the end state.
+3. Per-model cuts make cross-model false-retr counts non-comparable by construction — at Stage 4 the readout carries BOTH views: the common-0.55 hit counts AND the threshold-free per-row distributions (the per-home maxes above; the re-race adds its own blocks).
+
+Consumption: Stage 4 model re-race reports false-retr per model at the common 0.55 (comparable geometry ruler) and cites each model's proposed cut for the honest gate view; Step 6 takes the per-model cut as its initial production answer-gate. The `FALSE_RETRIEVAL_THRESHOLD` env/config stays 0.55 for the harness until Step 6 needs the per-model cut as a setting.
+
