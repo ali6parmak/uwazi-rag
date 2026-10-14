@@ -5829,3 +5829,41 @@ retrieval: embedding
 cov@k = anchor paragraphs covered in top-k (any chunk holding the paragraph counts); cov@3000 = same within the first 3,000 retrieved chars (whole packed chunks)
 P@k / RP are systematically pessimistic — gold is self-anchored (questions were drafted from the passage they quote); compare configs, never absolutes
 
+## 2026-10-14 — Waves 3.3 + 3.4 verdict (rung-2 layers + type-aware merge — hand-recorded read of the sweep33_*/sweep34 comparison tables above; no new runs, no new numbers)
+
+Scope: 60 graded cells, no failures — sweep33_methods_{uwazi, contractnli, cuad, maud} (4 arms × 3 models × 4 homes = 48) + sweep34_types_uwazi ({merge, type-merge} × {plain, +crumb} × 3 models = 12). Merge incumbents were rebuilt inside sweep33 and matched their recorded predecessor scores exactly (embeddings bit-stable across builds); sweep34 reuses the sweep33 merge + merge-crumb stores (6 new builds: type-merge ± crumb × 3 models). Per-model triples are bge / gemma / snowflake. Δ = arm − plain merge incumbent (percentage points).
+
+### (a) Sentence-boundary layer — measured NO-OP
+
+Every lens at every home×model sits within ±1.0; the only footprint is chunk count (+0.2–1.2%: uwazi 4,488→4,514, contractnli 1,091→1,095, cuad 13,459→13,488, maud 28,860→29,207). Mechanism: at the ~0.8-budget cut window, legal prose rarely offers a sentence end — cuts land where the word cut already did. Largest observed delta: uwazi-gemma doc@10 −0.8; uwazi cov@3000 +1.0/+0.0/+0.1.
+
+### (b) Breadcrumb layer — one-line story: doc-family coherence up, within-family discrimination down
+
+| home | doc@1 Δ | doc@10 Δ | chunk R@1 Δ | cov@3000 Δ | gate |
+|---|---|---|---|---|---|
+| uwazi | +3.0/−3.8/−1.5 | +0.4/0.0/+0.3 | +1.1/−5.2/−3.9 | −1.5/−3.9/−3.0 | 0/3 all arms |
+| contractnli | +2.9/+1.7/+6.9 | +0.3/+0.1/+1.2 | −1.2/−2.2/+3.2 | −8.7/−9.3/−6.6 | gemma 2/5→1/5 on crumb arms |
+| cuad | 0.0/−0.2/0.0 | 0.0/0.0/0.0 | −0.6/−1.9/−0.8 | −3.6/−7.0/−3.1 | 4/4, 1/4, 1/4 unchanged |
+| maud | −0.7/0.0/−1.0 | −0.4/+0.4/+0.5 | −1.4/−0.4/+0.2 | −3.9/−1.6/−0.9 | 4/4, 1/4, 0/4 unchanged |
+
+The doc-attribution currency is real (contractnli doc@1 up on all three models) but purchased with crumb bytes: cov@3000 falls on all 12 home-model pairs (−0.9…−9.3, scaling with crumb length — contractnli's sentence-sized headings −6.6…−9.3, uwazi's short typed headings −1.5…−3.9), and the ranking lens (chunk R@1) drops on 9 of 12. Interaction = zero: sentence × crumb interaction ≤ 0.9 pp on chunk R@1 and doc@10 in every home-model cell. Gate change: gemma/contractnli 2/5→1/5 on both crumb arms; otherwise the gate tracked the model, not the geometry, throughout.
+
+### 3.4 — type-aware merge 2×2 (uwazi; Δ type-merge − merge)
+
+| model | chunk R@1 | chunk R@10 | MRR | doc@1 | doc@10 (decider) | cov@3000 | P@1 | chunks | gate |
+|---|---|---|---|---|---|---|---|---|---|
+| bge-m3 | −2.8 | −6.7 | +0.019 | +0.4 | +0.4 | −5.0 | +3.3 | 4,488→5,403 (+20.4%) | 0/3 |
+| gemma | −6.2 | −10.4 | +0.007 | −1.5 | −1.5 | −4.1 | +1.1 | « | 0/3 |
+| snowflake | −6.0 | −12.2 | +0.001 | −0.4 | 0.0 | −1.2 | +0.4 | « | 0/3 |
+
+(chunks row shared; scan estimate pre-stated at ~5,565 = +24%.) Same partitioning signature as every rejected method arm: ranking-lens collapse at +20.4% store cost, and only precision-flavored cells move up (P@1 +0.4…+3.3, MRR ≈ flat, +0.019/+0.007/+0.001 on bge/gemma/snowflake is the split-runs rank-averaging artifact). Crumb main effect inside type-merge unchanged (chunk R@1 +0.4/−3.0/−2.8, doc@1 +2.2/−0.8/−3.0, cov@3000 −2.4/−2.8/−4.2); 0/3 gate everywhere.
+
+### Decisions (user, 2026-10-14)
+
+1. **Rung 2: DECLINE both layers for the lock.** sentence-boundary is a measured no-op (no lens to trade); the crumb's doc@1 currency is real but Step-6 citation-territory — pre-stated revisit (citation formatting, per-instance config flip; code stays default OFF and dormant; chunk_config records the keys only when ON, params() carries a "layers" slug so sent/crumb store slugs can't collide).
+2. **Type-merge: REJECTED.** Stage-3 method ladder COMPLETE — incumbent merge locks; all raced alternatives rejected (section, section-split, segment — 3.0–3.2; rung-2 layers declined — 3.3; type-merge — 3.4). Lock chunker = merge at per-home budgets (uwazi@1200, privacyqa@2400, contractnli@1200, cuad@2400, maud@2400; vic passthrough-4096 unchanged), header on, overlap 0.15.
+
+### Lock wave — next before Step 5
+
+(i) `_build_naive_store` grows the new chunk-config keys (split_mode + sentence_cuts/breadcrumb knobs, OFF at the lock); (ii) production default budget decision for real instances (1200 candidate, measured on Uwazi; benchmarks keep per-dataset budgets); (iii) `uwazi-rag eval` parity block on `data/eval/golden.jsonl` at the locked config; (iv) per-model false-retr threshold re-derivation on manual rows (pre-declared Stage 2). Then STOP for review before Stage 4 (model re-race, bge-m3 / embeddinggemma / snowflake-arctic-embed2 / qwen3-8b, at the locked geometry → Step 5).
+

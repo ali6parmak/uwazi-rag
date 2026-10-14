@@ -6,6 +6,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from uwazi_api.client import UwaziClient
 from uwazi_api.domain.exceptions import SegmentationNotFoundError
@@ -26,7 +27,7 @@ from uwazi_rag.use_cases.build_golden import (
     read_jsonl,
     write_passages_file,
 )
-from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, TARGET_MAX_CHARS, build_chunks
+from uwazi_rag.use_cases.chunking import OVERLAP_RATIO, SPLIT_MODES, TARGET_MAX_CHARS, build_chunks
 from uwazi_rag.use_cases.embed_probe import format_probe_report, run_embed_probe
 from uwazi_rag.use_cases.eval_retrieval import RESULTS_FILE, render, score_rows
 from uwazi_rag.use_cases.eval_run import (
@@ -105,6 +106,22 @@ def _build_parser() -> argparse.ArgumentParser:
         type=int,
         default=None,
         help="vector size of --embedding-model (default: probed at runtime when the model is overridden)",
+    )
+    build_index.add_argument(
+        "--split-mode",
+        choices=SPLIT_MODES,
+        default="merge",
+        help="chunking method (default: merge — the locked Step 4c incumbent; the others stay race arms)",
+    )
+    build_index.add_argument(
+        "--sentence-cuts",
+        action="store_true",
+        help="rung-2 layer on merge: monster cuts prefer sentence ends (wave 3.3 raced, declined at the lock)",
+    )
+    build_index.add_argument(
+        "--breadcrumb",
+        action="store_true",
+        help="rung-2 layer on merge/type-merge: the header's template slot becomes the section heading",
     )
 
     search = subparsers.add_parser(
@@ -302,6 +319,9 @@ def _build_naive_store(
     max_chars: int,
     overlap: float,
     header: bool,
+    split_mode: str = "merge",
+    sentence_cuts: bool = False,
+    breadcrumb: bool = False,
     batch_size: int = 32,
     limit: int | None = None,
 ) -> tuple[IndexStats, int]:
@@ -309,10 +329,14 @@ def _build_naive_store(
 
     Dimensions: ``declared`` wins; else the model is probed once (``probe=True``,
     i.e. whenever the model was named explicitly — the benchmark always names
-    its models); else the configured ``EMBEDDING_DIMENSIONS``. The store
-    records chunk_config + model so grading later verifies exactly what this
-    built. Raises ``ValueError``/``RuntimeError``/``OSError`` for the caller to
-    present.
+    its models); else the configured ``EMBEDDING_DIMENSIONS``. The chunking
+    knobs (Step 4c: ``split_mode``, ``sentence_cuts``/``breadcrumb`` layers)
+    mirror the sweep runner's recording rule — keys join ``chunk_config`` only
+    when non-default — so a CLI-built store carries the exact identity the
+    benchmark path, grading round-trip, and the committed merge stores use.
+    The store records chunk_config + model so grading later verifies exactly
+    what this built. Raises ``ValueError``/``RuntimeError``/``OSError`` for the
+    caller to present.
     """
     if declared_dimensions:
         dimensions = declared_dimensions
@@ -330,10 +354,26 @@ def _build_naive_store(
     else:
         dimensions = configuration.EMBEDDING_DIMENSIONS
 
+    # One dict is the whole chunking contract: it is recorded in the store AND is
+    # the exact keyword set `index_captures` re-chunks from — the same identity
+    # `_ensure_store` derives from the chunker faces (`chunk_config()` records
+    # split_mode only when non-merge and the layer keys only when ON).
+    chunk_config: dict[str, Any] = {
+        "target_max_chars": max_chars,
+        "overlap_ratio": overlap,
+        "prepend_header": header,
+    }
+    if split_mode != "merge":
+        chunk_config["split_mode"] = split_mode
+    if sentence_cuts:
+        chunk_config["sentence_cuts"] = True
+    if breadcrumb:
+        chunk_config["breadcrumb"] = True
+
     store = NaiveVectorStore(
         dimensions=dimensions,
         embedding_model=model,
-        chunk_config={"target_max_chars": max_chars, "overlap_ratio": overlap, "prepend_header": header},
+        chunk_config=chunk_config,
     )
     stats = index_captures(
         raw_dir=raw_dir,
@@ -342,9 +382,7 @@ def _build_naive_store(
         expected_dimensions=dimensions,
         batch_size=batch_size,
         limit=limit,
-        target_max_chars=max_chars,
-        overlap_ratio=overlap,
-        prepend_header=header,
+        **chunk_config,
     )
     store.save(store_path)
     return stats, dimensions
@@ -355,8 +393,12 @@ def _run_build_index(args: argparse.Namespace) -> int:
 
     Step 3.5 grew the benchmark surface: chunking knobs (``--max-chars``,
     ``--overlap``, ``--no-header``) and an embedding-model override (``--embedding-model``
-    + probed/declared ``--embedding-dimensions``). Both are recorded in the
-    store so `eval` grades exactly what was built.
+    + probed/declared ``--embedding-dimensions``). Step 4c grew the method
+    surface: ``--split-mode`` (every ``SPLIT_MODES`` entry) and the wave-3.3
+    rung-2 layers (``--sentence-cuts``/``--breadcrumb``). All join the store's
+    recorded chunk_config by the same keys-only-when-non-default rule, so
+    `eval` grades exactly what was built and the merge default keeps the
+    legacy store identity (the lock's byte-parity gate).
     """
     model = args.embedding_model or configuration.EMBEDDING_MODEL
     output = Path(args.output) if args.output else configuration.NAIVE_STORE_PATH
@@ -372,6 +414,9 @@ def _run_build_index(args: argparse.Namespace) -> int:
             max_chars=args.max_chars,
             overlap=args.overlap,
             header=not args.no_header,
+            split_mode=args.split_mode,
+            sentence_cuts=args.sentence_cuts,
+            breadcrumb=args.breadcrumb,
             batch_size=args.batch_size,
             limit=args.limit,
         )

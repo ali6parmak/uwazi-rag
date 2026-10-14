@@ -540,7 +540,7 @@ entities.
 
 ---
 
-## Step 4c — Chunking-method stage (Stage ladder waves 3.0–3.3, pre-stated 2026-10-09)
+## Step 4c — Chunking-method stage (Stage ladder waves 3.0–3.4, pre-stated 2026-10-09)
 
 **Goal:** measure the chunking-method axis the way the model axis was measured — one question
 per wave, methods pure and offline-testable, fixed reference model — then lock chunking +
@@ -647,7 +647,7 @@ unchanged, pre-chunked, out of scope). Open for the lock wave: the production de
 budget for real instances (1200 is the measured-on-Uwazi candidate; benchmarks keep
 per-dataset budgets regardless — geometry stays config, never code).
 
-**Wave 3.3 — rung 2 on the winner = merge (one change at a time; pre-stated 2026-10-13):**
+**Wave 3.3 — rung 2 on the winner = merge (one change at a time; pre-stated 2026-10-13; ran 2026-10-13/14, recorded — see the 3.3/3.4 verdict below):**
 
 - (a) **sentence-boundary splitting**: ONLY merge's intra-paragraph (monster) cuts change —
   the cut window (same ~0.8-budget floor as the word cut) prefers the last sentence end
@@ -689,13 +689,34 @@ from body text). Race (user call 2026-10-13: the wave-3.3 breadcrumb composes wi
 one change at a time is kept by the 2×2): {merge, type-merge} × {plain, +breadcrumb} × the
 3 shortlist models — 12 cells; the merge and merge+breadcrumb stores are reused from
 sweep33 (same slugs), so 6 new builds. The 2×2 gives both main effects cleanly
-(type-vs-merge, crumb-vs-no-crumb) plus the interaction.
+(type-vs-merge, crumb-vs-no-crumb) plus the interaction. (Ran 2026-10-14, recorded —
+see the 3.3/3.4 verdict below.)
 
-**Lock wave — before Step 5:** one `uwazi-rag eval` block on `data/eval/golden.jsonl` at
-the locked config (the AGENTS parity gate); per-model false-retr threshold re-derivation
-on manual rows (justified by the Stage-2 gate finding); `_build_naive_store` carries the
-new chunk-config keys. Then Stage 4 re-race (bge-m3, embeddinggemma,
-snowflake-arctic-embed2, qwen3-8b) at the locked geometry.
+**Waves 3.3 + 3.4 verdict (RECORDED 2026-10-14 — one combined block in results.md):**
+60 graded cells, no failures; merge incumbents rebuilt and bit-stable across builds.
+Sentence-boundary layer = measured NO-OP (every lens ≤ ±1.0 at every home×model; only
+chunk counts +0.2–1.2% — at the ~0.8-budget cut window legal prose rarely offers a
+sentence end). Breadcrumb layer = doc-family coherence up (contractnli doc@1
++2.9/+1.7/+6.9 per bge/gemma/snowflake) purchased with crumb bytes: cov@3000 down on all
+12 home-model pairs (−0.9…−9.3, scaling with crumb length), chunk R@1 down on 9 of 12,
+interaction ≈ zero; gate gemma/contractnli 2/5→1/5 on crumb arms. Type-merge = the
+partitioning signature of every rejected arm: ranking-lens collapse (chunk R@1
+−2.8…−6.2, R@10 −6.7…−12.2) at +20.4% store cost (4,488→5,403), only precision-flavored
+gains (P@1 +0.4…+3.3, MRR ≈ flat), decider no win (+0.4/−1.5/0.0). Decisions: rung 2
+DECLINED for the lock — sentence_cuts/breadcrumb stay in the code default OFF (dormant;
+chunk_config records the keys only when ON, params() carries a "layers" slug so sent/crumb
+store files can't collide); the crumb is a pre-stated Step-6 revisit (citation currency,
+per-instance config flip). Type-merge REJECTED. Stage-3 method ladder COMPLETE —
+incumbent merge locks; section, section-split, segment and type-merge raced and rejected.
+
+**Lock wave — before Step 5 (IN PROGRESS 2026-10-14):** (i) `_build_naive_store` carries
+the new chunk-config keys (split_mode + sentence_cuts/breadcrumb knobs, OFF at the lock);
+(ii) production default budget for real instances — OPEN user decision (1200 candidate,
+measured on Uwazi; per-dataset benchmark budgets stay config-only); (iii) one
+`uwazi-rag eval` block on `data/eval/golden.jsonl` at the locked config (the AGENTS
+parity gate); (iv) per-model false-retr threshold re-derivation on manual rows
+(justified by the Stage-2 gate finding; pre-declared). Then Stage 4 re-race (bge-m3,
+embeddinggemma, snowflake-arctic-embed2, qwen3-8b) at the locked geometry.
 
 **Parked / given up (2026-10-09):** topic-shift/semantic-splitting boundaries (embeds
 during chunking — method×model fused; pre-declared fallback only for a headingless prose
@@ -706,9 +727,10 @@ table/figure descriptions (no non-text segments); boilerplate drop (section+pack
 it; honest form = index-side mask only); fixed-size windows (external 36-method benchmark:
 paragraph-grouping ≫ fixed-size — and the incumbent already is paragraph-grouping).
 
-**Done when (4c):** waves 3.0–3.4 recorded (3.1+3.2 combined into the single 3.x verdict
-block; waves 3.3/3.4 each recorded as their own results blocks) + the lock wave's eval
-parity block; PLAN here updated; then STOP for review before Stage 4.
+**Done when (4c):** waves 3.0–3.4 recorded (the 3.1+3.2 verdict folded into the single
+3.x block; 3.3+3.4 into the one combined verdict block; raw sweep tables stand as their
+own recorded blocks) + the lock wave's eval parity block; PLAN here updated; then STOP
+for review before Stage 4.
 
 ---
 
